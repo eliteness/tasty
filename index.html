@@ -84,7 +84,7 @@
         /* --- LAYOUTS --- */
         .main-container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px; /* Slightly wider to accommodate bigger card */
             margin: 0 auto;
             padding: 20px;
         }
@@ -92,18 +92,62 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
 
-        /* --- SWAP VIEW LAYOUT (Left Box + Right Card) --- */
+        /* --- SWAP VIEW LAYOUT --- */
         .swap-view-grid {
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            gap: 40px;
+            gap: 50px; /* More gap */
             flex-wrap: wrap;
         }
 
-        /* Swap Component */
+        /* --- LEFT COLUMN: SWAP INTERFACE --- */
         .swap-column { flex: 1; max-width: 450px; min-width: 320px; }
         
+        /* Swap Header with Settings */
+        .swap-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .swap-title {
+            font-family: 'Merriweather', serif;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        .settings-icon {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+        .settings-icon:hover { transform: rotate(90deg); }
+
+        /* Settings Panel */
+        .settings-panel {
+            background: #f0f0f0;
+            border: 2px solid #000;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .settings-panel.open { display: block; }
+        .slip-label { font-family: 'Courier Prime', monospace; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
+        .slip-options { display: flex; gap: 8px; }
+        .slip-btn {
+            flex: 1;
+            background: #fff; border: 1px solid #000;
+            font-family: 'Courier Prime', monospace; font-size: 12px;
+            padding: 6px; cursor: pointer;
+        }
+        .slip-btn.active { background: #000; color: #fff; }
+        .slip-input {
+            width: 60px; border: 1px solid #000; padding: 6px;
+            font-family: 'Courier Prime', monospace; font-size: 12px; text-align: center;
+        }
+
+        /* Trade Boxes */
         .trade-box {
             background: #fff;
             border: 2px solid #000;
@@ -150,35 +194,54 @@
         }
         .action-btn:hover { background: #000; color: #fff; }
 
-        /* Right Summary Card (Swap Tab) */
-        .summary-column { flex: 1; max-width: 400px; min-width: 320px; }
+        /* --- RIGHT COLUMN: SUMMARY CARD (BIGGER) --- */
+        .summary-column { 
+            flex: 1; 
+            max-width: 500px; /* INCREASED SIZE */
+            min-width: 320px; 
+        }
         
         .info-card {
             border: 2px solid #000;
             background: #fff;
-            padding: 24px;
+            padding: 30px; /* INCREASED PADDING */
         }
         .info-header {
-            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;
         }
-        .pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; }
-        .date-label { font-family: 'Courier Prime', monospace; font-size: 10px; margin-top: 4px; }
-        .price-large { font-family: 'Merriweather', serif; font-weight: 900; font-size: 32px; text-align: right; line-height: 1; }
-        .price-change { font-family: 'Courier Prime', monospace; font-size: 14px; text-align: right; color: #00aa00; margin-top: 5px; font-weight: bold; }
+        .pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 22px; /* BIGGER FONT */ }
+        .date-label { font-family: 'Courier Prime', monospace; font-size: 11px; margin-top: 6px; }
+        
+        .price-large { 
+            font-family: 'Merriweather', serif; 
+            font-weight: 900; 
+            font-size: 42px; /* BIGGER PRICE */
+            text-align: right; 
+            line-height: 1; 
+        }
+        .price-change { 
+            font-family: 'Courier Prime', monospace; 
+            font-size: 16px; 
+            text-align: right; 
+            color: #00aa00; 
+            margin-top: 8px; 
+            font-weight: bold; 
+        }
 
-        .mini-grid { display: flex; gap: 10px; margin-bottom: 20px; }
-        .mini-box { border: 1px solid #000; padding: 10px; flex: 1; }
-        .mini-label { font-family: 'Courier Prime', monospace; font-size: 10px; text-transform: uppercase; margin-bottom: 5px; }
-        .mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 16px; }
+        .mini-grid { display: flex; gap: 15px; margin-bottom: 25px; }
+        .mini-box { border: 1px solid #000; padding: 15px; flex: 1; }
+        .mini-label { font-family: 'Courier Prime', monospace; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
+        .mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; /* BIGGER VALS */ }
 
-        .dashed-line { border-top: 1px dashed #000; margin: 20px 0; }
+        .dashed-line { border-top: 1px dashed #000; margin: 25px 0; }
 
-        /* Liquidity Composition Styles (Shared) */
-        .comp-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 15px; }
-        .comp-row { margin-bottom: 12px; }
-        .comp-text { display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+        /* Liquidity Composition Styles */
+        .comp-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; }
+        .comp-row { margin-bottom: 16px; }
+        .comp-text { display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
         .comp-bar {
-            width: 100%; height: 12px; border: 1px solid #000; background: #fff; padding: 1px;
+            width: 100%; height: 16px; /* THICKER BARS */
+            border: 1px solid #000; background: #fff; padding: 2px;
         }
         .comp-fill { height: 100%; background: #000; width: 0%; transition: width 1s; }
         .comp-fill.striped {
@@ -198,12 +261,11 @@
             height: 350px; width: 100%; background: #fdfdfd; border-bottom: 1px solid #000; position: relative; padding: 10px;
         }
         
-        /* Stats Grid (3x2) */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid #000; }
         .stat-cell { border-right: 1px solid #000; padding: 15px; }
         .stat-cell:last-child { border-right: none; }
-        .stat-cell:nth-child(3n) { border-right: none; } /* Remove border on 3rd col */
-        .stat-cell:nth-child(-n+3) { border-bottom: 1px solid #000; } /* Bottom border for first row */
+        .stat-cell:nth-child(3n) { border-right: none; }
+        .stat-cell:nth-child(-n+3) { border-bottom: 1px solid #000; }
         
         .an-footer { padding: 24px; }
 
@@ -230,6 +292,26 @@
                 
                 <!-- LEFT: TRADE INTERFACE -->
                 <div class="swap-column">
+                    
+                    <!-- Header with Settings Icon -->
+                    <div class="swap-header-row">
+                        <div class="swap-title">Swap</div>
+                        <div class="settings-icon" onclick="toggleSettings()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Settings Panel -->
+                    <div id="settingsPanel" class="settings-panel">
+                        <div class="slip-label">SLIPPAGE TOLERANCE</div>
+                        <div class="slip-options">
+                            <button class="slip-btn" onclick="setSlip(0.1)">0.1%</button>
+                            <button class="slip-btn active" onclick="setSlip(0.5)">0.5%</button>
+                            <button class="slip-btn" onclick="setSlip(1.0)">1.0%</button>
+                            <input type="number" id="customSlip" class="slip-input" placeholder="Custom" oninput="setCustomSlip()">
+                        </div>
+                    </div>
+
                     <!-- Sell -->
                     <div class="trade-box">
                         <div class="trade-label">Sell</div>
@@ -273,7 +355,7 @@
                     </div>
 
                     <div class="receipt-area">
-                        <div class="receipt-row"><span>Trade Type</span><span>Volatile</span></div>
+                        <div class="receipt-row"><span>Slippage</span><span id="slipDisplay">0.5%</span></div>
                         <div class="receipt-row"><span>Rate</span><span id="rateTxt">---</span></div>
                         <div class="receipt-row"><span>Quote (Inc. Fees)</span><span id="quoteTxt">---</span></div>
                     </div>
@@ -281,7 +363,7 @@
                     <button class="action-btn">SWAP</button>
                 </div>
 
-                <!-- RIGHT: SUMMARY CARD -->
+                <!-- RIGHT: SUMMARY CARD (BIGGER NOW) -->
                 <div class="summary-column">
                     <div class="info-card">
                         <div class="info-header">
@@ -396,12 +478,12 @@
 
         let pair = null;
         let isBuy = true;
+        let slippage = 0.5;
         let chartInstance = null;
 
         function switchTab(t) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            
             const btn = (t === 'swap') ? document.querySelector('.tab-btn:nth-child(1)') : document.querySelector('.tab-btn:nth-child(2)');
             btn.classList.add('active');
             document.getElementById(t + '-view').classList.add('active');
@@ -417,6 +499,35 @@
                     updateAllUI();
                 }
             } catch(e) { console.error(e); }
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('open');
+        }
+
+        function setSlip(val) {
+            slippage = val;
+            document.getElementById('customSlip').value = "";
+            updateSlipUI();
+        }
+
+        function setCustomSlip() {
+            const val = parseFloat(document.getElementById('customSlip').value);
+            if(!isNaN(val)) slippage = val;
+            updateSlipUI();
+        }
+
+        function updateSlipUI() {
+            const btns = document.querySelectorAll('.slip-btn');
+            btns.forEach(b => {
+                if(parseFloat(b.innerText) === slippage && document.getElementById('customSlip').value === "") {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+            document.getElementById('slipDisplay').innerText = slippage + "%";
+            calc(); 
         }
 
         function updateAllUI() {
@@ -442,7 +553,6 @@
 
             document.getElementById('anPair').innerText = `${pair.baseToken.symbol} / ${pair.quoteToken.symbol}`;
             document.getElementById('anPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(6);
-            
             const anChgEl = document.getElementById('anChange');
             anChgEl.innerText = chgEl.innerText;
             anChgEl.style.color = chgEl.style.color;
@@ -467,18 +577,15 @@
         function updateSwapInputs() {
             const tBase = { sym: pair.baseToken.symbol, name: pair.baseToken.name, icon: IMG_BOMB };
             const tQuote = { sym: pair.quoteToken.symbol, name: pair.quoteToken.name, icon: IMG_ETHENA };
-
             const tin = isBuy ? tQuote : tBase;
             const tout = isBuy ? tBase : tQuote;
 
             document.getElementById('sSym').innerText = tin.sym;
             document.getElementById('sName').innerText = tin.name;
             document.getElementById('sIcon').src = tin.icon;
-
             document.getElementById('bSym').innerText = tout.sym;
             document.getElementById('bName').innerText = tout.name;
             document.getElementById('bIcon').src = tout.icon;
-
             calc();
         }
 
@@ -497,9 +604,8 @@
                 return;
             }
             
-            const pNative = parseFloat(pair.priceNative); // 1 Base = X Quote
+            const pNative = parseFloat(pair.priceNative); 
             const pUsdBase = parseFloat(pair.priceUsd);
-
             let out = 0, usd = 0;
 
             if(isBuy) {
@@ -510,35 +616,36 @@
                 usd = val * pUsdBase;
             }
 
+            
+            
             document.getElementById('outAmt').value = out.toFixed(6);
             document.getElementById('sUsd').innerText = fmtUSD(usd);
-            document.getElementById('bUsd').innerHTML = `<span style="color:#cc0000">-0.5%</span> ${fmtUSD(usd*0.995)}`;
+            
+            const feePercent = 0.005; 
+            const totalImpact = feePercent; 
+            
+            document.getElementById('bUsd').innerHTML = `<span style="color:#cc0000">-${(totalImpact*100).toFixed(1)}%</span> ${fmtUSD(usd*(1-totalImpact))}`;
             
             const rate = isBuy ? (1/pNative) : pNative;
             document.getElementById('rateTxt').innerText = `1 ${isBuy?pair.quoteToken.symbol:pair.baseToken.symbol} = ${rate.toFixed(4)} ${isBuy?pair.baseToken.symbol:pair.quoteToken.symbol}`;
-            document.getElementById('quoteTxt').innerText = out.toFixed(6) + " (Inc Fees)";
+            document.getElementById('quoteTxt').innerText = out.toFixed(6);
         }
 
         function renderChart(currPrice) {
             const ctx = document.getElementById('customChart').getContext('2d');
-            
             const labels = [];
             const data = [];
             let price = currPrice * 0.8; 
-            
             for(let i=1; i<=30; i++) {
                 labels.push(`Day ${i}`);
-                if(i === 30) {
-                    data.push(currPrice);
-                } else {
+                if(i === 30) data.push(currPrice);
+                else {
                     const move = (Math.random() - 0.4) * (currPrice * 0.05);
                     price += move;
                     data.push(price);
                 }
             }
-
             if(chartInstance) chartInstance.destroy();
-
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
