@@ -25,21 +25,36 @@
             flex-direction: column;
         }
 
-        /* --- NAVBAR --- */
-        .navbar {
+        /* --- HEADER --- */
+        .header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 20px 40px;
-            background: #fff;
-            border-bottom: 2px solid #000;
+            background: transparent;
         }
-        .logo {
+
+        /* Container for Icon + Text */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Space between icon and text */
+        }
+        
+        .top-logo {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+        .logo-text {
             font-family: 'Merriweather', serif;
             font-weight: 900;
             font-size: 24px;
-            text-transform: uppercase;
+            /* text-transform: uppercase; Removed to allow "e" to be lowercase */
+            letter-spacing: 1px;
         }
+
         .connect-btn {
             background: #fff;
             color: #000;
@@ -57,10 +72,10 @@
             display: flex;
             justify-content: center;
             gap: 0;
-            margin-top: 40px;
+            margin-top: 20px;
             border-bottom: 2px solid #000;
             width: fit-content;
-            margin: 40px auto 20px auto;
+            margin: 20px auto 20px auto;
         }
         .tab-btn {
             background: #fff;
@@ -84,7 +99,7 @@
         /* --- LAYOUTS --- */
         .main-container {
             width: 100%;
-            max-width: 1200px; /* Slightly wider to accommodate bigger card */
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -97,7 +112,7 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            gap: 50px; /* More gap */
+            gap: 50px; 
             flex-wrap: wrap;
         }
 
@@ -194,28 +209,27 @@
         }
         .action-btn:hover { background: #000; color: #fff; }
 
-        /* --- RIGHT COLUMN: SUMMARY CARD (BIGGER) --- */
         .summary-column { 
             flex: 1; 
-            max-width: 500px; /* INCREASED SIZE */
+            max-width: 450px;
             min-width: 320px; 
         }
         
         .info-card {
             border: 2px solid #000;
             background: #fff;
-            padding: 30px; /* INCREASED PADDING */
+            padding: 30px;
         }
         .info-header {
             display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;
         }
-        .pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 22px; /* BIGGER FONT */ }
+        .pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 22px; }
         .date-label { font-family: 'Courier Prime', monospace; font-size: 11px; margin-top: 6px; }
         
         .price-large { 
             font-family: 'Merriweather', serif; 
             font-weight: 900; 
-            font-size: 42px; /* BIGGER PRICE */
+            font-size: 42px;
             text-align: right; 
             line-height: 1; 
         }
@@ -231,7 +245,7 @@
         .mini-grid { display: flex; gap: 15px; margin-bottom: 25px; }
         .mini-box { border: 1px solid #000; padding: 15px; flex: 1; }
         .mini-label { font-family: 'Courier Prime', monospace; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
-        .mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; /* BIGGER VALS */ }
+        .mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
 
         .dashed-line { border-top: 1px dashed #000; margin: 25px 0; }
 
@@ -240,7 +254,7 @@
         .comp-row { margin-bottom: 16px; }
         .comp-text { display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
         .comp-bar {
-            width: 100%; height: 16px; /* THICKER BARS */
+            width: 100%; height: 16px;
             border: 1px solid #000; background: #fff; padding: 2px;
         }
         .comp-fill { height: 100%; background: #000; width: 0%; transition: width 1s; }
@@ -273,12 +287,15 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="logo">ETHENA</div>
+    <div class="header-row">
+        <div class="logo-container">
+            <img src="https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FeTHENA.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5" alt="eTHENA" class="top-logo">
+            <span class="logo-text">eTHENA</span>
+        </div>
+        
         <button class="connect-btn">CONNECT WALLET</button>
-    </nav>
+    </div>
 
-    <!-- TABS -->
     <div class="tab-container">
         <button class="tab-btn active" onclick="switchTab('swap')">SWAP</button>
         <button class="tab-btn" onclick="switchTab('analysis')">ANALYSIS</button>
@@ -286,14 +303,11 @@
 
     <div class="main-container">
 
-        <!-- TAB 1: SWAP VIEW -->
         <div id="swap-view" class="view-section active">
             <div class="swap-view-grid">
                 
-                <!-- LEFT: TRADE INTERFACE -->
                 <div class="swap-column">
                     
-                    <!-- Header with Settings Icon -->
                     <div class="swap-header-row">
                         <div class="swap-title">Swap</div>
                         <div class="settings-icon" onclick="toggleSettings()">
@@ -301,7 +315,6 @@
                         </div>
                     </div>
 
-                    <!-- Hidden Settings Panel -->
                     <div id="settingsPanel" class="settings-panel">
                         <div class="slip-label">SLIPPAGE TOLERANCE</div>
                         <div class="slip-options">
@@ -312,7 +325,6 @@
                         </div>
                     </div>
 
-                    <!-- Sell -->
                     <div class="trade-box">
                         <div class="trade-label">Sell</div>
                         <div class="trade-content">
@@ -336,7 +348,6 @@
                         </div>
                     </div>
 
-                    <!-- Buy -->
                     <div class="trade-box">
                         <div class="trade-label">Buy</div>
                         <div class="trade-content">
@@ -363,7 +374,6 @@
                     <button class="action-btn">SWAP</button>
                 </div>
 
-                <!-- RIGHT: SUMMARY CARD (BIGGER NOW) -->
                 <div class="summary-column">
                     <div class="info-card">
                         <div class="info-header">
@@ -391,7 +401,6 @@
                         <div class="dashed-line"></div>
 
                         <div class="comp-title">Pool Composition</div>
-                        <!-- Comp Rows -->
                         <div class="comp-row">
                             <div class="comp-text"><span id="cTok1">---</span><span id="cVal1">0</span></div>
                             <div class="comp-bar"><div class="comp-fill" id="cBar1" style="width:50%"></div></div>
@@ -406,10 +415,8 @@
             </div>
         </div>
 
-        <!-- TAB 2: ANALYSIS VIEW -->
         <div id="analysis-view" class="view-section">
             <div class="analysis-card">
-                <!-- Header -->
                 <div class="an-header">
                     <div>
                         <div class="pair-label" id="anPair">... / ...</div>
@@ -421,12 +428,10 @@
                     </div>
                 </div>
 
-                <!-- Chart -->
                 <div class="an-chart-container">
                     <canvas id="customChart"></canvas>
                 </div>
 
-                <!-- Data Grid -->
                 <div class="stats-grid">
                     <div class="stat-cell">
                         <div class="mini-label">Market Cap</div>
@@ -454,7 +459,6 @@
                     </div>
                 </div>
 
-                <!-- Footer Liq -->
                 <div class="an-footer">
                     <div class="comp-title">Liquidity Composition</div>
                     <div class="comp-row">
