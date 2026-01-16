@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eThena</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-body: #F4F5F7;
+            --bg-card: #FFFFFF;
+            --bg-input: #F1F4F9;
+            --text-main: #0E111A;
+            --text-sub: #6C757D;
+            --accent: #000000; /* Black for high contrast */
+            --accent-hover: #333333;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --danger: #EF4444;
+            --radius-box: 16px;
+            --radius-btn: 12px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            background: black;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .nav-item:hover { color: var(--accent); cursor: pointer; }
+        .nav-item.active { color: var(--accent); font-weight: 600; }
+
+        .connect-btn {
+            background: var(--accent);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-btn);
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .connect-btn:hover { background: var(--accent-hover); }
+
+        /* --- LAYOUT --- */
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 24px;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        /* --- CARD STYLES --- */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-box);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        /* --- LEFT COLUMN: SWAP --- */
+        .swap-section {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .swap-card {
+            padding: 8px;
+        }
+
+        .swap-header {
+            padding: 16px 20px;
+            display: flex;
+            gap: 24px;
+            border-bottom: 1px solid transparent;
+        }
+
+        .tab {
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            padding-bottom: 4px;
+        }
+        .tab.active {
+            color: var(--text-main);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .swap-body {
+            padding: 12px;
+        }
+
+        .input-container {
+            background: var(--bg-input);
+            border-radius: var(--radius-box);
+            padding: 16px;
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        
+        .input-container:hover {
+            border-color: #d1d5db;
+        }
+
+        .input-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .input-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .token-amount {
+            background: transparent;
+            border: none;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-main);
+            width: 50%;
+            outline: none;
+        }
+
+        .token-amount::placeholder { color: #9ca3af; }
+
+        .token-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 6px 12px 6px 6px;
+            border-radius: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .token-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+        }
+
+        .token-symbol {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .switch-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .switch-icon {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-sub);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            margin-top: 12px;
+            background: var(--accent);
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            border-radius: var(--radius-btn);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+
+        /* --- RIGHT COLUMN: STATS / CHART --- */
+        .stats-section {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chart-card {
+            padding: 24px;
+            min-height: 300px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .pair-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .pair-icons {
+            display: flex;
+            position: relative;
+        }
+        .pair-icons img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        .pair-icons img:nth-child(2) { margin-left: -12px; }
+
+        .price-display {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .change-pill {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .bg-green { background: #DCFCE7; color: #166534; }
+        .bg-red { background: #FEE2E2; color: #991B1B; }
+
+        /* Visualizing Stats layout */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-box {
+            background: var(--bg-input);
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Liquidity Bars */
+        .liquidity-breakdown {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .pool-item {
+            margin-bottom: 16px;
+        }
+
+        .pool-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .progress-track {
+            height: 6px;
+            background: #E5E7EB;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill { height: 100%; border-radius: 3px; }
+
+        /* Routing Card */
+        .routing-card {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .route-title { font-weight: 600; font-size: 14px; }
+        .route-path { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 12px; 
+            color: var(--text-sub);
+        }
+        .route-dot { width: 16px; height: 16px; border-radius: 50%; }
+
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>eTHENA</span> 
+        </div>
+        <div class="nav-links">
+            <div class="nav-item">Trade</div>
+            <div class="nav-item">Dashboard</div>
+            <div class="nav-item">Analytics</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div style="font-size:14px; font-weight:600;">$0.253</div>
+            <button class="connect-btn">Connect Wallet</button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-container">
+
+        <!-- LEFT: SWAP UI -->
+        <div class="swap-section">
+            <div class="card swap-card">
+                <div class="swap-header">
+                    <div class="tab active">Swap</div>
+                    <div class="tab">Limit</div>
+                    <div class="tab">TWAP</div>
+                </div>
+
+                <div class="swap-body">
+                    <!-- INPUT 1 (SELL) -->
+                    <div class="input-container">
+                        <div class="input-top">
+                            <span>Sell</span>
+                            <span>Balance: 0</span>
+                        </div>
+                        <div class="input-main">
+                            <input type="number" id="inputAmount" class="token-amount" placeholder="0.0" oninput="calculateSwap()">
+                            <div class="token-selector" onclick="setMode('sell')">
+                                <img src="" id="sellIcon" class="token-icon">
+                                <span class="token-symbol" id="sellSymbol">---</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                            </div>
+                        </div>
+                        <div style="text-align:right; font-size:12px; color:#9CA3AF; margin-top:4px;" id="sellUsd">
+                            $0.00
+                        </div>
+                    </div>
+
+                    <!-- SWITCHER -->
+                    <div class="switch-btn">
+                        <div class="switch-icon" onclick="toggleSwap()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10l5 5 5-5"/><path d="M7 14l5-5 5 5"/></svg>
+                        </div>
+                    </div>
+
+                    <!-- INPUT 2 (BUY) -->
+                    <div class="input-container">
+                        <div class="input-top">
+                            <span>Buy</span>
+                            <span>Balance: 0</span>
+                        </div>
+                        <div class="input-main">
+                            <input type="text" id="outputAmount" class="token-amount" placeholder="0.0" readonly>
+                            <div class="token-selector" onclick="setMode('buy')">
+                                <img src="" id="buyIcon" class="token-icon">
+                                <span class="token-symbol" id="buySymbol">---</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                            </div>
+                        </div>
+                        <div style="text-align:right; font-size:12px; color:#9CA3AF; margin-top:4px;" id="buyUsd">
+                            $0.00
+                        </div>
+                    </div>
+
+                    <button class="action-btn">Connect Wallet</button>
+
+                    <div style="margin-top:16px; font-size:12px; color:var(--text-sub); display:flex; justify-content:space-between;">
+                        <span>Price</span>
+                        <span id="rateDisplay">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: STATS / CHART UI -->
+        <div class="stats-section">
+            <div class="card chart-card">
+                
+                <!-- HEADER (Like the chart header) -->
+                <div class="chart-header">
+                    <div>
+                        <div class="pair-title">
+                            <div class="pair-icons">
+                                <img id="headIcon1" src="">
+                                <img id="headIcon2" src="">
+                            </div>
+                            <span id="headerPairName">FBOMB / ETHENA</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-sub);" id="currentDate">Jan 16, 2026, 04:35 AM</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <span class="price-display" id="mainPrice">$0.0000</span>
+                        <span class="change-pill bg-green" id="priceChange">+0.00%</span>
+                    </div>
+                </div>
+
+                <!-- STATS GRID (Replacing Chart visual with Data) -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Market Cap</div>
+                        <div class="stat-value" id="fdvValue">$0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Liquidity</div>
+                        <div class="stat-value" id="liqValue">$0</div>
+                    </div>
+                </div>
+
+                <!-- LIQUIDITY BREAKDOWN -->
+                <div class="liquidity-breakdown">
+                    <div class="stat-label" style="margin-bottom:12px;">Pool Composition</div>
+                    
+                    <div class="pool-item">
+                        <div class="pool-text">
+                            <span id="pool1Label">FBOMB</span>
+                            <span id="pool1Val">0</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: 50%; background: #000;"></div>
+                        </div>
+                    </div>
+
+                    <div class="pool-item">
+                        <div class="pool-text">
+                            <span id="pool2Label">ETHENA</span>
+                            <span id="pool2Val">0</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: 50%; background: #9CA3AF;"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ROUTING CARD -->
+            <div class="card routing-card">
+                <div class="route-title">Order Routing</div>
+                <div class="route-path" id="routeInfo">
+                    <img src="" id="routeIcon1" class="route-dot">
+                    <span>100%</span>
+                    <span>→</span>
+                    <img src="" id="routeIcon2" class="route-dot">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // CONFIG
+        const API = "https://api.dexscreener.com/latest/dex/search?q=fbomb%20ethena";
+        const ICON_BOMB = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FfBOMB.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
+        const ICON_ETHENA = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FeTHENA.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
+
+        // STATE
+        let pairData = null;
+        let isBuyMode = true; // True = Buying Ethena (Bomb -> Ethena)
+
+        // INIT
+        async function init() {
+            // Set date
+            document.getElementById('currentDate').innerText = new Date().toLocaleString();
+            
+            try {
+                const res = await fetch(API);
+                const data = await res.json();
+                if(data.pairs && data.pairs.length > 0) {
+                    pairData = data.pairs[0];
+                    updateUI();
+                }
+            } catch(e) {
+                console.log("Error", e);
+            }
+        }
+
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+        }
+        function formatNum(num) {
+            return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(num);
+        }
+
+        function toggleSwap() {
+            isBuyMode = !isBuyMode;
+            // Swap inputs visual only, logic handles recalc
+            const currentIn = document.getElementById('inputAmount').value;
+            document.getElementById('inputAmount').value = document.getElementById('outputAmount').value;
+            // Clear out to prevent confusion or trigger recalc
+            updateSwapUI();
+        }
+
+        function updateUI() {
+            if(!pairData) return;
+
+            // 1. STATS SECTION
+            document.getElementById('headerPairName').innerText = pairData.baseToken.symbol + " / " + pairData.quoteToken.symbol;
+            document.getElementById('headIcon1').src = ICON_BOMB;
+            document.getElementById('headIcon2').src = ICON_ETHENA;
+
+            const price = parseFloat(pairData.priceUsd);
+            document.getElementById('mainPrice').innerText = "$" + price.toFixed(6);
+            
+            const change = pairData.priceChange.h24;
+            const changeEl = document.getElementById('priceChange');
+            changeEl.innerText = (change >= 0 ? "+" : "") + change + "%";
+            changeEl.className = "change-pill " + (change >= 0 ? "bg-green" : "bg-red");
+
+            document.getElementById('fdvValue').innerText = formatCurrency(pairData.fdv);
+            document.getElementById('liqValue').innerText = formatCurrency(pairData.liquidity.usd);
+
+            // Liquidity Breakdown
+            document.getElementById('pool1Label').innerText = pairData.baseToken.symbol;
+            document.getElementById('pool1Val').innerText = formatNum(pairData.liquidity.base);
+            
+            document.getElementById('pool2Label').innerText = pairData.quoteToken.symbol;
+            document.getElementById('pool2Val').innerText = formatNum(pairData.liquidity.quote);
+
+            updateSwapUI();
+        }
+
+        function updateSwapUI() {
+            // Mapping:
+            // Mode Buy: Input = Bomb, Output = Ethena
+            // Mode Sell: Input = Ethena, Output = Bomb
+            
+            const tokenBomb = { sym: 'FBOMB', icon: ICON_BOMB };
+            const tokenEthena = { sym: 'ETHENA', icon: ICON_ETHENA };
+
+            const inputToken = isBuyMode ? tokenBomb : tokenEthena;
+            const outputToken = isBuyMode ? tokenEthena : tokenBomb;
+
+            // Update Input visuals
+            document.getElementById('sellSymbol').innerText = inputToken.sym;
+            document.getElementById('sellIcon').src = inputToken.icon;
+            
+            document.getElementById('buySymbol').innerText = outputToken.sym;
+            document.getElementById('buyIcon').src = outputToken.icon;
+
+            // Routing Visuals
+            document.getElementById('routeIcon1').src = inputToken.icon;
+            document.getElementById('routeIcon2').src = outputToken.icon;
+
+            calculateSwap();
+        }
+
+        function calculateSwap() {
+            if(!pairData) return;
+            const amountIn = parseFloat(document.getElementById('inputAmount').value);
+            
+            if(!amountIn) {
+                document.getElementById('outputAmount').value = "";
+                document.getElementById('sellUsd').innerText = "$0.00";
+                document.getElementById('buyUsd').innerText = "$0.00";
+                return;
+            }
+
+            // Price Logic
+            // pairData.priceNative is Base/Quote (1 Base = X Quote)
+            // Assuming Base = FBOMB, Quote = ETHENA (check API response structure usually)
+            
+            // Let's rely on USD price ratio for robustness
+            // If API says Base is FBOMB:
+            const basePrice = parseFloat(pairData.priceUsd); 
+            const quotePrice = basePrice / parseFloat(pairData.priceNative);
+
+            let priceIn = 0;
+            let priceOut = 0;
+
+            if (isBuyMode) {
+                // In: FBOMB (Base), Out: ETHENA (Quote)
+                // This assumes base is FBOMB. If base is Ethena, logic flips. 
+                // Let's handle generic matching:
+                if(pairData.baseToken.symbol === 'FBOMB') {
+                    priceIn = basePrice;
+                    priceOut = quotePrice;
+                } else {
+                    priceIn = quotePrice;
+                    priceOut = basePrice;
+                }
+            } else {
+                // Sell Mode
+                if(pairData.baseToken.symbol === 'FBOMB') {
+                    priceIn = quotePrice;
+                    priceOut = basePrice;
+                } else {
+                    priceIn = basePrice;
+                    priceOut = quotePrice;
+                }
+            }
+
+            const totalUsd = amountIn * priceIn;
+            const amountOut = totalUsd / priceOut;
+            const rate = amountOut / amountIn;
+
+            document.getElementById('outputAmount').value = amountOut.toFixed(4);
+            document.getElementById('sellUsd').innerText = formatCurrency(totalUsd);
+            document.getElementById('buyUsd').innerText = formatCurrency(totalUsd);
+            
+            document.getElementById('rateDisplay').innerText = `1 ${document.getElementById('sellSymbol').innerText} = ${rate.toFixed(4)} ${document.getElementById('buySymbol').innerText}`;
+        }
+
+        // Run
+        init();
+
+    </script>
+</body>
+</html>
