@@ -575,8 +575,10 @@
         }
 
         function updateSwapInputs() {
-            const tBase = { sym: pair.baseToken.symbol, name: pair.baseToken.name, icon: IMG_BOMB };
-            const tQuote = { sym: pair.quoteToken.symbol, name: pair.quoteToken.name, icon: IMG_ETHENA };
+            
+            const tBase = { sym: pair.baseToken.symbol, name: pair.baseToken.name, icon: IMG_ETHENA };
+            const tQuote = { sym: pair.quoteToken.symbol, name: pair.quoteToken.name, icon: IMG_BOMB };
+
             const tin = isBuy ? tQuote : tBase;
             const tout = isBuy ? tBase : tQuote;
 
