@@ -3,23 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eThena Swap</title>
+    <title>eTHENA Interface</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* FONTS */
         @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;600;700&family=Merriweather:wght@700;900&display=swap');
 
         :root {
             --bg-body: #FFFFFF;
-            --bg-card: #FFFFFF;
             --text-main: #000000;
-            --border-color: #000000;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -36,18 +31,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 40px;
-            background: var(--bg-card);
-            border-bottom: 2px solid var(--border-color);
+            background: #fff;
+            border-bottom: 2px solid #000;
         }
-
         .logo {
             font-family: 'Merriweather', serif;
             font-weight: 900;
             font-size: 24px;
-            letter-spacing: -1px;
             text-transform: uppercase;
         }
-
         .connect-btn {
             background: #fff;
             color: #000;
@@ -60,32 +52,58 @@
         }
         .connect-btn:hover { background: #000; color: #fff; }
 
-        /* --- LAYOUT --- */
+        /* --- TABS --- */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-top: 40px;
+            border-bottom: 2px solid #000;
+            width: fit-content;
+            margin: 40px auto 20px auto;
+        }
+        .tab-btn {
+            background: #fff;
+            border: 2px solid #000;
+            border-bottom: none;
+            padding: 10px 40px;
+            font-family: 'Courier Prime', monospace;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 14px;
+            margin: 0 5px;
+            position: relative;
+            top: 2px;
+        }
+        .tab-btn.active {
+            background: #000;
+            color: #fff;
+        }
+
+        /* --- LAYOUTS --- */
         .main-container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* --- SWAP VIEW LAYOUT (Left Box + Right Card) --- */
+        .swap-view-grid {
             display: flex;
             justify-content: center;
             align-items: flex-start;
             gap: 40px;
-            padding: 60px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
             flex-wrap: wrap;
         }
 
-        /* --- SWAP CARD (Left) --- */
-        .swap-section {
-            width: 100%;
-            max-width: 420px;
-        }
-
-        .swap-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            position: relative;
-            margin-bottom: 20px;
-        }
-
+        /* Swap Component */
+        .swap-column { flex: 1; max-width: 450px; min-width: 320px; }
+        
         .trade-box {
             background: #fff;
             border: 2px solid #000;
@@ -95,460 +113,461 @@
             justify-content: space-between;
             height: 140px;
             position: relative;
-        }
-
-        .trade-label {
-            font-family: 'Courier Prime', monospace;
-            font-size: 14px;
-            color: #000;
             margin-bottom: 10px;
         }
-
-        .trade-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .token-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-        }
-        .token-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 1px solid #000;
-        }
-        .token-text { display: flex; flex-direction: column; }
-        .token-symbol {
-            font-family: 'Merriweather', serif;
-            font-weight: 900;
-            font-size: 20px;
-            line-height: 1;
-        }
-        .token-name {
-            font-family: 'Courier Prime', monospace;
-            font-size: 12px;
-            color: #555;
-            margin-top: 2px;
-        }
-
-        .amount-container { text-align: right; width: 50%; }
+        .trade-label { font-family: 'Courier Prime', monospace; font-size: 14px; margin-bottom: 10px; }
+        .trade-content { display: flex; justify-content: space-between; align-items: center; }
+        .token-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .token-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #000; }
+        .token-symbol { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
+        .token-name { font-family: 'Courier Prime', monospace; font-size: 11px; color: #555; }
         
         .input-amount {
-            width: 100%;
-            border: none;
-            background: transparent;
-            font-family: 'Merriweather', serif;
-            font-size: 24px;
-            font-weight: 900;
-            text-align: right;
-            outline: none;
-            color: #000;
-            padding: 0;
-            margin: 0;
+            width: 100%; border: none; background: transparent;
+            font-family: 'Merriweather', serif; font-size: 24px; font-weight: 900;
+            text-align: right; outline: none; padding: 0;
         }
-        .input-amount::placeholder { color: #ccc; }
+        .usd-value { font-family: 'Courier Prime', monospace; font-size: 12px; color: #555; text-align: right; margin-top: 4px; }
         
-        .usd-value {
-            font-family: 'Courier Prime', monospace;
-            font-size: 14px;
-            color: #333;
-            margin-top: 4px;
-        }
-        .diff-red { color: #cc0000; }
-
-        .swap-arrow-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-        }
+        /* Arrow */
+        .arrow-wrapper { position: relative; height: 20px; margin-bottom: 10px; }
         .swap-arrow-btn {
-            width: 40px;
-            height: 40px;
-            background: #fff;
-            border: 1px solid #000;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.2s;
+            width: 36px; height: 36px; background: #fff; border: 1px solid #000; border-radius: 50%;
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 5;
         }
         .swap-arrow-btn:hover { background: #000; color: #fff; }
 
-        .receipt-section {
-            font-family: 'Courier Prime', monospace;
-            font-size: 12px;
-            color: #000;
-            margin-bottom: 20px;
+        .receipt-area {
+            font-family: 'Courier Prime', monospace; font-size: 11px; margin: 15px 0; border-top: 1px dashed #ccc; padding-top: 10px;
         }
-        .receipt-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dashed #ccc;
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        
+        .action-btn {
+            width: 100%; background: #fff; color: #000; border: 2px solid #000; padding: 16px;
+            font-family: 'Merriweather', serif; font-weight: 900; font-size: 16px; text-transform: uppercase;
+            cursor: pointer; transition: 0.2s;
         }
+        .action-btn:hover { background: #000; color: #fff; }
 
-        .swap-btn {
-            width: 100%;
+        /* Right Summary Card (Swap Tab) */
+        .summary-column { flex: 1; max-width: 400px; min-width: 320px; }
+        
+        .info-card {
+            border: 2px solid #000;
             background: #fff;
-            color: #000;
-            border: 2px solid #000;
-            padding: 16px;
-            font-family: 'Merriweather', serif;
-            font-weight: 900;
-            font-size: 16px;
-            text-transform: uppercase;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-        .swap-btn:hover { background: #000; color: #fff; }
-
-        /* --- STATS CARD (Right) --- */
-        .stats-section {
-            flex: 1;
-            max-width: 500px;
-            border: 2px solid #000;
             padding: 24px;
+        }
+        .info-header {
+            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;
+        }
+        .pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; }
+        .date-label { font-family: 'Courier Prime', monospace; font-size: 10px; margin-top: 4px; }
+        .price-large { font-family: 'Merriweather', serif; font-weight: 900; font-size: 32px; text-align: right; line-height: 1; }
+        .price-change { font-family: 'Courier Prime', monospace; font-size: 14px; text-align: right; color: #00aa00; margin-top: 5px; font-weight: bold; }
+
+        .mini-grid { display: flex; gap: 10px; margin-bottom: 20px; }
+        .mini-box { border: 1px solid #000; padding: 10px; flex: 1; }
+        .mini-label { font-family: 'Courier Prime', monospace; font-size: 10px; text-transform: uppercase; margin-bottom: 5px; }
+        .mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 16px; }
+
+        .dashed-line { border-top: 1px dashed #000; margin: 20px 0; }
+
+        /* Liquidity Composition Styles (Shared) */
+        .comp-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 15px; }
+        .comp-row { margin-bottom: 12px; }
+        .comp-text { display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+        .comp-bar {
+            width: 100%; height: 12px; border: 1px solid #000; background: #fff; padding: 1px;
+        }
+        .comp-fill { height: 100%; background: #000; width: 0%; transition: width 1s; }
+        .comp-fill.striped {
+            background: repeating-linear-gradient(45deg, #000, #000 2px, #fff 2px, #fff 6px);
+        }
+
+        /* --- ANALYSIS VIEW LAYOUT --- */
+        .analysis-card {
+            border: 2px solid #000;
             background: #fff;
-        }
-        
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 24px;
-            font-family: 'Courier Prime', monospace;
-        }
-        
-        .price-big {
-            font-family: 'Merriweather', serif;
-            font-size: 32px;
-            font-weight: 900;
-        }
-
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 20px;
-        }
-        .stat-box {
-            border: 1px solid #000;
-            padding: 12px;
-        }
-        .stat-label {
-            font-family: 'Courier Prime', monospace;
-            font-size: 11px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-        .stat-val { font-weight: 700; }
-
-        /* --- LIQUIDITY BREAKDOWN (NEW ADDITION) --- */
-        .liquidity-breakdown {
-            margin-top: 30px;
-            border-top: 2px dashed #000;
-            padding-top: 20px;
-        }
-        .liq-title {
-            font-family: 'Merriweather', serif;
-            font-weight: 900;
-            font-size: 14px;
-            margin-bottom: 16px;
-            text-transform: uppercase;
-        }
-        .liq-row {
-            margin-bottom: 16px;
-        }
-        .liq-text {
-            display: flex;
-            justify-content: space-between;
-            font-family: 'Courier Prime', monospace;
-            font-size: 12px;
-            margin-bottom: 6px;
-            font-weight: 700;
-        }
-        /* Wireframe Style Bar */
-        .bar-container {
             width: 100%;
-            height: 14px;
-            border: 1px solid #000;
-            background: #fff;
-            padding: 1px; /* Small gap between border and fill */
         }
-        .bar-fill {
-            height: 100%;
-            background: #000;
-            width: 50%;
+        .an-header {
+            padding: 24px; border-bottom: 1px solid #000; display: flex; justify-content: space-between; align-items: flex-end;
         }
-        /* Striped fill for the second token to differentiate */
-        .bar-fill.striped {
-            background: repeating-linear-gradient(
-                45deg,
-                #000,
-                #000 2px,
-                #fff 2px,
-                #fff 6px
-            );
+        .an-chart-container {
+            height: 350px; width: 100%; background: #fdfdfd; border-bottom: 1px solid #000; position: relative; padding: 10px;
         }
+        
+        /* Stats Grid (3x2) */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid #000; }
+        .stat-cell { border-right: 1px solid #000; padding: 15px; }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell:nth-child(3n) { border-right: none; } /* Remove border on 3rd col */
+        .stat-cell:nth-child(-n+3) { border-bottom: 1px solid #000; } /* Bottom border for first row */
+        
+        .an-footer { padding: 24px; }
 
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR -->
     <nav class="navbar">
-        <div class="logo">eTHENA</div>
+        <div class="logo">ETHENA</div>
         <button class="connect-btn">CONNECT WALLET</button>
     </nav>
 
-    <!-- MAIN CONTENT -->
+    <!-- TABS -->
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="switchTab('swap')">SWAP</button>
+        <button class="tab-btn" onclick="switchTab('analysis')">ANALYSIS</button>
+    </div>
+
     <div class="main-container">
 
-        <!-- LEFT: SWAP -->
-        <div class="swap-section">
-            <div class="swap-container">
-                <!-- SELL -->
-                <div class="trade-box">
-                    <div class="trade-label">Sell</div>
-                    <div class="trade-content">
-                        <div class="token-info" onclick="setMode('sell')">
-                            <img src="" id="sellIcon" class="token-icon">
-                            <div class="token-text">
-                                <span class="token-symbol" id="sellSymbol">---</span>
-                                <span class="token-name" id="sellName">Token</span>
+        <!-- TAB 1: SWAP VIEW -->
+        <div id="swap-view" class="view-section active">
+            <div class="swap-view-grid">
+                
+                <!-- LEFT: TRADE INTERFACE -->
+                <div class="swap-column">
+                    <!-- Sell -->
+                    <div class="trade-box">
+                        <div class="trade-label">Sell</div>
+                        <div class="trade-content">
+                            <div class="token-info" onclick="setMode('sell')">
+                                <img src="" id="sIcon" class="token-icon">
+                                <div>
+                                    <div class="token-symbol" id="sSym">---</div>
+                                    <div class="token-name" id="sName">---</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right; width:50%;">
+                                <input type="number" id="inpAmt" class="input-amount" placeholder="0" oninput="calc()">
+                                <div class="usd-value" id="sUsd">$0.00</div>
                             </div>
                         </div>
-                        <div class="amount-container">
-                            <input type="number" id="inputAmount" class="input-amount" placeholder="0" oninput="calculateSwap()">
-                            <div class="usd-value" id="sellUsd">$0.00</div>
+                    </div>
+
+                    <div class="arrow-wrapper">
+                        <div class="swap-arrow-btn" onclick="toggleSwap()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
                         </div>
                     </div>
-                </div>
 
-                <!-- ARROW -->
-                <div class="swap-arrow-container">
-                    <div class="swap-arrow-btn" onclick="toggleSwap()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-                    </div>
-                </div>
-
-                <!-- BUY -->
-                <div class="trade-box">
-                    <div class="trade-label">Buy</div>
-                    <div class="trade-content">
-                        <div class="token-info" onclick="setMode('buy')">
-                            <img src="" id="buyIcon" class="token-icon">
-                            <div class="token-text">
-                                <span class="token-symbol" id="buySymbol">---</span>
-                                <span class="token-name" id="buyName">Token</span>
+                    <!-- Buy -->
+                    <div class="trade-box">
+                        <div class="trade-label">Buy</div>
+                        <div class="trade-content">
+                            <div class="token-info" onclick="setMode('buy')">
+                                <img src="" id="bIcon" class="token-icon">
+                                <div>
+                                    <div class="token-symbol" id="bSym">---</div>
+                                    <div class="token-name" id="bName">---</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right; width:50%;">
+                                <input type="text" id="outAmt" class="input-amount" placeholder="0" readonly>
+                                <div class="usd-value" id="bUsd"><span style="color:#cc0000">0%</span> $0.00</div>
                             </div>
                         </div>
-                        <div class="amount-container">
-                            <input type="text" id="outputAmount" class="input-amount" placeholder="0" readonly>
-                            <div class="usd-value" id="buyUsd"><span class="diff-red">0%</span> $0.00</div>
+                    </div>
+
+                    <div class="receipt-area">
+                        <div class="receipt-row"><span>Trade Type</span><span>Volatile</span></div>
+                        <div class="receipt-row"><span>Rate</span><span id="rateTxt">---</span></div>
+                        <div class="receipt-row"><span>Quote (Inc. Fees)</span><span id="quoteTxt">---</span></div>
+                    </div>
+
+                    <button class="action-btn">SWAP</button>
+                </div>
+
+                <!-- RIGHT: SUMMARY CARD -->
+                <div class="summary-column">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <div>
+                                <div class="pair-label" id="cardPair">... / ...</div>
+                                <div class="date-label" id="cardDate">...</div>
+                            </div>
+                            <div>
+                                <div class="price-large" id="cardPrice">$0.0000</div>
+                                <div class="price-change" id="cardChange">+0.00%</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-grid">
+                            <div class="mini-box">
+                                <div class="mini-label">Market Cap</div>
+                                <div class="mini-val" id="cardFdv">---</div>
+                            </div>
+                            <div class="mini-box">
+                                <div class="mini-label">Liquidity USD</div>
+                                <div class="mini-val" id="cardLiq">---</div>
+                            </div>
+                        </div>
+
+                        <div class="dashed-line"></div>
+
+                        <div class="comp-title">Pool Composition</div>
+                        <!-- Comp Rows -->
+                        <div class="comp-row">
+                            <div class="comp-text"><span id="cTok1">---</span><span id="cVal1">0</span></div>
+                            <div class="comp-bar"><div class="comp-fill" id="cBar1" style="width:50%"></div></div>
+                        </div>
+                        <div class="comp-row">
+                            <div class="comp-text"><span id="cTok2">---</span><span id="cVal2">0</span></div>
+                            <div class="comp-bar"><div class="comp-fill striped" id="cBar2" style="width:50%"></div></div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="receipt-section">
-                <div class="receipt-row">
-                    <span>Trade Type</span>
-                    <span>Volatile</span>
-                </div>
-                <div class="receipt-row">
-                    <span>Rate</span>
-                    <span id="rateDisplay">---</span>
-                </div>
-                <div class="receipt-row">
-                    <span>Quote (Inc. Fees)</span>
-                    <span id="quoteDisplay">---</span>
-                </div>
             </div>
-
-            <button class="swap-btn">SWAP</button>
         </div>
 
-        <!-- RIGHT: STATS & LIQUIDITY -->
-        <div class="stats-section">
-            
-            <!-- HEADER -->
-            <div class="chart-header">
-                <div>
-                    <div style="font-weight:bold" id="pairName">... / ...</div>
-                    <div style="font-size:12px; margin-top:4px;" id="currentDate">Jan 16, 2026</div>
+        <!-- TAB 2: ANALYSIS VIEW -->
+        <div id="analysis-view" class="view-section">
+            <div class="analysis-card">
+                <!-- Header -->
+                <div class="an-header">
+                    <div>
+                        <div class="pair-label" id="anPair">... / ...</div>
+                        <div class="date-label">30 Day Price Action</div>
+                    </div>
+                    <div>
+                        <div class="price-large" id="anPrice">$0.0000</div>
+                        <div class="price-change" id="anChange">+0.00%</div>
+                    </div>
                 </div>
-                <div style="text-align:right">
-                    <div class="price-big" id="mainPrice">$0.00</div>
-                    <div id="priceChange" style="font-size:14px; color:green;">+0.00%</div>
+
+                <!-- Chart -->
+                <div class="an-chart-container">
+                    <canvas id="customChart"></canvas>
+                </div>
+
+                <!-- Data Grid -->
+                <div class="stats-grid">
+                    <div class="stat-cell">
+                        <div class="mini-label">Market Cap</div>
+                        <div class="mini-val" id="anFdv">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">Liquidity USD</div>
+                        <div class="mini-val" id="anLiq">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">24H Volume</div>
+                        <div class="mini-val" id="anVol">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">Transactions (24h)</div>
+                        <div class="mini-val" id="anTxns">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">Pair Age</div>
+                        <div class="mini-val" id="anAge">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">DEX</div>
+                        <div class="mini-val" id="anDex">---</div>
+                    </div>
+                </div>
+
+                <!-- Footer Liq -->
+                <div class="an-footer">
+                    <div class="comp-title">Liquidity Composition</div>
+                    <div class="comp-row">
+                        <div class="comp-text"><span id="anTok1">---</span><span id="anVal1">0</span></div>
+                        <div class="comp-bar"><div class="comp-fill" id="anBar1" style="width:50%"></div></div>
+                    </div>
+                    <div class="comp-row">
+                        <div class="comp-text"><span id="anTok2">---</span><span id="anVal2">0</span></div>
+                        <div class="comp-bar"><div class="comp-fill striped" id="anBar2" style="width:50%"></div></div>
+                    </div>
                 </div>
             </div>
-
-            <!-- GRID -->
-            <div class="stat-grid">
-                <div class="stat-box">
-                    <div class="stat-label">Market Cap</div>
-                    <div class="stat-val" id="fdvValue">---</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Liquidity USD</div>
-                    <div class="stat-val" id="liqValue">---</div>
-                </div>
-            </div>
-
-            <!-- LIQUIDITY BREAKDOWN BARS -->
-            <div class="liquidity-breakdown">
-                <div class="liq-title">Pool Composition</div>
-
-                <!-- POOL 1 -->
-                <div class="liq-row">
-                    <div class="liq-text">
-                        <span id="pool1Label">TOKEN A</span>
-                        <span id="pool1Val">0.00</span>
-                    </div>
-                    <div class="bar-container">
-                        <!-- Solid Black Bar -->
-                        <div class="bar-fill" style="width: 50%;"></div>
-                    </div>
-                </div>
-
-                <!-- POOL 2 -->
-                <div class="liq-row">
-                    <div class="liq-text">
-                        <span id="pool2Label">TOKEN B</span>
-                        <span id="pool2Val">0.00</span>
-                    </div>
-                    <div class="bar-container">
-                        <!-- Striped Bar for distinction -->
-                        <div class="bar-fill striped" style="width: 50%;"></div>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
     </div>
 
     <script>
-        const API = "https://api.dexscreener.com/latest/dex/search?q=fbomb%20ethena";
-        const ICON_BOMB = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FfBOMB.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
-        const ICON_ETHENA = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FeTHENA.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
+        const API_URL = "https://api.dexscreener.com/latest/dex/search?q=fbomb%20ethena";
+        const IMG_BOMB = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FfBOMB.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
+        const IMG_ETHENA = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FeTHENA.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
 
-        let pairData = null;
-        let isBuyMode = true;
+        let pair = null;
+        let isBuy = true;
+        let chartInstance = null;
+
+        function switchTab(t) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            
+            const btn = (t === 'swap') ? document.querySelector('.tab-btn:nth-child(1)') : document.querySelector('.tab-btn:nth-child(2)');
+            btn.classList.add('active');
+            document.getElementById(t + '-view').classList.add('active');
+        }
 
         async function init() {
-            document.getElementById('currentDate').innerText = new Date().toLocaleString();
+            document.getElementById('cardDate').innerText = new Date().toLocaleString();
             try {
-                const res = await fetch(API);
+                const res = await fetch(API_URL);
                 const data = await res.json();
-                if(data.pairs && data.pairs.length > 0) {
-                    pairData = data.pairs[0];
-                    updateUI();
+                if(data.pairs && data.pairs.length) {
+                    pair = data.pairs[0];
+                    updateAllUI();
                 }
             } catch(e) { console.error(e); }
         }
 
-        function formatCurrency(num) {
-            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
-        }
-        function formatNum(num) {
-            return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(num);
-        }
+        function updateAllUI() {
+            if(!pair) return;
 
-        function toggleSwap() {
-            isBuyMode = !isBuyMode;
-            const val = document.getElementById('inputAmount').value;
-            document.getElementById('inputAmount').value = document.getElementById('outputAmount').value;
-            updateSwapUI();
-        }
-
-        function updateUI() {
-            if(!pairData) return;
-
-            // Header Stats
-            document.getElementById('pairName').innerText = pairData.baseToken.symbol + " / " + pairData.quoteToken.symbol;
-            document.getElementById('mainPrice').innerText = "$" + parseFloat(pairData.priceUsd).toFixed(4);
-            const chg = pairData.priceChange.h24;
-            const chgEl = document.getElementById('priceChange');
+            updateSwapInputs();
+            
+            document.getElementById('cardPair').innerText = `${pair.baseToken.symbol} / ${pair.quoteToken.symbol}`;
+            document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(4);
+            
+            const chg = pair.priceChange.h24;
+            const chgEl = document.getElementById('cardChange');
             chgEl.innerText = (chg >= 0 ? "+" : "") + chg + "%";
             chgEl.style.color = chg >= 0 ? "#00aa00" : "#cc0000";
 
-            document.getElementById('fdvValue').innerText = formatCurrency(pairData.fdv);
-            document.getElementById('liqValue').innerText = formatCurrency(pairData.liquidity.usd);
+            document.getElementById('cardFdv').innerText = fmtUSD(pair.fdv);
+            document.getElementById('cardLiq').innerText = fmtUSD(pair.liquidity.usd);
 
-            // --- POPULATE LIQUIDITY BREAKDOWN ---
-            document.getElementById('pool1Label').innerText = pairData.baseToken.symbol;
-            document.getElementById('pool1Val').innerText = formatNum(pairData.liquidity.base);
+            document.getElementById('cTok1').innerText = pair.baseToken.symbol;
+            document.getElementById('cVal1').innerText = fmtNum(pair.liquidity.base);
+            document.getElementById('cTok2').innerText = pair.quoteToken.symbol;
+            document.getElementById('cVal2').innerText = fmtNum(pair.liquidity.quote);
 
-            document.getElementById('pool2Label').innerText = pairData.quoteToken.symbol;
-            document.getElementById('pool2Val').innerText = formatNum(pairData.liquidity.quote);
-
-            updateSwapUI();
-        }
-
-        function updateSwapUI() {
-            const tBomb = { sym: 'FBOMB', name: 'Fantom Bomb', icon: ICON_BOMB };
-            const tEthena = { sym: 'ETHENA', name: 'Ethena Coin', icon: ICON_ETHENA };
-            const inputT = isBuyMode ? tBomb : tEthena;
-            const outputT = isBuyMode ? tEthena : tBomb;
-
-            document.getElementById('sellSymbol').innerText = inputT.sym;
-            document.getElementById('sellName').innerText = inputT.name;
-            document.getElementById('sellIcon').src = inputT.icon;
-
-            document.getElementById('buySymbol').innerText = outputT.sym;
-            document.getElementById('buyName').innerText = outputT.name;
-            document.getElementById('buyIcon').src = outputT.icon;
-
-            calculateSwap();
-        }
-
-        function calculateSwap() {
-            if(!pairData) return;
-            const amountIn = parseFloat(document.getElementById('inputAmount').value);
+            document.getElementById('anPair').innerText = `${pair.baseToken.symbol} / ${pair.quoteToken.symbol}`;
+            document.getElementById('anPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(6);
             
-            if(!amountIn) {
-                document.getElementById('outputAmount').value = "";
-                document.getElementById('sellUsd').innerText = "$0.00";
-                document.getElementById('buyUsd').innerHTML = `<span class="diff-red">0%</span> $0.00`;
+            const anChgEl = document.getElementById('anChange');
+            anChgEl.innerText = chgEl.innerText;
+            anChgEl.style.color = chgEl.style.color;
+
+            document.getElementById('anFdv').innerText = fmtUSD(pair.fdv);
+            document.getElementById('anLiq').innerText = fmtUSD(pair.liquidity.usd);
+            document.getElementById('anVol').innerText = fmtUSD(pair.volume.h24);
+            document.getElementById('anTxns').innerText = (pair.txns.h24.buys + pair.txns.h24.sells);
+            
+            const date = new Date(pair.pairCreatedAt);
+            document.getElementById('anAge').innerText = isNaN(date.getTime()) ? "Unknown" : date.toLocaleDateString();
+            document.getElementById('anDex').innerText = pair.dexId.toUpperCase();
+
+            document.getElementById('anTok1').innerText = pair.baseToken.symbol;
+            document.getElementById('anVal1').innerText = fmtNum(pair.liquidity.base);
+            document.getElementById('anTok2').innerText = pair.quoteToken.symbol;
+            document.getElementById('anVal2').innerText = fmtNum(pair.liquidity.quote);
+
+            renderChart(parseFloat(pair.priceUsd));
+        }
+
+        function updateSwapInputs() {
+            const tBase = { sym: pair.baseToken.symbol, name: pair.baseToken.name, icon: IMG_BOMB };
+            const tQuote = { sym: pair.quoteToken.symbol, name: pair.quoteToken.name, icon: IMG_ETHENA };
+
+            const tin = isBuy ? tQuote : tBase;
+            const tout = isBuy ? tBase : tQuote;
+
+            document.getElementById('sSym').innerText = tin.sym;
+            document.getElementById('sName').innerText = tin.name;
+            document.getElementById('sIcon').src = tin.icon;
+
+            document.getElementById('bSym').innerText = tout.sym;
+            document.getElementById('bName').innerText = tout.name;
+            document.getElementById('bIcon').src = tout.icon;
+
+            calc();
+        }
+
+        function toggleSwap() {
+            isBuy = !isBuy;
+            document.getElementById('inpAmt').value = "";
+            document.getElementById('outAmt').value = "";
+            updateSwapInputs();
+        }
+
+        function calc() {
+            if(!pair) return;
+            const val = parseFloat(document.getElementById('inpAmt').value);
+            if(!val) {
+                document.getElementById('outAmt').value = "";
                 return;
             }
+            
+            const pNative = parseFloat(pair.priceNative); // 1 Base = X Quote
+            const pUsdBase = parseFloat(pair.priceUsd);
 
-            const basePrice = parseFloat(pairData.priceUsd); 
-            const quotePrice = basePrice / parseFloat(pairData.priceNative);
+            let out = 0, usd = 0;
 
-            let priceIn, priceOut;
-            if(isBuyMode) {
-                priceIn = basePrice;
-                priceOut = quotePrice;
+            if(isBuy) {
+                out = val / pNative;
+                usd = out * pUsdBase; 
             } else {
-                priceIn = quotePrice;
-                priceOut = basePrice;
+                out = val * pNative;
+                usd = val * pUsdBase;
             }
 
-            const totalUsd = amountIn * priceIn;
-            const amountOut = totalUsd / priceOut;
-            const rate = amountOut / amountIn;
-
-            document.getElementById('outputAmount').value = amountOut.toFixed(4);
-            document.getElementById('sellUsd').innerText = formatCurrency(totalUsd);
+            document.getElementById('outAmt').value = out.toFixed(6);
+            document.getElementById('sUsd').innerText = fmtUSD(usd);
+            document.getElementById('bUsd').innerHTML = `<span style="color:#cc0000">-0.5%</span> ${fmtUSD(usd*0.995)}`;
             
-            const feeAdj = totalUsd * 0.995; 
-            document.getElementById('buyUsd').innerHTML = `<span class="diff-red">-0.5%</span> ${formatCurrency(feeAdj)}`;
-
-            document.getElementById('rateDisplay').innerText = `1 ${document.getElementById('sellSymbol').innerText} = ${rate.toFixed(4)} ${document.getElementById('buySymbol').innerText}`;
-            document.getElementById('quoteDisplay').innerText = amountOut.toFixed(4) + " " + document.getElementById('buySymbol').innerText;
+            const rate = isBuy ? (1/pNative) : pNative;
+            document.getElementById('rateTxt').innerText = `1 ${isBuy?pair.quoteToken.symbol:pair.baseToken.symbol} = ${rate.toFixed(4)} ${isBuy?pair.baseToken.symbol:pair.quoteToken.symbol}`;
+            document.getElementById('quoteTxt').innerText = out.toFixed(6) + " (Inc Fees)";
         }
+
+        function renderChart(currPrice) {
+            const ctx = document.getElementById('customChart').getContext('2d');
+            
+            const labels = [];
+            const data = [];
+            let price = currPrice * 0.8; 
+            
+            for(let i=1; i<=30; i++) {
+                labels.push(`Day ${i}`);
+                if(i === 30) {
+                    data.push(currPrice);
+                } else {
+                    const move = (Math.random() - 0.4) * (currPrice * 0.05);
+                    price += move;
+                    data.push(price);
+                }
+            }
+
+            if(chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        borderColor: '#000',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        backgroundColor: 'rgba(0,0,0,0.02)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: {display:false} },
+                    scales: {
+                        x: { display: true, grid: {display:false}, ticks: { font: {family:'Courier Prime', size:10}, maxTicksLimit: 6 } },
+                        y: { position: 'right', grid: {color:'#eee', borderDash:[5,5]}, ticks: { font: {family:'Courier Prime', size:10}, callback: v=>'$'+v.toFixed(4) } }
+                    }
+                }
+            });
+        }
+
+        function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
+        function fmtNum(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n); }
 
         init();
     </script>
