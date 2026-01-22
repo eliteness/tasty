@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eTHENA Interface</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+    <style>
+        /* FONTS */
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;600;700&family=Merriweather:wght@700;900&display=swap');
+
+        :root { --bg-body: #FFFFFF; --text-main: #000000; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* HEADER */
+        .header-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: transparent; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .top-logo { height: 50px; width: auto; display: block; }
+        .logo-text { font-family: 'Merriweather', serif; font-weight: 900; font-size: 24px; letter-spacing: 1px; }
+        .connect-btn { background: #fff; color: #000; padding: 8px 24px; border: 2px solid #000; font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .connect-btn:hover { background: #000; color: #fff; }
+
+        /* TABS */
+        .tab-container { display: flex; justify-content: center; gap: 0; margin-top: 20px; border-bottom: 2px solid #000; width: fit-content; margin: 20px auto 20px auto; }
+        .tab-btn { background: #fff; border: 2px solid #000; border-bottom: none; padding: 10px 40px; font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 14px; margin: 0 5px; position: relative; top: 2px; }
+        .tab-btn.active { background: #000; color: #fff; }
+
+        /* LAYOUTS */
+        .main-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* SWAP GRID */
+        .swap-view-grid { display: flex; justify-content: center; align-items: flex-start; gap: 50px; flex-wrap: wrap; }
+        .swap-column { flex: 1; max-width: 450px; min-width: 320px; }
+        .swap-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .swap-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; }
+        .settings-icon { cursor: pointer; width: 24px; height: 24px; transition: transform 0.3s ease; }
+        .settings-icon:hover { transform: rotate(90deg); }
+
+        .settings-panel { background: #f0f0f0; border: 2px solid #000; padding: 15px; margin-bottom: 15px; display: none; }
+        .settings-panel.open { display: block; }
+        .slip-label { font-family: 'Courier Prime', monospace; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
+        .slip-options { display: flex; gap: 8px; }
+        .slip-btn { flex: 1; background: #fff; border: 1px solid #000; font-family: 'Courier Prime', monospace; font-size: 12px; padding: 6px; cursor: pointer; }
+        .slip-btn.active { background: #000; color: #fff; }
+        .slip-input { width: 60px; border: 1px solid #000; padding: 6px; font-family: 'Courier Prime', monospace; font-size: 12px; text-align: center; }
+
+        .trade-box { background: #fff; border: 2px solid #000; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 140px; position: relative; margin-bottom: 10px; }
+        .trade-label { font-family: 'Courier Prime', monospace; font-size: 14px; margin-bottom: 10px; }
+        .trade-content { display: flex; justify-content: space-between; align-items: center; }
+        .token-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .token-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #000; }
+        .token-symbol { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
+        .token-name { font-family: 'Courier Prime', monospace; font-size: 11px; color: #555; }
+        
+        .input-amount { width: 100%; border: none; background: transparent; font-family: 'Merriweather', serif; font-size: 24px; font-weight: 900; text-align: right; outline: none; padding: 0; }
+        .usd-value { font-family: 'Courier Prime', monospace; font-size: 12px; color: #555; text-align: right; margin-top: 4px; }
+        
+        .arrow-wrapper { position: relative; height: 20px; margin-bottom: 10px; }
+        .swap-arrow-btn { width: 36px; height: 36px; background: #fff; border: 1px solid #000; border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 5; }
+        .swap-arrow-btn:hover { background: #000; color: #fff; }
+
+        .receipt-area { font-family: 'Courier Prime', monospace; font-size: 11px; margin: 15px 0; border-top: 1px dashed #ccc; padding-top: 10px; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        
+        .action-btn { width: 100%; background: #fff; color: #000; border: 2px solid #000; padding: 16px; font-family: 'Merriweather', serif; font-weight: 900; font-size: 16px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
+        .action-btn:hover { background: #000; color: #fff; }
+        /* Disable hover when disabled */
+        .action-btn:disabled { background: #ccc !important; cursor: not-allowed; }
+
+        .summary-column { flex: 1; max-width: 450px; min-width: 320px; }
+        .info-card { border: 2px solid #000; background: #fff; padding: 30px; }
+        .info-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        .pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 22px; }
+        .date-label { font-family: 'Courier Prime', monospace; font-size: 11px; margin-top: 6px; }
+        .price-large { font-family: 'Merriweather', serif; font-weight: 900; font-size: 42px; text-align: right; line-height: 1; }
+        .price-change { font-family: 'Courier Prime', monospace; font-size: 16px; text-align: right; color: #00aa00; margin-top: 8px; font-weight: bold; }
+        .mini-grid { display: flex; gap: 15px; margin-bottom: 25px; }
+        .mini-box { border: 1px solid #000; padding: 15px; flex: 1; }
+        .mini-label { font-family: 'Courier Prime', monospace; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
+        .mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
+        .dashed-line { border-top: 1px dashed #000; margin: 25px 0; }
+        .comp-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; }
+        .comp-row { margin-bottom: 16px; }
+        .comp-text { display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+        .comp-bar { width: 100%; height: 16px; border: 1px solid #000; background: #fff; padding: 2px; }
+        .comp-fill { height: 100%; background: #000; width: 0%; transition: width 1s; }
+        .comp-fill.striped { background: repeating-linear-gradient(45deg, #000, #000 2px, #fff 2px, #fff 6px); }
+
+        /* ANALYSIS VIEW */
+        .analysis-card { border: 2px solid #000; background: #fff; width: 100%; }
+        .an-header { padding: 24px; border-bottom: 1px solid #000; display: flex; justify-content: space-between; align-items: flex-end; }
+        .an-chart-container { height: 350px; width: 100%; background: #fdfdfd; border-bottom: 1px solid #000; position: relative; padding: 10px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid #000; }
+        .stat-cell { border-right: 1px solid #000; padding: 15px; }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell:nth-child(3n) { border-right: none; }
+        .stat-cell:nth-child(-n+3) { border-bottom: 1px solid #000; }
+        .an-footer { padding: 24px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-row">
+        <div class="logo-container">
+            <img src="https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FeTHENA.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5" alt="eTHENA" class="top-logo">
+            <span class="logo-text">eTHENA</span>
+        </div>
+        
+        <button id="connectBtn" class="connect-btn" onclick="connectWallet()">CONNECT WALLET</button>
+    </div>
+
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="switchTab('swap')">SWAP</button>
+        <button class="tab-btn" onclick="switchTab('analysis')">ANALYSIS</button>
+    </div>
+
+    <div class="main-container">
+
+        <div id="swap-view" class="view-section active">
+            <div class="swap-view-grid">
+                
+                <div class="swap-column">
+                    <div class="swap-header-row">
+                        <div class="swap-title">Swap</div>
+                        <div class="settings-icon" onclick="toggleSettings()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </div>
+                    </div>
+
+                    <div id="settingsPanel" class="settings-panel">
+                        <div class="slip-label">SLIPPAGE TOLERANCE</div>
+                        <div class="slip-options">
+                            <button class="slip-btn" onclick="setSlip(0.1)">0.1%</button>
+                            <button class="slip-btn active" onclick="setSlip(0.5)">0.5%</button>
+                            <button class="slip-btn" onclick="setSlip(1.0)">1.0%</button>
+                            <input type="number" id="customSlip" class="slip-input" placeholder="Custom" oninput="setCustomSlip()">
+                        </div>
+                    </div>
+
+                    <div class="trade-box">
+                        <div class="trade-label">Sell</div>
+                        <div class="trade-content">
+                            <div class="token-info" onclick="setMode('sell')">
+                                <img src="" id="sIcon" class="token-icon">
+                                <div>
+                                    <div class="token-symbol" id="sSym">---</div>
+                                    <div class="token-name" id="sName">---</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right; width:50%;">
+                                <input type="number" id="inpAmt" class="input-amount" placeholder="0" oninput="calc()">
+                                <div class="usd-value" id="sUsd">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="arrow-wrapper">
+                        <div class="swap-arrow-btn" onclick="toggleSwap()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="trade-box">
+                        <div class="trade-label">Buy</div>
+                        <div class="trade-content">
+                            <div class="token-info" onclick="setMode('buy')">
+                                <img src="" id="bIcon" class="token-icon">
+                                <div>
+                                    <div class="token-symbol" id="bSym">---</div>
+                                    <div class="token-name" id="bName">---</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right; width:50%;">
+                                <input type="text" id="outAmt" class="input-amount" placeholder="0" readonly>
+                                <div class="usd-value" id="bUsd">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="receipt-area">
+                        <div class="receipt-row"><span>Slippage</span><span id="slipDisplay">0.5%</span></div>
+                        <div class="receipt-row"><span>Rate</span><span id="rateTxt">---</span></div>
+                        <div class="receipt-row"><span>Quote (Inc. Fees)</span><span id="quoteTxt">---</span></div>
+                    </div>
+
+                    <button id="mainActionBtn" class="action-btn">CONNECT WALLET</button>
+                </div>
+
+                <div class="summary-column">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <div>
+                                <div class="pair-label" id="cardPair">... / ...</div>
+                                <div class="date-label" id="cardDate">...</div>
+                            </div>
+                            <div>
+                                <div class="price-large" id="cardPrice">$0.0000</div>
+                                <div class="price-change" id="cardChange">+0.00%</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-grid">
+                            <div class="mini-box">
+                                <div class="mini-label">Market Cap</div>
+                                <div class="mini-val" id="cardFdv">---</div>
+                            </div>
+                            <div class="mini-box">
+                                <div class="mini-label">Liquidity USD</div>
+                                <div class="mini-val" id="cardLiq">---</div>
+                            </div>
+                        </div>
+
+                        <div class="dashed-line"></div>
+
+                        <div class="comp-title">Pool Composition</div>
+                        <div class="comp-row">
+                            <div class="comp-text"><span id="cTok1">---</span><span id="cVal1">0</span></div>
+                            <div class="comp-bar"><div class="comp-fill" id="cBar1" style="width:50%"></div></div>
+                        </div>
+                        <div class="comp-row">
+                            <div class="comp-text"><span id="cTok2">---</span><span id="cVal2">0</span></div>
+                            <div class="comp-bar"><div class="comp-fill striped" id="cBar2" style="width:50%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="analysis-view" class="view-section">
+            <div class="analysis-card">
+                <div class="an-header">
+                    <div>
+                        <div class="pair-label" id="anPair">... / ...</div>
+                        <div class="date-label">30 Day Price Action</div>
+                    </div>
+                    <div>
+                        <div class="price-large" id="anPrice">$0.0000</div>
+                        <div class="price-change" id="anChange">+0.00%</div>
+                    </div>
+                </div>
+
+                <div class="an-chart-container">
+                    <canvas id="customChart"></canvas>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-cell">
+                        <div class="mini-label">Market Cap</div>
+                        <div class="mini-val" id="anFdv">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">Liquidity USD</div>
+                        <div class="mini-val" id="anLiq">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">24H Volume</div>
+                        <div class="mini-val" id="anVol">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">Transactions (24h)</div>
+                        <div class="mini-val" id="anTxns">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">Pair Age</div>
+                        <div class="mini-val" id="anAge">---</div>
+                    </div>
+                    <div class="stat-cell">
+                        <div class="mini-label">DEX</div>
+                        <div class="mini-val" id="anDex">---</div>
+                    </div>
+                </div>
+
+                <div class="an-footer">
+                    <div class="comp-title">Liquidity Composition</div>
+                    <div class="comp-row">
+                        <div class="comp-text"><span id="anTok1">---</span><span id="anVal1">0</span></div>
+                        <div class="comp-bar"><div class="comp-fill" id="anBar1" style="width:50%"></div></div>
+                    </div>
+                    <div class="comp-row">
+                        <div class="comp-text"><span id="anTok2">---</span><span id="anVal2">0</span></div>
+                        <div class="comp-bar"><div class="comp-fill striped" id="anBar2" style="width:50%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const ADDR_ROUTER = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
+        const ADDR_ETHENA = "0xafbe3b8b0939a5538DE32f7752A78e08C8492295";
+        const ADDR_FBOMB  = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
+        const ADDR_WBNB   = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+
+        const IMG_BOMB = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FfBOMB.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
+        const IMG_ETHENA = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FeTHENA.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
+
+        const ROUTER_ABI = [
+            "function getAmountsOut(uint amountIn, tuple(address from, address to, bool stable)[] memory routes) public view returns (uint[] memory amounts)",
+            "function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, tuple(address from, address to, bool stable)[] calldata routes, address to, uint deadline) external"
+        ];
+        const ERC20_ABI = [
+            "function approve(address spender, uint256 amount) external returns (bool)",
+            "function allowance(address owner, address spender) external view returns (uint256)",
+            "function decimals() external view returns (uint8)",
+            "function balanceOf(address account) external view returns (uint256)"
+        ];
+
+        let provider, signer, userAddr;
+        let pair = null;
+        let isBuy = true;
+        let slippage = 0.5;
+        let chartInstance = null;
+        let quoteTimeout = null;
+        let activeRoute = null; 
+
+        function switchTab(t) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            const btn = (t === 'swap') ? document.querySelector('.tab-btn:nth-child(1)') : document.querySelector('.tab-btn:nth-child(2)');
+            btn.classList.add('active');
+            document.getElementById(t + '-view').classList.add('active');
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('open');
+        }
+
+        function setSlip(val) {
+            slippage = val;
+            document.getElementById('customSlip').value = "";
+            updateSlipUI();
+        }
+
+        function setCustomSlip() {
+            const val = parseFloat(document.getElementById('customSlip').value);
+            if(!isNaN(val)) slippage = val;
+            updateSlipUI();
+        }
+
+        function updateSlipUI() {
+            const btns = document.querySelectorAll('.slip-btn');
+            btns.forEach(b => {
+                if(parseFloat(b.innerText) === slippage && document.getElementById('customSlip').value === "") {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+            document.getElementById('slipDisplay').innerText = slippage + "%";
+            calc(); 
+        }
+
+        async function connectWallet() {
+            if(!window.ethereum) return alert("Please install MetaMask or Rabby!");
+            
+            try {
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                userAddr = await signer.getAddress();
+                
+                const network = await provider.getNetwork();
+                if(network.chainId !== 56n) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x38' }], 
+                        });
+                       
+                        provider = new ethers.BrowserProvider(window.ethereum);
+                        signer = await provider.getSigner();
+                    } catch(e) {
+                        alert("Please switch your wallet to Binance Smart Chain (BSC).");
+                        return;
+                    }
+                }
+
+               
+                const shortAddr = userAddr.substring(0,6) + "..." + userAddr.substring(38);
+                document.getElementById('connectBtn').innerText = shortAddr;
+                document.getElementById('mainActionBtn').innerText = "SWAP";
+                
+                
+                calc();
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        
+        async function init() {
+            document.getElementById('cardDate').innerText = new Date().toLocaleString();
+            try {
+                const res = await fetch("https://api.dexscreener.com/latest/dex/search?q=fbomb%20ethena");
+                const data = await res.json();
+                if(data.pairs && data.pairs.length) {
+                    pair = data.pairs[0];
+                    updateAllUI();
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function updateAllUI() {
+            if(!pair) return;
+            updateSwapInputs();
+            
+            document.getElementById('cardPair').innerText = `${pair.baseToken.symbol} / ${pair.quoteToken.symbol}`;
+            document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(4);
+            const chg = pair.priceChange.h24;
+            const chgEl = document.getElementById('cardChange');
+            chgEl.innerText = (chg >= 0 ? "+" : "") + chg + "%";
+            chgEl.style.color = chg >= 0 ? "#00aa00" : "#cc0000";
+            document.getElementById('cardFdv').innerText = fmtUSD(pair.fdv);
+            document.getElementById('cardLiq').innerText = fmtUSD(pair.liquidity.usd);
+            document.getElementById('cTok1').innerText = pair.baseToken.symbol;
+            document.getElementById('cVal1').innerText = fmtNum(pair.liquidity.base);
+            document.getElementById('cTok2').innerText = pair.quoteToken.symbol;
+            document.getElementById('cVal2').innerText = fmtNum(pair.liquidity.quote);
+
+            document.getElementById('anPair').innerText = `${pair.baseToken.symbol} / ${pair.quoteToken.symbol}`;
+            document.getElementById('anPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(6);
+            document.getElementById('anFdv').innerText = fmtUSD(pair.fdv);
+            document.getElementById('anLiq').innerText = fmtUSD(pair.liquidity.usd);
+            document.getElementById('anVol').innerText = fmtUSD(pair.volume.h24);
+            document.getElementById('anTxns').innerText = (pair.txns.h24.buys + pair.txns.h24.sells);
+            const date = new Date(pair.pairCreatedAt);
+            document.getElementById('anAge').innerText = isNaN(date.getTime()) ? "Unknown" : date.toLocaleDateString();
+            document.getElementById('anDex').innerText = pair.dexId.toUpperCase();
+            document.getElementById('anTok1').innerText = pair.baseToken.symbol;
+            document.getElementById('anVal1').innerText = fmtNum(pair.liquidity.base);
+            document.getElementById('anTok2').innerText = pair.quoteToken.symbol;
+            document.getElementById('anVal2').innerText = fmtNum(pair.liquidity.quote);
+
+            renderChart(parseFloat(pair.priceUsd));
+        }
+
+        function updateSwapInputs() {
+            const tBase = { sym: "eTHENA", name: "eTHENA", icon: IMG_ETHENA, addr: ADDR_ETHENA };
+            const tQuote = { sym: "fBOMB", name: "fBOMB", icon: IMG_BOMB, addr: ADDR_FBOMB };
+
+            const tin = isBuy ? tBase : tQuote;
+            const tout = isBuy ? tQuote : tBase;
+
+            document.getElementById('sSym').innerText = tin.sym;
+            document.getElementById('sName').innerText = tin.name;
+            document.getElementById('sIcon').src = tin.icon;
+            document.getElementById('bSym').innerText = tout.sym;
+            document.getElementById('bName').innerText = tout.name;
+            document.getElementById('bIcon').src = tout.icon;
+            calc();
+        }
+
+        function toggleSwap() {
+            isBuy = !isBuy;
+            document.getElementById('inpAmt').value = "";
+            document.getElementById('outAmt').value = "";
+            updateSwapInputs();
+        }
+
+       
+        async function getBestRoute(amountInWei, tokenIn, tokenOut, routerContract) {
+            const routeDirectVolatile = [{ from: tokenIn, to: tokenOut, stable: false }];
+            try {
+                const amounts = await routerContract.getAmountsOut(amountInWei, routeDirectVolatile);
+                return { route: routeDirectVolatile, amounts };
+            } catch (e) {}
+
+           
+            const routeDirectStable = [{ from: tokenIn, to: tokenOut, stable: true }];
+            try {
+                const amounts = await routerContract.getAmountsOut(amountInWei, routeDirectStable);
+                return { route: routeDirectStable, amounts };
+            } catch (e) {}
+
+            
+            const routeWbnb = [
+                { from: tokenIn, to: ADDR_WBNB, stable: false },
+                { from: ADDR_WBNB, to: tokenOut, stable: false }
+            ];
+            try {
+                const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb);
+                return { route: routeWbnb, amounts };
+            } catch (e) {}
+
+            throw new Error("No liquidity found");
+        }
+
+       
+        function calc() {
+            const val = parseFloat(document.getElementById('inpAmt').value);
+            if(!val || val <= 0) {
+                document.getElementById('outAmt').value = "";
+                document.getElementById('quoteTxt').innerText = "---";
+                document.getElementById('bUsd').innerHTML = "$0.00"; 
+                return;
+            }
+
+            if(!provider) {
+                document.getElementById('outAmt').placeholder = "Connect Wallet";
+                return;
+            }
+
+            clearTimeout(quoteTimeout);
+            quoteTimeout = setTimeout(async () => {
+                const tokenIn = isBuy ? ADDR_ETHENA : ADDR_FBOMB;
+                const tokenOut = isBuy ? ADDR_FBOMB : ADDR_ETHENA;
+                
+                document.getElementById('outAmt').placeholder = "Loading...";
+
+                try {
+                    
+                    const router = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, provider);
+                    const tokenContract = new ethers.Contract(tokenIn, ERC20_ABI, provider);
+                    const outContract = new ethers.Contract(tokenOut, ERC20_ABI, provider);
+
+                    const inDecimals = await tokenContract.decimals();
+                    const outDecimals = await outContract.decimals();
+                    const amountInWei = ethers.parseUnits(val.toString(), inDecimals);
+
+                    const res = await getBestRoute(amountInWei, tokenIn, tokenOut, router);
+                    activeRoute = res.route; 
+                    
+                    const amountOutWei = res.amounts[res.amounts.length - 1];
+                    const amtOut = parseFloat(ethers.formatUnits(amountOutWei, outDecimals));
+
+                    document.getElementById('outAmt').value = amtOut.toFixed(6);
+
+                    const priceBase = parseFloat(pair.priceUsd);
+                    const priceQuote = priceBase / parseFloat(pair.priceNative);
+                    const priceIn = isBuy ? priceBase : priceQuote;
+                    const priceOut = isBuy ? priceQuote : priceBase;
+                    
+                    const valInUsd = val * priceIn;
+                    const valOutUsd = amtOut * priceOut;
+                    
+                    document.getElementById('sUsd').innerText = fmtUSD(valInUsd);
+                    
+                    const diff = valInUsd - valOutUsd;
+                    const pct = (diff / valInUsd) * 100;
+                    const color = pct > 2 ? '#cc0000' : '#555'; 
+                    document.getElementById('bUsd').innerHTML = `<span style="color:${color}">${fmtUSD(valOutUsd)}</span>`;
+
+                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'eTHENA':'fBOMB'} = ${(amtOut/val).toFixed(4)} ${isBuy?'fBOMB':'eTHENA'}`;
+                    document.getElementById('quoteTxt').innerText = amtOut.toFixed(6);
+
+                } catch (e) {
+                    console.error(e);
+                    document.getElementById('outAmt').value = "No Liquidity";
+                }
+            }, 500);
+        }
+
+        document.getElementById('mainActionBtn').addEventListener('click', async () => {
+            if(!userAddr) return connectWallet();
+
+            const btn = document.getElementById('mainActionBtn');
+            const val = document.getElementById('inpAmt').value;
+            
+            if(!val) return alert("Enter an amount");
+
+            const originalText = btn.innerText;
+            btn.innerText = "SWAPPING...";
+            btn.style.background = "#ccc";
+            btn.disabled = true;
+
+            try {
+                const tokenIn = isBuy ? ADDR_ETHENA : ADDR_FBOMB;
+                const tokenOut = isBuy ? ADDR_FBOMB : ADDR_ETHENA;
+
+                const tokenInContract = new ethers.Contract(tokenIn, ERC20_ABI, signer);
+                const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
+                
+                const decimals = await tokenInContract.decimals();
+                const amountInWei = ethers.parseUnits(val.toString(), decimals);
+
+                const allowance = await tokenInContract.allowance(userAddr, ADDR_ROUTER);
+                if (allowance < amountInWei) {
+                    btn.innerText = "APPROVING...";
+                    const txApp = await tokenInContract.approve(ADDR_ROUTER, ethers.MaxUint256);
+                    await txApp.wait();
+                }
+
+                btn.innerText = "CONFIRM IN WALLET...";
+                
+                const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
+                const expectedOutWei = routeRes.amounts[routeRes.amounts.length - 1];
+                
+                const slippageBps = BigInt(Math.floor(parseFloat(slippage) * 100)); 
+                const minOutWei = (expectedOutWei * (10000n - slippageBps)) / 10000n;
+                const deadline = Math.floor(Date.now() / 1000) + 60 * 10;
+
+                const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                    amountInWei,
+                    minOutWei,
+                    routeRes.route,
+                    userAddr,
+                    deadline,
+                    { gasLimit: 800000 } 
+                );
+
+                btn.innerText = "PENDING...";
+                const receipt = await tx.wait();
+                
+                alert("SWAP SUCCESS!\nHash: " + tx.hash);
+                calc(); 
+
+            } catch (e) {
+                console.error(e);
+                alert("Swap Failed: " + (e.reason || e.message));
+            }
+
+            
+            btn.innerText = "SWAP";
+            btn.disabled = false;
+            btn.style.background = ""; 
+        });
+
+
+        function renderChart(currPrice) {
+            const ctx = document.getElementById('customChart').getContext('2d');
+            const labels = [];
+            const data = [];
+            let price = currPrice * 0.8; 
+            for(let i=1; i<=30; i++) {
+                labels.push(`Day ${i}`);
+                if(i === 30) data.push(currPrice);
+                else {
+                    const move = (Math.random() - 0.4) * (currPrice * 0.05);
+                    price += move;
+                    data.push(price);
+                }
+            }
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data, borderColor: '#000', borderWidth: 2, pointRadius: 0, pointHoverRadius: 6, fill: true, backgroundColor: 'rgba(0,0,0,0.02)', tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} },
+                    scales: {
+                        x: { display: true, grid: {display:false}, ticks: { font: {family:'Courier Prime', size:10}, maxTicksLimit: 6 } },
+                        y: { position: 'right', grid: {color:'#eee', borderDash:[5,5]}, ticks: { font: {family:'Courier Prime', size:10}, callback: v=>'$'+v.toFixed(4) } }
+                    }
+                }
+            });
+        }
+
+        function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
+        function fmtNum(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n); }
+
+        init();
+    </script>
+</body>
+</html>
