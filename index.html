@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thena Strategy</title>
+    <title>Thena Strategy | Treasury</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <style>
@@ -36,33 +36,11 @@
         * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s, color 0.3s, border-color 0.3s; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        .quick-swap-btn {
-            background: var(--bg-card);
-            color: var(--text-main);
-            border: 2px solid var(--border);
-            font-family: 'Courier Prime', monospace;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-            padding: 15px 0;
-            margin-top: 15px; 
-            font-size: 16px;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .quick-swap-btn:hover { background: var(--text-main); color: var(--bg-body); transform: translateY(-2px); opacity: 0.9; }
-        [data-theme="dark"] .quick-swap-btn { background: #ffffff; color: #000000; }
-
         .header-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: transparent; }
         .logo-container { display: flex; align-items: center; gap: 15px; }
         .top-logo { height: 50px; width: auto; display: block; }
         [data-theme="dark"] .top-logo { filter: invert(1); }
-        
         .logo-text { font-family: 'Merriweather', serif; font-weight: 900; font-size: 24px; letter-spacing: 1px; line-height: 1; margin-top: 4px; }
-        
         .header-right { display: flex; gap: 15px; align-items: center; }
 
         .theme-btn {
@@ -94,18 +72,11 @@
         .swap-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; }
         .settings-icon { cursor: pointer; width: 24px; height: 24px; transition: transform 0.3s ease; }
         .settings-icon:hover { transform: rotate(90deg); }
-[data-theme="dark"] .token-icon[src*="thenastrat"] {
-    filter: invert(1);
-}
-input[type=number]::-webkit-outer-spin-button,
-input[type=number]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+        
+        [data-theme="dark"] .token-icon[src*="thenastrat"] { filter: invert(1); }
+        input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
 
-input[type=number] {
-  -moz-appearance: textfield;
-}
         .settings-panel { background: var(--bg-panel); border: 2px solid var(--border); padding: 15px; margin-bottom: 15px; display: none; }
         .settings-panel.open { display: block; }
         .slip-label { font-family: 'Courier Prime', monospace; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
@@ -114,8 +85,13 @@ input[type=number] {
         .slip-btn.active { background: var(--text-main); color: var(--bg-body); }
         .slip-input { width: 60px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 6px; font-family: 'Courier Prime', monospace; font-size: 12px; text-align: center; }
 
-        .trade-box { background: var(--bg-card); border: 2px solid var(--border); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 140px; position: relative; margin-bottom: 10px; }
-        .trade-label { font-family: 'Courier Prime', monospace; font-size: 14px; margin-bottom: 10px; }
+        .trade-box { background: var(--bg-card); border: 2px solid var(--border); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 160px; position: relative; margin-bottom: 10px; }
+        .trade-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .trade-label { font-family: 'Courier Prime', monospace; font-size: 14px; }
+        .balance-display { font-family: 'Courier Prime', monospace; font-size: 11px; color: var(--text-sub); display: flex; gap: 5px; align-items: center; }
+        .max-btn { background: var(--bg-panel); border: 1px solid var(--border); padding: 1px 4px; cursor: pointer; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .max-btn:hover { background: var(--text-main); color: var(--bg-body); }
+
         .trade-content { display: flex; justify-content: space-between; align-items: center; }
         .token-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .token-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); }
@@ -134,6 +110,7 @@ input[type=number] {
         .action-btn:hover { background: var(--text-main); color: var(--bg-body); }
         .action-btn:disabled { background: #ccc !important; cursor: not-allowed; }
 
+        /* Summary & Dash Styles */
         .summary-column { flex: 1; max-width: 450px; min-width: 320px; }
         .info-card { border: 2px solid var(--border); background: var(--bg-card); padding: 30px; }
         .info-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
@@ -154,10 +131,8 @@ input[type=number] {
         .comp-fill.striped { background: repeating-linear-gradient(45deg, var(--text-main), var(--text-main) 2px, var(--bg-card) 2px, var(--bg-card) 6px); }
 
         .dash-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        
         .dash-col-left { display: flex; flex-direction: column; gap: 20px; }
         .dash-col-right { display: flex; flex-direction: column; gap: 20px; }
-
         .chart-card { border: 2px solid var(--border); background: var(--bg-card); padding: 20px; height: 400px; display: flex; flex-direction: column; }
         .chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 15px; }
         .chart-title-group h2 { font-family: 'Merriweather', serif; font-weight: 900; font-size: 24px; margin-bottom: 5px; }
@@ -166,7 +141,6 @@ input[type=number] {
         .cp-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 32px; }
         .cp-change { font-family: 'Courier Prime', monospace; font-weight: 700; color: var(--accent-red); }
         .canvas-container { flex: 1; position: relative; width: 100%; }
-
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .stat-card { background: var(--bg-card); border: 2px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 110px; }
         .stat-lbl { font-family: 'Courier Prime', monospace; font-size: 13px; letter-spacing: 1px; color: var(--text-sub); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
@@ -175,7 +149,6 @@ input[type=number] {
         .dash-card { border: 2px solid var(--border); background: var(--bg-card); padding: 25px; }
         .dash-card-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; margin-bottom: 5px; }
         .dash-card-sub { font-family: 'Courier Prime', monospace; font-size: 11px; color: #666; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px dashed #ccc; }
-        
         .dash-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; }
         .dash-row:last-child { border-bottom: none; }
         .d-lbl { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 13px; }
@@ -186,135 +159,64 @@ input[type=number] {
         .user-profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .user-status { font-family: 'Courier Prime', monospace; font-size: 10px; text-transform: uppercase; background: var(--text-main); color: var(--bg-body); padding: 3px 6px; border-radius: 2px; }
         .user-status.disconnected { background: #ccc; color: #555; }
-        
         .query-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border); }
         .query-toggle { display: flex; align-items: center; gap: 8px; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none; }
         .query-toggle input { cursor: pointer; width: 14px; height: 14px; accent-color: var(--text-main); }
         .query-input-wrap { display: none; margin-top: 10px; }
         .query-input-wrap.show { display: block; }
         .query-field { width: 100%; padding: 8px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); font-family: 'Courier Prime', monospace; font-size: 12px; outline: none; }
-        .query-field:focus { border-color: var(--accent-green); }
-
         .user-balance-section { text-align: center; padding: 10px 0 20px 0; }
         .user-balance-lbl { font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; }
         .user-balance-big { font-family: 'Merriweather', serif; font-weight: 900; font-size: 25px; line-height: 1; }
         .user-balance-sym { font-size: 16px; color: var(--text-main); font-weight: 700; margin-left: 4px; }
-
         .address-box { background: var(--bg-card); border: 1px solid var(--border); padding: 12px; display: flex; justify-content: space-between; align-items: center; font-family: 'Courier Prime', monospace; font-size: 12px; margin-top: 5px; cursor: pointer; transition: 0.2s; overflow: hidden; }
         .address-box:hover { background: var(--text-main); color: var(--bg-body); }
         .copy-icon { width: 14px; height: 14px; flex-shrink: 0; }
-
-.socials-row { 
-    width: 100%;
-    padding: 0; 
-    display: flex; 
-    justify-content: center;
-    align-items: center; 
-    gap: 40px; 
-    margin: 50px auto 15px auto; 
-}
-
+        .socials-row { padding: 30px 0; display: flex; justify-content: center; gap: 40px; align-items: center; }
         .social-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-main); gap: 8px; transition: transform 0.2s; }
         .social-link:hover { transform: translateY(-3px); }
         .social-icon svg { width: 28px; height: 28px; fill: currentColor; }
         .social-text { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 12px; text-transform: uppercase; }
-
-.built-on-row { 
-    width: 100%;
-    display: flex; 
-    justify-content: center;
-    align-items: center; 
-    gap: 10px; 
-    padding-bottom: 40px; 
-    opacity: 0.8; 
-    margin: 0 auto;
-}
+        .built-on-row { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 20px 0 40px 0; opacity: 0.8; transition: opacity 0.3s; }
         .thena-icon-sm { width: 20px; height: 20px; display: block; }
         .built-text { font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        
 
         @media (max-width: 1024px) {
             .dash-layout { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); } 
         }
-
         @media (max-width: 768px) {
-            .header-row { 
-                padding: 10px 20px; 
-                flex-direction: row; 
-                justify-content: space-between; 
-                align-items: center;
-                gap: 0;
-            }
-
-          
-            .logo-container { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                align-items: center;
-                gap: 2px;
-                margin-bottom: 0;
-            }
-            .top-logo { 
-                height: 45px;
-                width: auto;
-            }
-            .logo-text { 
-                font-size: 15px;
-                font-family: 'Courier Prime', monospace; 
-                text-transform: uppercase;
-                margin-top: 0;
-                line-height: 1.2;
-            }
-
-            .header-right { 
-                width: auto; 
-                justify-content: flex-end; 
-                gap: 5px; 
-            }
-            .connect-btn {
-                padding: 10px 14px;
-                font-size: 20px;
-                height: 50px;
-            }
-            .theme-btn {
-                width: 40px;
-                height: 50px;
-            }
-            
+            .header-row { padding: 10px 20px; flex-direction: row; justify-content: space-between; align-items: center; gap: 0; }
+            .logo-container { flex-direction: column; align-items: flex-start; align-items: center; gap: 2px; margin-bottom: 0; }
+            .top-logo { height: 45px; width: auto; }
+            .logo-text { font-size: 15px; font-family: 'Courier Prime', monospace; text-transform: uppercase; margin-top: 0; line-height: 1.2; }
+            .header-right { width: auto; justify-content: flex-end; gap: 5px; }
+            .connect-btn { padding: 10px 14px; font-size: 20px; height: 50px; }
+            .theme-btn { width: 40px; height: 50px; }
             .tab-container { width: 100%; display: flex; padding: 0 10px; }
             .tab-btn { flex: 1; padding: 10px 0; font-size: 13px; text-align: center; }
-
             .swap-view-grid { gap: 20px; }
             .swap-column, .summary-column { min-width: 100%; max-width: 100%; }
-
             .stats-grid { gap: 10px; }
-
             .chart-header { flex-direction: column; align-items: flex-start; gap: 10px; }
             .chart-price-display { text-align: left; width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
         }
-
         @media (max-width: 480px) {
             .connect-btn { padding: 6px 10px; font-size: 10px; height: 34px; }
             .theme-btn { width: 34px; height: 34px; }
-            
             .trade-box { padding: 15px; height: auto; gap: 15px; }
             .trade-content { flex-direction: column; align-items: flex-start; gap: 12px; }
             .trade-content > div:last-child { width: 100% !important; text-align: left !important; }
             .input-amount { text-align: left; font-size: 24px; margin-top: 5px; }
             .usd-value { text-align: left; }
             .swap-arrow-btn { width: 30px; height: 30px; }
-
             .info-card { padding: 20px; }
             .price-large { font-size: 32px; }
             .mini-grid { flex-direction: column; gap: 10px; }
-
             .stat-val { font-size: 22px; }
             .cp-val { font-size: 24px; }
             .chart-title-group h2 { font-size: 18px; }
             .user-balance-big { font-size: 28px; }
-
             .socials-row { gap: 20px; }
         }
     </style>
@@ -326,7 +228,6 @@ input[type=number] {
             <img src="thenastrat_token_logo_black.png" alt="THESTRAT" class="top-logo">
             <span class="logo-text">Thena Strategy</span>
         </div>
-        
         <div class="header-right">
             <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
@@ -342,6 +243,7 @@ input[type=number] {
 
     <div class="main-container">
 
+        <!-- SWAP VIEW -->
         <div id="swap-view" class="view-section active">
             <div class="swap-view-grid">
                 <div class="swap-column">
@@ -355,15 +257,22 @@ input[type=number] {
                     <div id="settingsPanel" class="settings-panel">
                         <div class="slip-label">SLIPPAGE TOLERANCE</div>
                         <div class="slip-options">
-                            <button class="slip-btn" onclick="setSlip(0.1)">0.1%</button>
-                            <button class="slip-btn active" onclick="setSlip(0.5)">0.5%</button>
+                            <button class="slip-btn" onclick="setSlip(0.5)">0.5%</button>
                             <button class="slip-btn" onclick="setSlip(1.0)">1.0%</button>
+                            <button class="slip-btn" onclick="setSlip(5.0)">5.0%</button>
                             <input type="number" id="customSlip" class="slip-input" placeholder="Custom" oninput="setCustomSlip()">
                         </div>
                     </div>
 
+                    <!-- SELL BOX -->
                     <div class="trade-box">
-                        <div class="trade-label">Sell</div>
+                        <div class="trade-top-row">
+                            <div class="trade-label">Sell</div>
+                            <div class="balance-display">
+                                Balance: <span id="sBal">0</span>
+                                <button class="max-btn" onclick="setMax()">MAX</button>
+                            </div>
+                        </div>
                         <div class="trade-content">
                             <div class="token-info" onclick="setMode('sell')">
                                 <img src="" id="sIcon" class="token-icon">
@@ -385,8 +294,14 @@ input[type=number] {
                         </div>
                     </div>
 
+                    <!-- BUY BOX -->
                     <div class="trade-box">
-                        <div class="trade-label">Buy</div>
+                        <div class="trade-top-row">
+                            <div class="trade-label">Buy</div>
+                            <div class="balance-display">
+                                Balance: <span id="bBal">0</span>
+                            </div>
+                        </div>
                         <div class="trade-content">
                             <div class="token-info" onclick="setMode('buy')">
                                 <img src="" id="bIcon" class="token-icon">
@@ -451,9 +366,9 @@ input[type=number] {
             </div>
         </div>
 
+        <!-- DASHBOARD VIEW -->
         <div id="dashboard-view" class="view-section">
             <div class="dash-layout">
-                
                 <div class="dash-col-left">
                     <div class="chart-card">
                         <div class="chart-header">
@@ -489,11 +404,9 @@ input[type=number] {
                             <div class="stat-val" id="barChg" style="color:var(--accent-red);">-1.57%</div>
                         </div>
                     </div>
-                    
                 </div>
 
                 <div class="dash-col-right">
-                    
                     <div class="dash-card">
                         <div class="dash-card-title">Treasury Holdings</div>
                         <div class="dash-card-sub">Protocol Owned Assets</div>
@@ -519,7 +432,6 @@ input[type=number] {
                                 <div class="d-lbl">Total Treasury Value</div>
                                 <div class="d-sub">Estimated USD</div>
                             </div>
-                            
                             <div class="d-val" style="color:var(--accent-green); font-size:18px;">
                                 $100.00
                                 <span id="repClaimable" style="display:none;"></span>
@@ -558,39 +470,36 @@ input[type=number] {
                             </svg>
                         </div>
                     </div>
-
                 </div>
             </div>
-
-            
         </div>
-<div class="socials-row">
-                <a href="#" class="social-link" target="_blank">
-                    <div class="social-icon">
-                        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    </div>
-                    <span class="social-text">Twitter</span>
-                </a>
-                
-                <a href="#" class="social-link" target="_blank">
-                    <div class="social-icon">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                    </div>
-                    <span class="social-text">Docs</span>
-                </a>
-                <a href="#" class="social-link" target="_blank">
-                    <div class="social-icon">
-                        <svg viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg>
-                    </div>
-                    <span class="social-text">Telegram</span>
-                </a>
-            </div>
 
-            <div class="built-on-row">
-                <span class="built-text">Built on</span>
-                <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="thena-icon-sm">
-                <span class="built-text">Thena</span>
-            </div>
+        <div class="socials-row">
+            <a href="#" class="social-link" target="_blank">
+                <div class="social-icon">
+                    <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </div>
+                <span class="social-text">Twitter</span>
+            </a>
+            <a href="#" class="social-link" target="_blank">
+                <div class="social-icon">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <span class="social-text">Docs</span>
+            </a>
+            <a href="#" class="social-link" target="_blank">
+                <div class="social-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg>
+                </div>
+                <span class="social-text">Telegram</span>
+            </a>
+        </div>
+
+        <div class="built-on-row">
+            <span class="built-text">Built on</span>
+            <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="thena-icon-sm">
+            <span class="built-text">Thena</span>
+        </div>
     </div>
 
  <script>
@@ -731,6 +640,7 @@ input[type=number] {
 
                 calc();
                 updateDashboard();
+                fetchSwapBalances(); 
                 
                 if(document.getElementById('chkQuery').checked) {
                     handleQuery(); 
@@ -743,7 +653,6 @@ input[type=number] {
         async function init() {
             document.getElementById('cardDate').innerText = new Date().toLocaleString();
             try {
-                
                 if(!provider) provider = new ethers.JsonRpcProvider(BSC_RPC);
                 updateDashboard();
             } catch(e) { console.log("Init RPC error:", e); }
@@ -851,12 +760,10 @@ input[type=number] {
                     targetAddr = inputVal;
                     document.getElementById('userAddrDisplay').innerText = targetAddr.substring(0,8) + "..." + targetAddr.substring(36);
                 } else {
-                   
                     document.getElementById('userWallet').innerText = "---";
                     return;
                 }
             } else {
-                
                 if(!userAddr) return;
                 document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
             }
@@ -866,6 +773,44 @@ input[type=number] {
                 const walletWei = await tokenContract.balanceOf(targetAddr);
                 document.getElementById('userWallet').innerText = parseFloat(ethers.formatUnits(walletWei, 18)).toFixed(2);
             } catch(e) { console.log("User stats error", e); }
+        }
+
+        async function fetchSwapBalances() {
+            if(!userAddr || !provider) return;
+            try {
+                const tIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
+                const tOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                
+                const cIn = new ethers.Contract(tIn, MINIMAL_STRAT_ABI, provider);
+                const cOut = new ethers.Contract(tOut, MINIMAL_STRAT_ABI, provider);
+
+                const [bIn, bOut] = await Promise.all([
+                    cIn.balanceOf(userAddr),
+                    cOut.balanceOf(userAddr)
+                ]);
+
+                const bInFmt = ethers.formatUnits(bIn, 18); 
+                const bOutFmt = ethers.formatUnits(bOut, 18);
+
+                document.getElementById('sBal').innerText = parseFloat(bInFmt).toFixed(4);
+                document.getElementById('sBal').dataset.raw = bInFmt;
+                document.getElementById('bBal').innerText = parseFloat(bOutFmt).toFixed(4);
+
+                const inputVal = document.getElementById('inpAmt').value;
+                if(inputVal && parseFloat(inputVal) > 0) {
+                } else {
+                   
+                }
+
+            } catch(e) { console.log("Swap balance fetch error", e); }
+        }
+
+        function setMax() {
+            const raw = document.getElementById('sBal').dataset.raw;
+            if(raw) {
+                document.getElementById('inpAmt').value = raw;
+                calc();
+            }
         }
 
         function updateAllUI() {
@@ -903,6 +848,7 @@ input[type=number] {
             document.getElementById('bSym').innerText = tout.sym;
             document.getElementById('bName').innerText = tout.name;
             document.getElementById('bIcon').src = tout.icon;
+            fetchSwapBalances(); 
             calc();
         }
 
@@ -916,9 +862,11 @@ input[type=number] {
         async function getBestRoute(amountInWei, tokenIn, tokenOut, routerContract) {
             const routeWbnb = [{ from: tokenIn, to: ADDR_WBNB, stable: false }, { from: ADDR_WBNB, to: tokenOut, stable: false }];
             try { const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb); return { route: routeWbnb, amounts }; } catch (e) {}
+            
             const routeDir = [{ from: tokenIn, to: tokenOut, stable: false }];
             try { const amounts = await routerContract.getAmountsOut(amountInWei, routeDir); return { route: routeDir, amounts }; } catch (e) {}
-            throw new Error("No Liquidity");
+            
+            throw new Error("No Liquidity or Price Impact too High");
         }
 
         function calc() {
@@ -927,6 +875,7 @@ input[type=number] {
                 document.getElementById('outAmt').value = "";
                 document.getElementById('quoteTxt').innerText = "---";
                 document.getElementById('bUsd').innerHTML = "$0.00"; 
+                document.getElementById('sUsd').innerHTML = "$0.00";
                 return;
             }
             if(!provider) { document.getElementById('outAmt').placeholder = "Connect Wallet"; return; }
@@ -975,24 +924,39 @@ input[type=number] {
                 const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
                 const decimals = await tokenContract.decimals();
                 const amountInWei = ethers.parseUnits(val.toString(), decimals);
+                
                 const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
                 if(allowance < amountInWei) {
                     btn.innerText = "APPROVING...";
                     const txApp = await tokenContract.approve(ADDR_ROUTER, ethers.MaxUint256);
                     await txApp.wait();
                 }
+
                 btn.innerText = "SWAPPING...";
                 const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
                 const expectedOut = routeRes.amounts[routeRes.amounts.length-1];
+                
+                
                 const minOut = (expectedOut * BigInt((100 - slippage)*100)) / 10000n;
                 const deadline = Math.floor(Date.now()/1000) + 600;
+
                 const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                    amountInWei, minOut, routeRes.route, userAddr, deadline
+                    amountInWei, minOut, routeRes.route, userAddr, deadline, { gasLimit: 500000 }
                 );
                 await tx.wait();
                 alert("Swap Successful: " + tx.hash);
+                
+                fetchSwapBalances();
                 calc();
-            } catch(e) { console.error(e); alert("Swap Failed: " + (e.reason || e.message)); }
+
+            } catch(e) { 
+                console.error(e); 
+                if(e.message.includes("require(false)") || e.code === "CALL_EXCEPTION") {
+                    alert("Swap Failed: Please increase Slippage (try 2-5%) via the settings gear icon.");
+                } else {
+                    alert("Swap Failed: " + (e.reason || e.message)); 
+                }
+            }
             btn.innerText = "SWAP";
             btn.disabled = false;
         });
