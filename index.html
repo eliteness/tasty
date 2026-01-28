@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thena Strategy</title>
+    <title>Thena Strategy | Treasury</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <style>
@@ -904,7 +904,7 @@
                     const priceOut = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
                     const valOutUsd = amtOut * priceOut;
                     document.getElementById('bUsd').innerText = fmtUSD(valOutUsd);
-                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'STRAT':'BOMB'} = ${(amtOut/val).toFixed(4)} ${isBuy?'BOMB':'STRAT'}`;
+                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'THESTRAT':'fBOMB'} = ${(amtOut/val).toFixed(4)} ${isBuy?'fBOMB':'THESTRAT'}`;
                     document.getElementById('quoteTxt').innerText = amtOut.toFixed(6);
                 } catch(e) { console.log(e); }
             }, 500);
