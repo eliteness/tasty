@@ -795,13 +795,6 @@
                 document.getElementById('sBal').innerText = parseFloat(bInFmt).toFixed(4);
                 document.getElementById('sBal').dataset.raw = bInFmt;
                 document.getElementById('bBal').innerText = parseFloat(bOutFmt).toFixed(4);
-
-                const inputVal = document.getElementById('inpAmt').value;
-                if(inputVal && parseFloat(inputVal) > 0) {
-                } else {
-                   
-                }
-
             } catch(e) { console.log("Swap balance fetch error", e); }
         }
 
@@ -848,7 +841,7 @@
             document.getElementById('bSym').innerText = tout.sym;
             document.getElementById('bName').innerText = tout.name;
             document.getElementById('bIcon').src = tout.icon;
-            fetchSwapBalances(); 
+            fetchSwapBalances();
             calc();
         }
 
@@ -860,12 +853,20 @@
         }
 
         async function getBestRoute(amountInWei, tokenIn, tokenOut, routerContract) {
-            const routeWbnb = [{ from: tokenIn, to: ADDR_WBNB, stable: false }, { from: ADDR_WBNB, to: tokenOut, stable: false }];
-            try { const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb); return { route: routeWbnb, amounts }; } catch (e) {}
-            
             const routeDir = [{ from: tokenIn, to: tokenOut, stable: false }];
-            try { const amounts = await routerContract.getAmountsOut(amountInWei, routeDir); return { route: routeDir, amounts }; } catch (e) {}
+            try { 
+                const amounts = await routerContract.getAmountsOut(amountInWei, routeDir); 
+                return { route: routeDir, amounts }; 
+            } catch (e) {
+                console.log("Direct route failed, checking reserves...");
+            }
             
+            const routeWbnb = [{ from: tokenIn, to: ADDR_WBNB, stable: false }, { from: ADDR_WBNB, to: tokenOut, stable: false }];
+            try { 
+                const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb); 
+                return { route: routeWbnb, amounts }; 
+            } catch (e) {}
+
             throw new Error("No Liquidity or Price Impact too High");
         }
 
@@ -935,7 +936,6 @@
                 btn.innerText = "SWAPPING...";
                 const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
                 const expectedOut = routeRes.amounts[routeRes.amounts.length-1];
-                
                 
                 const minOut = (expectedOut * BigInt((100 - slippage)*100)) / 10000n;
                 const deadline = Math.floor(Date.now()/1000) + 600;
