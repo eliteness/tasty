@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thena Strategy | Treasury</title>
+    <title>Thena Strategy</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <style>
@@ -204,13 +204,31 @@ input[type=number] {
         .address-box:hover { background: var(--text-main); color: var(--bg-body); }
         .copy-icon { width: 14px; height: 14px; flex-shrink: 0; }
 
-        .socials-row { padding: 30px 0; display: flex; justify-content: center; gap: 40px; align-items: center; }
+.socials-row { 
+    width: 100%;
+    padding: 0; 
+    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    gap: 40px; 
+    margin: 50px auto 15px auto; 
+}
+
         .social-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-main); gap: 8px; transition: transform 0.2s; }
         .social-link:hover { transform: translateY(-3px); }
         .social-icon svg { width: 28px; height: 28px; fill: currentColor; }
         .social-text { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 12px; text-transform: uppercase; }
 
-        .built-on-row { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 20px 0 40px 0; opacity: 0.8; transition: opacity 0.3s; }
+.built-on-row { 
+    width: 100%;
+    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    gap: 10px; 
+    padding-bottom: 40px; 
+    opacity: 0.8; 
+    margin: 0 auto;
+}
         .thena-icon-sm { width: 20px; height: 20px; display: block; }
         .built-text { font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -544,7 +562,9 @@ input[type=number] {
                 </div>
             </div>
 
-            <div class="socials-row">
+            
+        </div>
+<div class="socials-row">
                 <a href="#" class="social-link" target="_blank">
                     <div class="social-icon">
                         <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -558,7 +578,6 @@ input[type=number] {
                     </div>
                     <span class="social-text">Docs</span>
                 </a>
-
                 <a href="#" class="social-link" target="_blank">
                     <div class="social-icon">
                         <svg viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg>
@@ -572,8 +591,6 @@ input[type=number] {
                 <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="thena-icon-sm">
                 <span class="built-text">Thena</span>
             </div>
-        </div>
-
     </div>
 
  <script>
@@ -615,7 +632,7 @@ input[type=number] {
 
         let provider, signer, userAddr;
         let pair = null;
-        let isBuy = true;
+        let isBuy = false;
         let slippage = 0.5;
         let quoteTimeout = null;
         let chartInstance = null;
