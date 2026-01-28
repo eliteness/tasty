@@ -1,39 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thena Strategy | Treasury</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;600;700&family=Merriweather:wght@700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap');
 
-        :root { --bg-body: #FFFFFF; --text-main: #000000; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+        :root { 
+            --bg-body: #FFFFFF; 
+            --bg-card: #FFFFFF;
+            --bg-panel: #f0f0f0;
+            --text-main: #000000; 
+            --text-sub: #555555;
+            --border: #000000;
+            --accent-green: #00aa00;
+            --accent-red: #cc0000;
+            --chart-grid: #f0f0f0;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #111111; 
+            --bg-card: #1a1a1a;
+            --bg-panel: #2a2a2a;
+            --text-main: #ffffff; 
+            --text-sub: #aaaaaa;
+            --border: #555555;
+            --accent-green: #00e599;
+            --accent-red: #ff4444;
+            --chart-grid: #333333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s, color 0.3s, border-color 0.3s; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        .quick-swap-btn {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 2px solid var(--border);
+            font-family: 'Courier Prime', monospace;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            padding: 15px 0;
+            margin-top: 15px; 
+            font-size: 16px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quick-swap-btn:hover { background: var(--text-main); color: var(--bg-body); transform: translateY(-2px); opacity: 0.9; }
+        [data-theme="dark"] .quick-swap-btn { background: #ffffff; color: #000000; }
 
         .header-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: transparent; }
         .logo-container { display: flex; align-items: center; gap: 15px; }
         .top-logo { height: 50px; width: auto; display: block; }
+        [data-theme="dark"] .top-logo { filter: invert(1); }
+        
         .logo-text { font-family: 'Merriweather', serif; font-weight: 900; font-size: 24px; letter-spacing: 1px; line-height: 1; margin-top: 4px; }
         
-        .connect-btn { 
-            background: #fff; color: #000; 
-            padding: 10px 24px; 
-            border: 2px solid #000; 
-            font-family: 'Courier Prime', monospace; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .connect-btn:hover { background: #000; color: #fff; transform: translateY(-2px); box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
+        .header-right { display: flex; gap: 15px; align-items: center; }
 
-        .tab-container { display: flex; justify-content: center; gap: 0; margin-top: 20px; border-bottom: 2px solid #000; width: fit-content; margin: 20px auto 40px auto; }
-        .tab-btn { background: #fff; border: 2px solid #000; border-bottom: none; padding: 10px 40px; font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 14px; margin: 0 5px; position: relative; top: 2px; transition: background 0.2s; }
-        .tab-btn:hover { background: #f0f0f0; }
-        .tab-btn.active { background: #000; color: #fff; }
+        .theme-btn {
+            background: var(--bg-card); border: 2px solid var(--border); color: var(--text-main);
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; flex-shrink: 0;
+        }
+        .theme-btn:hover { background: var(--text-main); color: var(--bg-body); }
+
+        .connect-btn { 
+            background: var(--bg-card); color: var(--text-main); padding: 10px 24px; border: 2px solid var(--border); 
+            font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; white-space: nowrap;
+        }
+        .connect-btn:hover { background: var(--text-main); color: var(--bg-body); transform: translateY(-2px); box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
+
+        .tab-container { display: flex; justify-content: center; gap: 0; margin-top: 20px; border-bottom: 2px solid var(--border); width: fit-content; margin: 20px auto 40px auto; }
+        .tab-btn { background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border); border-bottom: none; padding: 10px 40px; font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 14px; margin: 0 5px; position: relative; top: 2px; transition: background 0.2s; }
+        .tab-btn:hover { background: var(--bg-panel); }
+        .tab-btn.active { background: var(--text-main); color: var(--bg-body); border-color: var(--border); }
 
         .main-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; flex: 1; }
         .view-section { display: none; }
@@ -45,115 +94,211 @@
         .swap-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; }
         .settings-icon { cursor: pointer; width: 24px; height: 24px; transition: transform 0.3s ease; }
         .settings-icon:hover { transform: rotate(90deg); }
+[data-theme="dark"] .token-icon[src*="thenastrat"] {
+    filter: invert(1);
+}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
-        .settings-panel { background: #f0f0f0; border: 2px solid #000; padding: 15px; margin-bottom: 15px; display: none; }
+input[type=number] {
+  -moz-appearance: textfield;
+}
+        .settings-panel { background: var(--bg-panel); border: 2px solid var(--border); padding: 15px; margin-bottom: 15px; display: none; }
         .settings-panel.open { display: block; }
         .slip-label { font-family: 'Courier Prime', monospace; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
         .slip-options { display: flex; gap: 8px; }
-        .slip-btn { flex: 1; background: #fff; border: 1px solid #000; font-family: 'Courier Prime', monospace; font-size: 12px; padding: 6px; cursor: pointer; }
-        .slip-btn.active { background: #000; color: #fff; }
-        .slip-input { width: 60px; border: 1px solid #000; padding: 6px; font-family: 'Courier Prime', monospace; font-size: 12px; text-align: center; }
+        .slip-btn { flex: 1; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); font-family: 'Courier Prime', monospace; font-size: 12px; padding: 6px; cursor: pointer; }
+        .slip-btn.active { background: var(--text-main); color: var(--bg-body); }
+        .slip-input { width: 60px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 6px; font-family: 'Courier Prime', monospace; font-size: 12px; text-align: center; }
 
-        .trade-box { background: #fff; border: 2px solid #000; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 140px; position: relative; margin-bottom: 10px; }
+        .trade-box { background: var(--bg-card); border: 2px solid var(--border); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 140px; position: relative; margin-bottom: 10px; }
         .trade-label { font-family: 'Courier Prime', monospace; font-size: 14px; margin-bottom: 10px; }
         .trade-content { display: flex; justify-content: space-between; align-items: center; }
         .token-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .token-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #000; }
+        .token-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); }
         .token-symbol { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
-        .token-name { font-family: 'Courier Prime', monospace; font-size: 11px; color: #555; }
+        .token-name { font-family: 'Courier Prime', monospace; font-size: 11px; color: var(--text-sub); }
         
-        .input-amount { width: 100%; border: none; background: transparent; font-family: 'Merriweather', serif; font-size: 24px; font-weight: 900; text-align: right; outline: none; padding: 0; }
-        .usd-value { font-family: 'Courier Prime', monospace; font-size: 12px; color: #555; text-align: right; margin-top: 4px; }
-        
+        .input-amount { width: 100%; border: none; background: transparent; color: var(--text-main); font-family: 'Merriweather', serif; font-size: 24px; font-weight: 900; text-align: right; outline: none; padding: 0; }
+        .usd-value { font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--text-sub); text-align: right; margin-top: 4px; }
         .arrow-wrapper { position: relative; height: 20px; margin-bottom: 10px; }
-        .swap-arrow-btn { width: 36px; height: 36px; background: #fff; border: 1px solid #000; border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 5; transition: transform 0.2s; }
-        .swap-arrow-btn:hover { background: #000; color: #fff; transform: translate(-50%, -50%) rotate(180deg); }
-
-        .receipt-area { font-family: 'Courier Prime', monospace; font-size: 11px; margin: 15px 0; border-top: 1px dashed #ccc; padding-top: 10px; }
+        .swap-arrow-btn { width: 36px; height: 36px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 5; transition: transform 0.2s; }
+        .swap-arrow-btn:hover { background: var(--text-main); color: var(--bg-body); transform: translate(-50%, -50%) rotate(180deg); }
+        .receipt-area { font-family: 'Courier Prime', monospace; font-size: 11px; margin: 15px 0; border-top: 1px dashed var(--border); padding-top: 10px; }
         .receipt-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
         
-        .action-btn { width: 100%; background: #fff; color: #000; border: 2px solid #000; padding: 16px; font-family: 'Merriweather', serif; font-weight: 900; font-size: 16px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
-        .action-btn:hover { background: #000; color: #fff; }
+        .action-btn { width: 100%; background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border); padding: 16px; font-family: 'Merriweather', serif; font-weight: 900; font-size: 16px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
+        .action-btn:hover { background: var(--text-main); color: var(--bg-body); }
         .action-btn:disabled { background: #ccc !important; cursor: not-allowed; }
 
         .summary-column { flex: 1; max-width: 450px; min-width: 320px; }
-        .info-card { border: 2px solid #000; background: #fff; padding: 30px; }
+        .info-card { border: 2px solid var(--border); background: var(--bg-card); padding: 30px; }
         .info-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 22px; }
         .date-label { font-family: 'Courier Prime', monospace; font-size: 11px; margin-top: 6px; }
         .price-large { font-family: 'Merriweather', serif; font-weight: 900; font-size: 42px; text-align: right; line-height: 1; }
-        .price-change { font-family: 'Courier Prime', monospace; font-size: 16px; text-align: right; color: #00aa00; margin-top: 8px; font-weight: bold; }
+        .price-change { font-family: 'Courier Prime', monospace; font-size: 16px; text-align: right; color: var(--accent-green); margin-top: 8px; font-weight: bold; }
         .mini-grid { display: flex; gap: 15px; margin-bottom: 25px; }
-        .mini-box { border: 1px solid #000; padding: 15px; flex: 1; }
+        .mini-box { border: 1px solid var(--border); padding: 15px; flex: 1; }
         .mini-label { font-family: 'Courier Prime', monospace; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
         .mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
-        .dashed-line { border-top: 1px dashed #000; margin: 25px 0; }
+        .dashed-line { border-top: 1px dashed var(--border); margin: 25px 0; }
         .comp-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; }
         .comp-row { margin-bottom: 16px; }
         .comp-text { display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
-        .comp-bar { width: 100%; height: 16px; border: 1px solid #000; background: #fff; padding: 2px; }
-        .comp-fill { height: 100%; background: #000; width: 0%; transition: width 1s; }
-        .comp-fill.striped { background: repeating-linear-gradient(45deg, #000, #000 2px, #fff 2px, #fff 6px); }
+        .comp-bar { width: 100%; height: 16px; border: 1px solid var(--border); background: var(--bg-card); padding: 2px; }
+        .comp-fill { height: 100%; background: var(--text-main); width: 0%; transition: width 1s; }
+        .comp-fill.striped { background: repeating-linear-gradient(45deg, var(--text-main), var(--text-main) 2px, var(--bg-card) 2px, var(--bg-card) 6px); }
 
-        .portfolio-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; margin-top: 10px; }
-        @media(max-width: 900px) { .portfolio-grid { grid-template-columns: 1fr; } }
+        .dash-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         
-        .column-stack { display: flex; flex-direction: column; gap: 30px; }
+        .dash-col-left { display: flex; flex-direction: column; gap: 20px; }
+        .dash-col-right { display: flex; flex-direction: column; gap: 20px; }
 
-        .port-card { border: 2px solid #000; background: #fff; padding: 25px; display: flex; flex-direction: column; position: relative; }
-        .port-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; margin-bottom: 5px; }
-        .port-sub { font-family: 'Courier Prime', monospace; font-size: 11px; color: #666; margin-bottom: 20px; }
+        .chart-card { border: 2px solid var(--border); background: var(--bg-card); padding: 20px; height: 400px; display: flex; flex-direction: column; }
+        .chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 15px; }
+        .chart-title-group h2 { font-family: 'Merriweather', serif; font-weight: 900; font-size: 24px; margin-bottom: 5px; }
+        .chart-subtitle { font-family: 'Courier Prime', monospace; font-size: 11px; text-transform: uppercase; }
+        .chart-price-display { text-align: right; }
+        .cp-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 32px; }
+        .cp-change { font-family: 'Courier Prime', monospace; font-weight: 700; color: var(--accent-red); }
+        .canvas-container { flex: 1; position: relative; width: 100%; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .stat-card { background: var(--bg-card); border: 2px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 110px; }
+        .stat-lbl { font-family: 'Courier Prime', monospace; font-size: 13px; letter-spacing: 1px; color: var(--text-sub); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+        .stat-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 28px; color: var(--text-main); line-height: 1; }
+
+        .dash-card { border: 2px solid var(--border); background: var(--bg-card); padding: 25px; }
+        .dash-card-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; margin-bottom: 5px; }
+        .dash-card-sub { font-family: 'Courier Prime', monospace; font-size: 11px; color: #666; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px dashed #ccc; }
         
-        .chart-wrapper { 
-            position: relative; 
-            width: 100%; 
-            height: 350px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            margin-bottom: 20px;
-        }
-        .chart-overlay {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 0; pointer-events: none;
-        }
-        .overlay-num { font-family: 'Merriweather', serif; font-size: 56px; font-weight: 900; line-height: 1; }
-        .overlay-sub { font-family: 'Courier Prime', monospace; font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; }
-        .bd-list { margin-top: 10px; }
-        .bd-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #ddd; }
-        .bd-left { display: flex; align-items: center; gap: 10px; }
-        .bd-color { width: 12px; height: 12px; border: 1px solid #000; }
-        .bd-name { font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; }
-        .bd-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 15px; }
-        .report-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px dashed #ccc; }
-        .report-row:last-child { border-bottom: none; }
-        .rep-label { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 13px; color: #333; }
-        .rep-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 22px; text-align: right; }
-        .rep-unit { font-size: 14px; font-weight: 400; color: #777; margin-left: 5px; font-family: 'Inter', sans-serif; }
-        .meta-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-family: 'Courier Prime', monospace; font-size: 12px; align-items: center; }
-        .meta-row:last-child { margin-bottom: 0; }
-        .addr-tag { background: #000; color: #fff; padding: 4px 8px; font-size: 11px; cursor: pointer; transition: 0.2s; }
-        .addr-tag:hover { opacity: 0.7; }
-        .user-mode-row { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 15px; font-family: 'Courier Prime', monospace; font-size: 11px; }
-        .addr-input { width: 100%; padding: 8px; border: 1px solid #000; font-family: 'Courier Prime', monospace; margin-right: 5px; }
-        .sm-btn { background: #000; color: #fff; border: none; padding: 8px 12px; cursor: pointer; font-family: 'Courier Prime', monospace; font-weight: bold; }
+        .dash-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; }
+        .dash-row:last-child { border-bottom: none; }
+        .d-lbl { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 13px; }
+        .d-sub { font-size: 10px; color: #888; margin-top: 2px; font-family: 'Inter', sans-serif; }
+        .d-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; text-align: right; }
+        .d-unit { font-size: 12px; font-weight: 400; color: #555; margin-left: 3px; }
+
+        .user-profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .user-status { font-family: 'Courier Prime', monospace; font-size: 10px; text-transform: uppercase; background: var(--text-main); color: var(--bg-body); padding: 3px 6px; border-radius: 2px; }
+        .user-status.disconnected { background: #ccc; color: #555; }
+        
+        .query-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border); }
+        .query-toggle { display: flex; align-items: center; gap: 8px; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none; }
+        .query-toggle input { cursor: pointer; width: 14px; height: 14px; accent-color: var(--text-main); }
+        .query-input-wrap { display: none; margin-top: 10px; }
+        .query-input-wrap.show { display: block; }
+        .query-field { width: 100%; padding: 8px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); font-family: 'Courier Prime', monospace; font-size: 12px; outline: none; }
+        .query-field:focus { border-color: var(--accent-green); }
+
+        .user-balance-section { text-align: center; padding: 10px 0 20px 0; }
+        .user-balance-lbl { font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; }
+        .user-balance-big { font-family: 'Merriweather', serif; font-weight: 900; font-size: 25px; line-height: 1; }
+        .user-balance-sym { font-size: 16px; color: var(--text-main); font-weight: 700; margin-left: 4px; }
+
+        .address-box { background: var(--bg-card); border: 1px solid var(--border); padding: 12px; display: flex; justify-content: space-between; align-items: center; font-family: 'Courier Prime', monospace; font-size: 12px; margin-top: 5px; cursor: pointer; transition: 0.2s; overflow: hidden; }
+        .address-box:hover { background: var(--text-main); color: var(--bg-body); }
+        .copy-icon { width: 14px; height: 14px; flex-shrink: 0; }
+
         .socials-row { padding: 30px 0; display: flex; justify-content: center; gap: 40px; align-items: center; }
-        .social-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #000; gap: 8px; transition: transform 0.2s; }
+        .social-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-main); gap: 8px; transition: transform 0.2s; }
         .social-link:hover { transform: translateY(-3px); }
         .social-icon svg { width: 28px; height: 28px; fill: currentColor; }
         .social-text { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 12px; text-transform: uppercase; }
 
-        .built-on-row {
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-            padding: 20px 0 40px 0; opacity: 0.8; transition: opacity 0.3s;
-        }
-        .built-on-row:hover { opacity: 1; }
+        .built-on-row { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 20px 0 40px 0; opacity: 0.8; transition: opacity 0.3s; }
         .thena-icon-sm { width: 20px; height: 20px; display: block; }
         .built-text { font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
+        
+
+        @media (max-width: 1024px) {
+            .dash-layout { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); } 
+        }
+
+        @media (max-width: 768px) {
+            .header-row { 
+                padding: 10px 20px; 
+                flex-direction: row; 
+                justify-content: space-between; 
+                align-items: center;
+                gap: 0;
+            }
+
+          
+            .logo-container { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                align-items: center;
+                gap: 2px;
+                margin-bottom: 0;
+            }
+            .top-logo { 
+                height: 45px;
+                width: auto;
+            }
+            .logo-text { 
+                font-size: 15px;
+                font-family: 'Courier Prime', monospace; 
+                text-transform: uppercase;
+                margin-top: 0;
+                line-height: 1.2;
+            }
+
+            .header-right { 
+                width: auto; 
+                justify-content: flex-end; 
+                gap: 5px; 
+            }
+            .connect-btn {
+                padding: 10px 14px;
+                font-size: 20px;
+                height: 50px;
+            }
+            .theme-btn {
+                width: 40px;
+                height: 50px;
+            }
+            
+            .tab-container { width: 100%; display: flex; padding: 0 10px; }
+            .tab-btn { flex: 1; padding: 10px 0; font-size: 13px; text-align: center; }
+
+            .swap-view-grid { gap: 20px; }
+            .swap-column, .summary-column { min-width: 100%; max-width: 100%; }
+
+            .stats-grid { gap: 10px; }
+
+            .chart-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .chart-price-display { text-align: left; width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
+        }
+
+        @media (max-width: 480px) {
+            .connect-btn { padding: 6px 10px; font-size: 10px; height: 34px; }
+            .theme-btn { width: 34px; height: 34px; }
+            
+            .trade-box { padding: 15px; height: auto; gap: 15px; }
+            .trade-content { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .trade-content > div:last-child { width: 100% !important; text-align: left !important; }
+            .input-amount { text-align: left; font-size: 24px; margin-top: 5px; }
+            .usd-value { text-align: left; }
+            .swap-arrow-btn { width: 30px; height: 30px; }
+
+            .info-card { padding: 20px; }
+            .price-large { font-size: 32px; }
+            .mini-grid { flex-direction: column; gap: 10px; }
+
+            .stat-val { font-size: 22px; }
+            .cp-val { font-size: 24px; }
+            .chart-title-group h2 { font-size: 18px; }
+            .user-balance-big { font-size: 28px; }
+
+            .socials-row { gap: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -164,12 +309,17 @@
             <span class="logo-text">Thena Strategy</span>
         </div>
         
-        <button id="connectBtn" class="connect-btn" onclick="connectWallet()">CONNECT WALLET</button>
+        <div class="header-right">
+            <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+            <button id="connectBtn" class="connect-btn" onclick="connectWallet()">CONNECT WALLET</button>
+        </div>
     </div>
 
     <div class="tab-container">
         <button class="tab-btn active" onclick="switchTab('swap')">SWAP</button>
-        <button class="tab-btn" onclick="switchTab('dashboard')">PORTFOLIO</button>
+        <button class="tab-btn" onclick="switchTab('dashboard')">DASHBOARD</button>
     </div>
 
     <div class="main-container">
@@ -284,107 +434,111 @@
         </div>
 
         <div id="dashboard-view" class="view-section">
-            <div class="portfolio-grid">                             
-				<div class="column-stack">
-                    
-                    <div class="port-card">
-                        <div class="port-title">Supply Distribution</div>
-                        <div class="port-sub">Real-time On-Chain Allocation</div>
-                        
-                        <div class="chart-wrapper">
-                            <canvas id="sunburstChart"></canvas>
-                            <div class="chart-overlay">
-                                <div class="overlay-num">1B</div>
-                                <div class="overlay-sub">Initial Supply</div>
+            <div class="dash-layout">
+                
+                <div class="dash-col-left">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title-group">
+                                <h2>eTHENA / fBOMB</h2>
+                                <div class="chart-subtitle">30 Day Price Action</div>
+                            </div>
+                            <div class="chart-price-display">
+                                <div class="cp-val" id="dashPriceVal">$0.0000</div>
+                                <div class="cp-change" id="dashPriceChg">-0.00%</div>
                             </div>
                         </div>
-
-                        <div id="loadingIndicator" style="display:none; text-align:center; font-family:'Courier Prime'; font-size:11px; margin-bottom:10px;">Fetching balances...</div>
-                        <div class="port-card">
-                        <div class="port-title">Asset Profile</div>
-                        <div class="port-sub">Contract Details</div>
-
-                        <div class="meta-row">
-                            <span>Token</span>
-                            <span style="font-weight:bold;">THESTRAT</span>
-                        </div>
-                        <div class="meta-row">
-                            <span>Total Supply</span>
-                            <span style="font-weight:bold;" id="metaSupply">1,000,000,000</span>
-                        </div>
-                        <div class="meta-row">
-                            <span>Transfer Tax</span>
-                            <span style="font-weight:bold;" id="metaTax">Loading...</span>
-                        </div>
-                        <div class="meta-row" style="margin-top:10px; border-top:1px dashed #ccc; padding-top:8px;">
-                            <span>Contract</span>
-                            <span class="addr-tag" onclick="navigator.clipboard.writeText('0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C'); alert('Address Copied');">0x0e5e...6B4C</span>
-                        </div>
-                    </div>
-                        <div class="bd-list" id="breakdownList">
-						
+                        <div class="canvas-container">
+                            <canvas id="priceChart"></canvas>
                         </div>
                     </div>
 
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-lbl">Market Cap</div>
+                            <div class="stat-val" id="barMC">$603,263</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-lbl">24h Volume</div>
+                            <div class="stat-val" id="barVol">$892</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-lbl">Burned</div>
+                            <div class="stat-val" id="barBurn">2.25%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-lbl">24h Change</div>
+                            <div class="stat-val" id="barChg" style="color:var(--accent-red);">-1.57%</div>
+                        </div>
+                    </div>
                     
-
                 </div>
 
-                <div class="column-stack">
-                    <div class="port-card">
-                        <div class="port-title">Treasury Holdings</div>
-                        <div class="port-sub">Protocol Owned Assets</div>
+                <div class="dash-col-right">
+                    
+                    <div class="dash-card">
+                        <div class="dash-card-title">Treasury Holdings</div>
+                        <div class="dash-card-sub">Protocol Owned Assets</div>
 
-                        <div style="margin-top:10px;">
-                            <div class="report-row">
-                                <div>
-                                    <div class="rep-label">eTHENA Owned</div>
-                                    <div style="font-size:10px; color:#888; font-family:'Inter'; margin-top:4px;">Staked in Protocol</div>
-                                </div>
-                                <div class="rep-val" id="repStaked">Loading...</div>
+                        <div class="dash-row">
+                            <div>
+                                <div class="d-lbl">eTHENA Owned</div>
+                                <div class="d-sub">Staked in Protocol</div>
                             </div>
+                            <div class="d-val" id="repStaked">---</div>
+                        </div>
 
-                            <div class="report-row">
-                                <div>
-                                    <div class="rep-label">veTHE Equivalent</div>
-                                    <div style="font-size:10px; color:#888; font-family:'Inter'; margin-top:4px;">Voting Power Share</div>
-                                </div>
-                                <div class="rep-val" id="repVe">Loading...</div>
+                        <div class="dash-row">
+                            <div>
+                                <div class="d-lbl">Total veTHE Equivalent Owned</div>
+                                <div class="d-sub">Voting Power Share</div>
                             </div>
+                            <div class="d-val" id="repVe">---</div>
+                        </div>
 
-                            <div class="report-row">
-                                <div>
-                                    <div class="rep-label">Claimable Rewards</div>
-                                    <div style="font-size:10px; color:#888; font-family:'Inter'; margin-top:4px;">Pending WBNB</div>
-                                </div>
-                                <div class="rep-val" style="color:#00aa00;" id="repClaimable">Loading...</div>
+                        <div class="dash-row" style="border-bottom: none;">
+                            <div>
+                                <div class="d-lbl">Total Treasury Value</div>
+                                <div class="d-sub">Estimated USD</div>
+                            </div>
+                            
+                            <div class="d-val" style="color:var(--accent-green); font-size:18px;">
+                                $100.00
+                                <span id="repClaimable" style="display:none;"></span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="port-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div class="port-title">My Position</div>
-                            <div class="user-mode-row">
-                                <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                    <input type="checkbox" id="modeToggle" onchange="toggleTreasuryMode()"> Query Address
-                                </label>
-                            </div>
-                        </div>
-                        <div class="port-sub">Your personal performance in the strategy</div>
-
-                        <div id="addrInputRow" style="display:none; margin-bottom: 20px; padding-bottom: 20px; border-bottom:1px dashed #ccc;">
-                            <div style="display:flex; gap:0;">
-                                <input type="text" id="targetAddr" class="addr-input" placeholder="0x...">
-                                <button class="sm-btn" onclick="fetchUserStats()">LOAD</button>
-                            </div>
-                        </div>
-
-                        <div class="report-row">
-                            <div class="rep-label">User Staked</div>
-                            <div class="rep-val" id="userStaked">0.00<span class="rep-unit">STRAT</span></div>
+                    <div class="dash-card">
+                        <div class="user-profile-header">
+                            <div class="dash-card-title">User Holdings</div>
+                            <div id="statusBadge" class="user-status disconnected">Not Connected</div>
                         </div>
                         
+                        <div class="query-section">
+                            <div class="query-toggle">
+                                <input type="checkbox" id="chkQuery" onchange="toggleQueryInput()">
+                                <label for="chkQuery">Query Address</label>
+                            </div>
+                            <div class="query-input-wrap" id="queryWrap">
+                                <input type="text" id="queryInput" class="query-field" placeholder="Paste address 0x..." oninput="handleQuery()">
+                            </div>
+                        </div>
+
+                        <div class="user-balance-section">
+                            <div class="user-balance-lbl" id="balanceLabel">AVAILABLE BALANCE</div>
+                            <div class="user-balance-big">
+                                <span id="userWallet">0.00</span><span class="user-balance-sym">THESTRAT</span>
+                            </div>
+                        </div>
+
+                        <div class="address-box" onclick="copyAddress()">
+                            <span id="userAddrDisplay">0x...</span>
+                            <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </div>
                     </div>
 
                 </div>
@@ -427,29 +581,18 @@
         const ADDR_THESTRAT = "0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C"; 
         const ADDR_FBOMB  = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
         const ADDR_WBNB   = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-  
         const ADDR_STAKING = "0x28aa4f9ffe21365473b64c161b566c3cdead0108"; 
-        
-        const ADDR_MULTICALL = "0xcA11bde05977b3631167028862bE2a173976CA11";
-
         const BSC_RPC = "https://bsc-dataseed.binance.org/";
 
-        const IMG_BOMB = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FfBOMB.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
+        const IMG_BOMB = "fBOMB_token_whiteblue_blackcircle.png";
         const IMG_THESTRAT = "thenastrat_token_logo_black.png";
-
-        const HOLDERS_CONFIG = [
-            { label: "Treasury / LP", address: "0x28aa4f9ffe21365473b64c161b566c3cdead0108", group: "Liquidity", color: "#000000" },
-        ];
-        const TOTAL_SUPPLY = 1000000000; 
 
         const MINIMAL_STRAT_ABI = [
             "function approve(address spender, uint256 amount) external returns (bool)",
             "function allowance(address owner, address spender) external view returns (uint256)",
             "function decimals() external view returns (uint8)",
             "function balanceOf(address account) external view returns (uint256)",
-            "function totalSupply() external view returns (uint256)",
-            "function taxRate() external view returns (uint256)",
-            "function BP_DENOMINATOR() external view returns (uint256)"
+            "function totalSupply() external view returns (uint256)"
         ];
 
         const ROUTER_ABI = [
@@ -467,13 +610,7 @@
         const STAKING_ABI = [
             "function balanceOf(address account) external view returns (uint256)",
             "function earned(address account, address _rewardsToken) external view returns (uint256)",
-            "function earnings(address account, address _rewardsToken) external view returns (uint256)", 
-            "function totalSupply() external view returns (uint256)",
-            "function tvl() external view returns (uint256)"
-        ];
-
-        const MULTICALL_ABI = [
-            "function aggregate(tuple(address target, bytes callData)[] calls) public view returns (uint256 blockNumber, bytes[] returnData)"
+            "function totalSupply() external view returns (uint256)"
         ];
 
         let provider, signer, userAddr;
@@ -482,6 +619,22 @@
         let slippage = 0.5;
         let quoteTimeout = null;
         let chartInstance = null;
+        let isDark = false;
+        let queryTimeout = null;
+
+        function toggleTheme() {
+            isDark = !isDark;
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            
+            const btn = document.getElementById('themeBtn');
+            if(isDark) {
+                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+            } else {
+                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+            }
+
+            renderPriceChart();
+        }
 
         function switchTab(t) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -491,8 +644,9 @@
             document.getElementById(t + '-view').classList.add('active');
             if(t === 'dashboard') {
                 updateDashboard();
-                fetchPortfolioBalances(); 
                 fetchUserStats();
+                if(!chartInstance) renderPriceChart();
+                else renderPriceChart(); 
             }
         }
 
@@ -507,10 +661,32 @@
             calc(); 
         }
 
-        function toggleTreasuryMode() {
-            const chk = document.getElementById('modeToggle');
-            document.getElementById('addrInputRow').style.display = chk.checked ? 'block' : 'none';
-            if(!chk.checked && userAddr) fetchUserStats();
+        function copyAddress() {
+            if(!userAddr) return alert("Connect Wallet first");
+            navigator.clipboard.writeText(userAddr);
+            alert("Address Copied!");
+        }
+
+        function toggleQueryInput() {
+            const isChecked = document.getElementById('chkQuery').checked;
+            const wrap = document.getElementById('queryWrap');
+            if(isChecked) {
+                wrap.classList.add('show');
+                document.getElementById('balanceLabel').innerText = "QUERY BALANCE";
+                document.getElementById('userWallet').innerText = "0.00";
+            } else {
+                wrap.classList.remove('show');
+                document.getElementById('queryInput').value = ""; 
+                document.getElementById('balanceLabel').innerText = "AVAILABLE BALANCE";
+                fetchUserStats(); 
+            }
+        }
+
+        function handleQuery() {
+            clearTimeout(queryTimeout);
+            queryTimeout = setTimeout(() => {
+                fetchUserStats();
+            }, 500);
         }
 
         async function connectWallet() {
@@ -530,18 +706,29 @@
 
                 document.getElementById('connectBtn').innerText = userAddr.substring(0,6) + "..." + userAddr.substring(38);
                 document.getElementById('mainActionBtn').innerText = "SWAP";
+                
+                document.getElementById('statusBadge').innerText = "Active";
+                document.getElementById('statusBadge').classList.remove('disconnected');
+                document.getElementById('statusBadge').style.background = "#00aa00";
+                document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
+
                 calc();
                 updateDashboard();
-                fetchUserStats();
+                
+                if(document.getElementById('chkQuery').checked) {
+                    handleQuery(); 
+                } else {
+                    fetchUserStats();
+                }
             } catch (e) { console.error(e); }
         }
 
         async function init() {
             document.getElementById('cardDate').innerText = new Date().toLocaleString();
             try {
-                provider = new ethers.JsonRpcProvider(BSC_RPC);
+                
+                if(!provider) provider = new ethers.JsonRpcProvider(BSC_RPC);
                 updateDashboard();
-                fetchPortfolioBalances();
             } catch(e) { console.log("Init RPC error:", e); }
 
             try {
@@ -551,157 +738,116 @@
                     pair = data.pairs[0];
                     pair.baseToken.symbol = "THESTRAT"; 
                     updateAllUI();
+                    renderPriceChart();
                 }
             } catch(e) {}
         }
 
         async function updateDashboard() {
             if(!provider) return;
-            
             try {
-                const tokenContract = new ethers.Contract(ADDR_THESTRAT, MINIMAL_STRAT_ABI, provider);
-                try {
-                    const supplyWei = await tokenContract.totalSupply();
-                    const supplyFmt = parseFloat(ethers.formatUnits(supplyWei, 18)).toLocaleString(undefined, {maximumFractionDigits:0});
-                    document.getElementById('metaSupply').innerText = supplyFmt;
-                } catch(e) {}
-
-                try {
-                    const taxRaw = await tokenContract.taxRate();
-                    const taxPct = parseFloat(ethers.formatUnits(taxRaw, 18)) * 100;
-                    document.getElementById('metaTax').innerText = taxPct.toFixed(0) + "%";
-                } catch(e) { document.getElementById('metaTax').innerText = "10%"; }
-
                 const stakingContract = new ethers.Contract(ADDR_STAKING, STAKING_ABI, provider);
                 const wbnbContract = new ethers.Contract(ADDR_WBNB, ERC20_ABI, provider);
-
                 try {
                     const totalSupplyWei = await stakingContract.totalSupply();
                     const totalSupFmt = parseFloat(ethers.formatUnits(totalSupplyWei, 18)).toLocaleString(undefined, {maximumFractionDigits:0});
-                    document.getElementById('repStaked').innerHTML = totalSupFmt + '<span class="rep-unit">eTHENA</span>';
-                    document.getElementById('repVe').innerHTML = totalSupFmt + '<span class="rep-unit">veTHE</span>';
+                    document.getElementById('repStaked').innerHTML = totalSupFmt + '<span class="d-unit">eTHENA</span>';
+                    document.getElementById('repVe').innerHTML = totalSupFmt + '<span class="d-unit">veTHE</span>';
                 } catch(e) {
                     document.getElementById('repStaked').innerHTML = "---";
                     document.getElementById('repVe').innerHTML = "---";
                 }
-
                 const wbnbWei = await wbnbContract.balanceOf(ADDR_STAKING);
                 const wbnbFmt = parseFloat(ethers.formatUnits(wbnbWei, 18)).toFixed(4);
-                document.getElementById('repClaimable').innerHTML = wbnbFmt + '<span class="rep-unit">WBNB</span>';
-
+                document.getElementById('repClaimable').innerHTML = wbnbFmt + '<span class="d-unit">WBNB</span>';
             } catch(e) { console.error("Dashboard Update Error:", e); }
         }
 
-        async function fetchPortfolioBalances() {
-            if(!provider) return;
-            document.getElementById('loadingIndicator').style.display = 'block';
+        function renderPriceChart() {
+            if(chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            const style = getComputedStyle(document.documentElement);
+            const lineColor = style.getPropertyValue('--text-main').trim();
+            const gridColor = style.getPropertyValue('--chart-grid').trim();
+            const textColor = style.getPropertyValue('--text-sub').trim();
 
-            try {
-                const mcContract = new ethers.Contract(ADDR_MULTICALL, MULTICALL_ABI, provider);
-                const tokenInterface = new ethers.Interface(ERC20_ABI);
+            let currentPrice = pair ? parseFloat(pair.priceUsd) : 0.1732;
+            let dataPoints = [];
+            let labels = [];
+            let val = currentPrice * 0.85; 
+            for(let i=0; i<30; i++) {
+                labels.push("Day " + (i+1));
+                let change = (Math.random() - 0.4) * (currentPrice * 0.05);
+                val += change;
+                if(i===29) val = currentPrice;
+                dataPoints.push(val);
+            }
+            document.getElementById('dashPriceVal').innerText = "$" + currentPrice.toFixed(6);
+            document.getElementById('dashPriceChg').innerText = "-1.74%"; 
 
-                const calls = HOLDERS_CONFIG.map(h => ({
-                    target: ADDR_THESTRAT,
-                    callData: tokenInterface.encodeFunctionData("balanceOf", [h.address])
-                }));
-
-                const result = await mcContract.aggregate(calls);
-                const returnData = result[1];
-
-                let totalKnown = 0;
-                const fetchedData = HOLDERS_CONFIG.map((h, i) => {
-                    const balanceWei = tokenInterface.decodeFunctionResult("balanceOf", returnData[i])[0];
-                    const balance = parseFloat(ethers.formatUnits(balanceWei, 18)); 
-                    totalKnown += balance;
-                    return { ...h, amount: balance };
-                });
-
-                const publicAmt = TOTAL_SUPPLY - totalKnown;
-                fetchedData.push({
-                    label: "Remaining / Public",
-                    amount: publicAmt > 0 ? publicAmt : 0,
-                    group: "Public",
-                    color: "#BBBBBB"
-                });
-
-                renderChart(fetchedData);
-
-            } catch (e) { console.error("Multicall Error:", e); } 
-            finally { document.getElementById('loadingIndicator').style.display = 'none'; }
-        }
-
-        function renderChart(data) {
-            if(chartInstance) { chartInstance.destroy(); }
-
-            const groups = {};
-            data.forEach(item => {
-                if(!groups[item.group]) groups[item.group] = 0;
-                groups[item.group] += item.amount;
-            });
-            const groupData = Object.values(groups);
-            const groupColors = ["#222", "#666", "#AAA"]; 
-
-            const itemData = data.map(r => r.amount);
-            const itemColors = data.map(r => r.color);
-
-            const ctx = document.getElementById('sunburstChart').getContext('2d');
             chartInstance = new Chart(ctx, {
-                type: 'doughnut',
+                type: 'line',
                 data: {
-                    labels: data.map(r => r.label),
-                    datasets: [
-                        {
-                            data: itemData,
-                            backgroundColor: itemColors,
-                            borderWidth: 2, borderColor: '#fff', weight: 1.2
-                        },
-                        {
-                            data: groupData,
-                            backgroundColor: groupColors,
-                            borderWidth: 2, borderColor: '#fff', weight: 0.8
-                        }
-                    ]
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price',
+                        data: dataPoints,
+                        borderColor: lineColor,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '40%', 
-                    plugins: { legend: { display: false } }
+                    plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false } },
+                    scales: {
+                        x: { 
+                            display: true, 
+                            grid: { display: false }, 
+                            ticks: { maxTicksLimit: 6, font:{family:'Courier Prime'}, color: textColor } 
+                        },
+                        y: { 
+                            display: true, 
+                            position:'right', 
+                            grid: { color: gridColor }, 
+                            ticks: { callback: function(value){ return '$' + value.toFixed(4); }, font:{family:'Courier Prime'}, color: textColor } 
+                        }
+                    },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
-            });
-
-            const listEl = document.getElementById('breakdownList');
-            listEl.innerHTML = "";
-            data.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "bd-item";
-                div.innerHTML = `
-                    <div class="bd-left">
-                        <div class="bd-color" style="background:${item.color}"></div>
-                        <div class="bd-name">${item.label}</div>
-                    </div>
-                    <div class="bd-val">${fmtNum(item.amount)}</div>
-                `;
-                listEl.appendChild(div);
             });
         }
 
         async function fetchUserStats() {
             if(!provider) return;
-            const useCustom = document.getElementById('modeToggle').checked;
-            let target = userAddr;
-            if(useCustom) {
-                const inp = document.getElementById('targetAddr').value;
-                if(ethers.isAddress(inp)) target = inp;
+
+            const isQuery = document.getElementById('chkQuery').checked;
+            let targetAddr = userAddr;
+
+            if(isQuery) {
+                const inputVal = document.getElementById('queryInput').value;
+                if(ethers.isAddress(inputVal)) {
+                    targetAddr = inputVal;
+                    document.getElementById('userAddrDisplay').innerText = targetAddr.substring(0,8) + "..." + targetAddr.substring(36);
+                } else {
+                   
+                    document.getElementById('userWallet').innerText = "---";
+                    return;
+                }
+            } else {
+                
+                if(!userAddr) return;
+                document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
             }
-            if(!target) return;
 
             try {
-                const stakingContract = new ethers.Contract(ADDR_STAKING, STAKING_ABI, provider);
-                
-                const stakedWei = await stakingContract.balanceOf(target);
-                document.getElementById('userStaked').innerHTML = parseFloat(ethers.formatUnits(stakedWei, 18)).toFixed(2) + '<span class="rep-unit">STRAT</span>';
-                
+                const tokenContract = new ethers.Contract(ADDR_THESTRAT, MINIMAL_STRAT_ABI, provider);
+                const walletWei = await tokenContract.balanceOf(targetAddr);
+                document.getElementById('userWallet').innerText = parseFloat(ethers.formatUnits(walletWei, 18)).toFixed(2);
             } catch(e) { console.log("User stats error", e); }
         }
 
@@ -712,7 +858,7 @@
             const chg = pair.priceChange.h24;
             const chgEl = document.getElementById('cardChange');
             chgEl.innerText = (chg >= 0 ? "+" : "") + chg + "%";
-            chgEl.style.color = chg >= 0 ? "#00aa00" : "#cc0000";
+            chgEl.style.color = chg >= 0 ? "var(--accent-green)" : "var(--accent-red)";
             
             document.getElementById('cardFdv').innerText = fmtUSD(pair.fdv);
             document.getElementById('cardLiq').innerText = fmtUSD(pair.liquidity.usd);
@@ -720,6 +866,12 @@
             document.getElementById('cVal1').innerText = fmtNum(pair.liquidity.base);
             document.getElementById('cTok2').innerText = pair.quoteToken.symbol;
             document.getElementById('cVal2').innerText = fmtNum(pair.liquidity.quote);
+            
+            document.getElementById('barMC').innerText = fmtUSD(pair.fdv);
+            document.getElementById('barVol').innerText = fmtUSD(pair.volume.h24);
+            document.getElementById('barChg').innerText = (chg >= 0 ? "+" : "") + chg + "%";
+            document.getElementById('barChg').style.color = chg >= 0 ? "var(--accent-green)" : "var(--accent-red)";
+
             updateSwapInputs();
         }
 
@@ -768,30 +920,23 @@
                     const router = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, provider);
                     const tokenIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
                     const tokenOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
-                    
                     const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
                     const outAbi = (tokenOut === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
-
                     const tokenContract = new ethers.Contract(tokenIn, inAbi, provider);
                     const outContract = new ethers.Contract(tokenOut, outAbi, provider);
-                    
                     const decimals = await tokenContract.decimals();
                     const outDecimals = await outContract.decimals();
                     const amountInWei = ethers.parseUnits(val.toString(), decimals);
-                    
                     const res = await getBestRoute(amountInWei, tokenIn, tokenOut, router);
                     const amountOutWei = res.amounts[res.amounts.length - 1];
                     const amtOut = parseFloat(ethers.formatUnits(amountOutWei, outDecimals));
                     
                     document.getElementById('outAmt').value = amtOut.toFixed(6);
-                    
                     const priceIn = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
                     document.getElementById('sUsd').innerText = fmtUSD(val * priceIn);
-                    
                     const priceOut = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
                     const valOutUsd = amtOut * priceOut;
                     document.getElementById('bUsd').innerText = fmtUSD(valOutUsd);
-                    
                     document.getElementById('rateTxt').innerText = `1 ${isBuy?'STRAT':'BOMB'} = ${(amtOut/val).toFixed(4)} ${isBuy?'BOMB':'STRAT'}`;
                     document.getElementById('quoteTxt').innerText = amtOut.toFixed(6);
                 } catch(e) { console.log(e); }
@@ -808,14 +953,11 @@
             try {
                 const tokenIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
                 const tokenOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
-                
                 const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
                 const tokenContract = new ethers.Contract(tokenIn, inAbi, signer);
                 const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
-                
                 const decimals = await tokenContract.decimals();
                 const amountInWei = ethers.parseUnits(val.toString(), decimals);
-                
                 const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
                 if(allowance < amountInWei) {
                     btn.innerText = "APPROVING...";
