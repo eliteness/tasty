@@ -447,6 +447,127 @@ input[type=number] { -moz-appearance: textfield; }
     .user-balance-big { font-size: 28px; }
     .socials-row { gap: 20px; }
 }
+
+
+#mobileInfoBtn { 
+    display: none; 
+}
+
+@media (max-width: 768px) {
+    #leftAdBox, #rightBadgeBox { 
+        display: none !important; 
+    }
+
+    #mobileInfoBtn.show-btn {
+        display: flex !important; 
+        justify-content: center; 
+        align-items: center;
+        width: 20px; 
+        height: 20px;
+        background: transparent; 
+        color: var(--text-sub);
+        border: 1.5px solid var(--text-sub); 
+        border-radius: 50%;
+        font-family: 'Merriweather', serif; 
+        font-weight: 700; 
+        font-size: 12px;
+        line-height: 1;
+        cursor: pointer;
+        margin-left: 8px; 
+        transition: transform 0.2s;
+    }
+    #mobileInfoBtn.show-btn:active { transform: scale(0.9); }
+
+    body.show-ads #leftAdBox {
+        display: flex !important;
+        position: fixed;
+        top: 45%; 
+        left: 50%;
+        bottom: auto; 
+        transform: translate(-50%, -50%); 
+        z-index: 2010;
+        width: 280px; 
+        box-shadow: 0 0 25px rgba(0,0,0,0.5); 
+    }
+
+    body.show-ads::before {
+        content: '';
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.85); 
+        z-index: 2009;
+        backdrop-filter: blur(4px);
+    }
+
+    body.show-ads #leftAdBox {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: space-between;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        transform: none !important;
+        border: none;
+        border-radius: 0;
+        max-width: none;
+        z-index: 2020;
+        background: var(--bg-card);
+        padding: 0;
+    }
+
+    body.show-ads #leftAdBox .ad-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 400px; 
+        margin: 0 auto;
+        padding: 0 30px;
+        position: relative; 
+        z-index: 10;
+    }
+
+    body.show-ads .ad-main-icon {
+        width: 100px; height: 100px; margin-bottom: 25px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    body.show-ads .ad-title {
+        font-size: 24px; margin-bottom: 30px; line-height: 1.4;
+    }
+    body.show-ads .ad-drop-btn {
+        padding: 18px 25px; font-size: 16px; letter-spacing: 1px;
+    }
+    body.show-ads .ad-drop-content a {
+        padding: 15px 20px; font-size: 14px;
+    }
+
+    body.show-ads .ad-crop-zone {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        overflow: hidden; pointer-events: none; z-index: 0;
+    }
+    body.show-ads .ad-watermark {
+        position: absolute; top: 50%; left: 50%;
+        width: 100vw; height: auto; max-width: none;
+        transform: translate(-50%, -50%); opacity: 0.1; 
+    }
+
+    body.show-ads #leftAdBox .close-btn {
+        position: absolute; top: 25px; right: 25px; left: auto;
+        width: 50px; height: 50px; font-size: 24px;
+        background: var(--bg-panel); border: 2px solid var(--border); z-index: 2025;
+    }
+
+    body.show-ads #leftAdBox .ad-footer {
+        width: 100%; padding: 30px;
+        background: var(--bg-panel); border-top: 2px solid var(--border);
+        display: flex; justify-content: space-between; align-items: center; z-index: 20;
+    }
+    body.show-ads .ad-footer-lbl { font-size: 18px !important; font-weight: 900; }
+    body.show-ads .mclb-logo { height: 40px !important; width: auto; }
+}
+
     </style>
 </head>
 <body>
@@ -491,28 +612,34 @@ input[type=number] { -moz-appearance: textfield; }
                         </div>
                     </div>
 
-                    <div class="trade-box">
-                        <div class="trade-top-row">
-                            <div class="trade-label">Sell</div>
-                            <div class="balance-display">
-                                Balance: <span id="sBal">0</span>
-                                <button class="max-btn" onclick="setMax()">MAX</button>
-                            </div>
-                        </div>
-                        <div class="trade-content">
-                            <div class="token-info" onclick="setMode('sell')">
-                                <img src="" id="sIcon" class="token-icon">
-                                <div>
-                                    <div class="token-symbol" id="sSym">---</div>
-                                    <div class="token-name" id="sName">---</div>
-                                </div>
-                            </div>
-                            <div style="text-align:right; width:50%;">
-                                <input type="number" id="inpAmt" class="input-amount" placeholder="0" oninput="calc()">
-                                <div class="usd-value" id="sUsd">$0.00</div>
-                            </div>
+                   <div class="trade-box">
+                    <div class="trade-top-row">
+                        <div class="trade-label">Sell</div>
+                        <div class="balance-display">
+                            Balance: <span id="sBal">0</span>
+                            <button class="max-btn" onclick="setMax()">MAX</button>
                         </div>
                     </div>
+                    <div class="trade-content">
+                       
+<div class="token-info" onclick="setMode('sell')">
+    <img src="" id="sIcon" class="token-icon">
+    
+    <div>
+        <div style="display: flex; align-items: center;">
+            <div class="token-symbol" id="sSym">---</div>
+            <div id="mobileInfoBtn" onclick="event.stopPropagation(); toggleAds()">?</div>
+        </div>
+        <div class="token-name" id="sName">---</div>
+    </div>
+</div>
+
+                        <div style="text-align:right; width:50%;">
+                            <input type="number" id="inpAmt" class="input-amount" placeholder="0" oninput="calc()">
+                            <div class="usd-value" id="sUsd">$0.00</div>
+                        </div>
+                    </div>
+                </div>
 
                     <div class="arrow-wrapper">
                         <div class="swap-arrow-btn" onclick="toggleSwap()">
@@ -698,7 +825,6 @@ input[type=number] { -moz-appearance: textfield; }
             </div>
         </div>
 
-        <!-- UPDATED SOCIAL ICONS -->
         <div class="socials-row">
             <a href="#" class="social-link" target="_blank" title="Twitter">
                 <div class="social-icon">
@@ -1066,6 +1192,15 @@ input[type=number] { -moz-appearance: textfield; }
             document.getElementById('bSym').innerText = tout.sym;
             document.getElementById('bName').innerText = tout.name;
             document.getElementById('bIcon').src = tout.icon;
+
+          
+            const helpBtn = document.getElementById('mobileInfoBtn');
+            if (tin.sym === "fBOMB") {
+                helpBtn.classList.add('show-btn');
+            } else {
+                helpBtn.classList.remove('show-btn');
+            }
+
             fetchSwapBalances();
             calc();
         }
@@ -1195,6 +1330,30 @@ quoteTimeout = setTimeout(async () => {
             btn.innerText = "SWAP";
             btn.disabled = false;
         });
+		function toggleAds() {
+    document.body.classList.toggle('show-ads');
+    
+    const btn = document.getElementById('mobileInfoBtn');
+    if (document.body.classList.contains('show-ads')) {
+        btn.innerText = "X";
+        btn.style.color = "var(--accent-red)";
+        btn.style.borderColor = "var(--accent-red)"; 
+    } else {
+        btn.innerText = "?";
+        btn.style.color = "var(--text-sub)";
+        btn.style.borderColor = "var(--text-sub)";
+    }
+}
+
+document.addEventListener('click', function(e) {
+    if (document.body.classList.contains('show-ads')) {
+        if (!e.target.closest('#leftAdBox') && 
+            !e.target.closest('#rightBadgeBox') && 
+            !e.target.closest('#mobileInfoBtn')) {
+            toggleAds();
+        }
+    }
+});
 function closeAd(id) {
         document.getElementById(id).style.display = 'none';
     }
@@ -1204,7 +1363,7 @@ function closeAd(id) {
         init();
     </script>	
     <div id="leftAdBox" class="ad-box">
-        <div class="close-btn" onclick="closeAd('leftAdBox')">X</div>
+<div class="close-btn" onclick="toggleAds()">X</div>
         
         <div class="ad-crop-zone">
             <img src="https://thena.fi/favicon/apple-touch-icon.png" class="ad-watermark">
@@ -1242,5 +1401,6 @@ function closeAd(id) {
         </div>
     </a>
     </div>
+
 </body>
 </html>
