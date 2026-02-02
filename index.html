@@ -765,17 +765,17 @@ input[type=number] { -moz-appearance: textfield; }
                         <div class="dash-row">
                             <div>
                                 <div class="d-lbl">eTHENA Owned</div>
-                                <div class="d-sub">Staked in Protocol</div>
+                                <div class="d-sub">Staked in Eliteness Protocol</div>
                             </div>
-                            <div class="d-val" id="repStaked">---</div>
+                            <div class="d-val" id="repStaked">Loading...</div>
                         </div>
 
                         <div class="dash-row">
                             <div>
-                                <div class="d-lbl">Total veTHE Equivalent Owned</div>
-                                <div class="d-sub">Voting Power Share</div>
+                                <div class="d-lbl">Total veTHE Equivalent</div>
+                                <div class="d-sub">Based on Ratio ~2.53</div>
                             </div>
-                            <div class="d-val" id="repVe">---</div>
+                            <div class="d-val" id="repVe">Loading...</div>
                         </div>
 
                         <div class="dash-row" style="border-bottom: none;">
@@ -783,11 +783,12 @@ input[type=number] { -moz-appearance: textfield; }
                                 <div class="d-lbl">Total Treasury Value</div>
                                 <div class="d-sub">Estimated USD</div>
                             </div>
-                            <div class="d-val" style="color:var(--accent-green); font-size:18px;">
-                                $100.00
-                                <span id="repClaimable" style="display:none;"></span>
+                            <div class="d-val" style="color:var(--accent-green); font-size:18px;" id="repTotalValue">
+                                $0.00
                             </div>
                         </div>
+                        
+                        <div id="repClaimable" style="display:none;"></div>
                     </div>
 
                     <div class="dash-card">
@@ -854,11 +855,21 @@ input[type=number] { -moz-appearance: textfield; }
     </div>
 
  <script>
-        const ADDR_ROUTER = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
+        const ADDR_ROUTER   = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
         const ADDR_THESTRAT = "0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C"; 
-        const ADDR_FBOMB  = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
-        const ADDR_WBNB   = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-        const ADDR_STAKING = "0x28aa4f9ffe21365473b64c161b566c3cdead0108"; 
+        const ADDR_FBOMB    = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
+        const ADDR_WBNB     = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+        
+        const ADDR_TREASURY = "0x28aa4f9ffe21365473b64c161b566c3cdead0108"; 
+        const ADDR_GAUGE    = "0xce6b9bae3c330e0455d1af0ae3996f496cdbf1f1"; 
+        const ADDR_LP_PAIR  = "0x7245D36825acFE58dE64E1b4A5F6d95662628faA";
+        
+        const ADDR_ETHENA   = "0xafbe3b8b0939a5538DE32f7752A78e08C8492295";
+        const ADDR_THE      = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11"; 
+        const ADDR_VETHE    = "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D"; 
+
+        let VETHE_RATIO = 2.50; // test
+
         const BSC_RPC = "https://bsc-dataseed.binance.org/";
 
         const IMG_BOMB = "fBOMB_token_whiteblue_blackcircle.png";
@@ -890,6 +901,19 @@ input[type=number] { -moz-appearance: textfield; }
             "function totalSupply() external view returns (uint256)"
         ];
 
+        const PAIR_ABI = [
+            "function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+            "function totalSupply() external view returns (uint256)",
+            "function token0() external view returns (address)",
+            "function token1() external view returns (address)"
+        ];
+
+        const VETHE_ABI = [
+            "function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)",
+            "function locked(uint256 id) external view returns (int128 amount, uint256 end)",
+            "function balanceOf(address owner) external view returns (uint256)"
+        ];
+
         let provider, signer, userAddr;
         let pair = null;
         let isBuy = false;
@@ -902,14 +926,10 @@ input[type=number] { -moz-appearance: textfield; }
         function toggleTheme() {
             isDark = !isDark;
             document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-            
             const btn = document.getElementById('themeBtn');
-            if(isDark) {
-                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
-            } else {
-                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
-            }
-
+            btn.innerHTML = isDark ? 
+                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>' : 
+                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
             renderPriceChart();
         }
 
@@ -922,7 +942,7 @@ input[type=number] { -moz-appearance: textfield; }
             if(t === 'dashboard') {
                 updateDashboard();
                 fetchUserStats();
-                if(!chartInstance) renderPriceChart();
+                if(chartInstance) renderPriceChart(); 
                 else renderPriceChart(); 
             }
         }
@@ -961,9 +981,7 @@ input[type=number] { -moz-appearance: textfield; }
 
         function handleQuery() {
             clearTimeout(queryTimeout);
-            queryTimeout = setTimeout(() => {
-                fetchUserStats();
-            }, 500);
+            queryTimeout = setTimeout(() => { fetchUserStats(); }, 500);
         }
 
         async function connectWallet() {
@@ -984,20 +1002,19 @@ input[type=number] { -moz-appearance: textfield; }
                 document.getElementById('connectBtn').innerText = userAddr.substring(0,6) + "..." + userAddr.substring(38);
                 document.getElementById('mainActionBtn').innerText = "SWAP";
                 
-                document.getElementById('statusBadge').innerText = "Active";
-                document.getElementById('statusBadge').classList.remove('disconnected');
-                document.getElementById('statusBadge').style.background = "#00aa00";
+                const badge = document.getElementById('statusBadge');
+                badge.innerText = "Active";
+                badge.classList.remove('disconnected');
+                badge.style.background = "#00aa00";
                 document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
 
                 calc();
                 updateDashboard();
                 fetchSwapBalances(); 
                 
-                if(document.getElementById('chkQuery').checked) {
-                    handleQuery(); 
-                } else {
-                    fetchUserStats();
-                }
+                if(document.getElementById('chkQuery').checked) handleQuery(); 
+                else fetchUserStats();
+                
             } catch (e) { console.error(e); }
         }
 
@@ -1023,20 +1040,73 @@ input[type=number] { -moz-appearance: textfield; }
         async function updateDashboard() {
             if(!provider) return;
             try {
-                const stakingContract = new ethers.Contract(ADDR_STAKING, STAKING_ABI, provider);
+                const gaugeContract = new ethers.Contract(ADDR_GAUGE, STAKING_ABI, provider);
+                const pairContract = new ethers.Contract(ADDR_LP_PAIR, PAIR_ABI, provider);
                 const wbnbContract = new ethers.Contract(ADDR_WBNB, ERC20_ABI, provider);
-                try {
-                    const totalSupplyWei = await stakingContract.totalSupply();
-                    const totalSupFmt = parseFloat(ethers.formatUnits(totalSupplyWei, 18)).toLocaleString(undefined, {maximumFractionDigits:0});
-                    document.getElementById('repStaked').innerHTML = totalSupFmt + '<span class="d-unit">eTHENA</span>';
-                    document.getElementById('repVe').innerHTML = totalSupFmt + '<span class="d-unit">veTHE</span>';
-                } catch(e) {
-                    document.getElementById('repStaked').innerHTML = "---";
-                    document.getElementById('repVe').innerHTML = "---";
+                const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
+                const veTheContract = new ethers.Contract(ADDR_VETHE, VETHE_ABI, provider);              
+                const etSupplyWei = await ethenaContract.totalSupply();
+                const etSupply = parseFloat(ethers.formatUnits(etSupplyWei, 18));
+
+                const veBalance = await veTheContract.balanceOf(ADDR_ETHENA);
+                let totalVeLocked = 0;
+
+                if (Number(veBalance) > 0) {
+                    const tokenId = await veTheContract.tokenOfOwnerByIndex(ADDR_ETHENA, 0);
+                    const lockedStruct = await veTheContract.locked(tokenId);
+                    totalVeLocked = parseFloat(ethers.formatUnits(lockedStruct[0], 18));
                 }
-                const wbnbWei = await wbnbContract.balanceOf(ADDR_STAKING);
+
+                if (etSupply > 0 && totalVeLocked > 0) {
+                    VETHE_RATIO = totalVeLocked / etSupply;
+                    
+                }
+                
+                const stakedLPWei = await gaugeContract.balanceOf(ADDR_TREASURY);
+                const stakedLP = parseFloat(ethers.formatUnits(stakedLPWei, 18));
+
+                const totalLPSupplyWei = await pairContract.totalSupply();
+                const totalLP = parseFloat(ethers.formatUnits(totalLPSupplyWei, 18));
+                
+                const reserves = await pairContract.getReserves();
+                const reserveEthenaWei = reserves[1]; 
+                const totalEthenaPool = parseFloat(ethers.formatUnits(reserveEthenaWei, 18));
+
+                const poolShare = stakedLP / totalLP;
+                const myEthena = totalEthenaPool * poolShare;
+                
+                const myVeThe = myEthena * VETHE_RATIO;
+
+                const elemStaked = document.getElementById('repStaked');
+                if(elemStaked) elemStaked.innerHTML = myEthena.toLocaleString(undefined, {maximumFractionDigits:0}) + '<span class="d-unit">eTHENA</span>';
+
+                const elemVe = document.getElementById('repVe');
+                if(elemVe) elemVe.innerHTML = myVeThe.toLocaleString(undefined, {maximumFractionDigits:0}) + '<span class="d-unit">veTHE</span>';
+
+                try {
+                    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
+                    const data = await res.json();
+                    
+                    if(data.pairs && data.pairs.length > 0) {
+                        const priceOfThe = parseFloat(data.pairs[0].priceUsd);
+                        
+                        const totalIntrinsicValue = myVeThe * priceOfThe;
+                        
+                        const elemTotal = document.getElementById('repTotalValue');
+                        if(elemTotal) {
+                            elemTotal.innerText = fmtUSD(totalIntrinsicValue);
+                        }
+                    } 
+                } catch(e) {
+                    console.log("Price fetch error", e);
+                }
+
+                const wbnbWei = await wbnbContract.balanceOf(ADDR_GAUGE);
                 const wbnbFmt = parseFloat(ethers.formatUnits(wbnbWei, 18)).toFixed(4);
-                document.getElementById('repClaimable').innerHTML = wbnbFmt + '<span class="d-unit">WBNB</span>';
+                if(document.getElementById('repClaimable')) {
+                    document.getElementById('repClaimable').innerHTML = wbnbFmt + '<span class="d-unit">WBNB</span>';
+                }
+
             } catch(e) { console.error("Dashboard Update Error:", e); }
         }
 
@@ -1082,17 +1152,8 @@ input[type=number] { -moz-appearance: textfield; }
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false } },
                     scales: {
-                        x: { 
-                            display: true, 
-                            grid: { display: false }, 
-                            ticks: { maxTicksLimit: 6, font:{family:'Courier Prime'}, color: textColor } 
-                        },
-                        y: { 
-                            display: true, 
-                            position:'right', 
-                            grid: { color: gridColor }, 
-                            ticks: { callback: function(value){ return '$' + value.toFixed(4); }, font:{family:'Courier Prime'}, color: textColor } 
-                        }
+                        x: { display: true, grid: { display: false }, ticks: { maxTicksLimit: 6, font:{family:'Courier Prime'}, color: textColor } },
+                        y: { display: true, position:'right', grid: { color: gridColor }, ticks: { callback: function(value){ return '$' + value.toFixed(4); }, font:{family:'Courier Prime'}, color: textColor } }
                     },
                     interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
@@ -1101,10 +1162,8 @@ input[type=number] { -moz-appearance: textfield; }
 
         async function fetchUserStats() {
             if(!provider) return;
-
             const isQuery = document.getElementById('chkQuery').checked;
             let targetAddr = userAddr;
-
             if(isQuery) {
                 const inputVal = document.getElementById('queryInput').value;
                 if(ethers.isAddress(inputVal)) {
@@ -1118,7 +1177,6 @@ input[type=number] { -moz-appearance: textfield; }
                 if(!userAddr) return;
                 document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
             }
-
             try {
                 const tokenContract = new ethers.Contract(ADDR_THESTRAT, MINIMAL_STRAT_ABI, provider);
                 const walletWei = await tokenContract.balanceOf(targetAddr);
@@ -1131,18 +1189,11 @@ input[type=number] { -moz-appearance: textfield; }
             try {
                 const tIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
                 const tOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
-                
                 const cIn = new ethers.Contract(tIn, MINIMAL_STRAT_ABI, provider);
                 const cOut = new ethers.Contract(tOut, MINIMAL_STRAT_ABI, provider);
-
-                const [bIn, bOut] = await Promise.all([
-                    cIn.balanceOf(userAddr),
-                    cOut.balanceOf(userAddr)
-                ]);
-
+                const [bIn, bOut] = await Promise.all([ cIn.balanceOf(userAddr), cOut.balanceOf(userAddr) ]);
                 const bInFmt = ethers.formatUnits(bIn, 18); 
                 const bOutFmt = ethers.formatUnits(bOut, 18);
-
                 document.getElementById('sBal').innerText = parseFloat(bInFmt).toFixed(4);
                 document.getElementById('sBal').dataset.raw = bInFmt;
                 document.getElementById('bBal').innerText = parseFloat(bOutFmt).toFixed(4);
@@ -1151,10 +1202,7 @@ input[type=number] { -moz-appearance: textfield; }
 
         function setMax() {
             const raw = document.getElementById('sBal').dataset.raw;
-            if(raw) {
-                document.getElementById('inpAmt').value = raw;
-                calc();
-            }
+            if(raw) { document.getElementById('inpAmt').value = raw; calc(); }
         }
 
         function updateAllUI() {
@@ -1165,19 +1213,16 @@ input[type=number] { -moz-appearance: textfield; }
             const chgEl = document.getElementById('cardChange');
             chgEl.innerText = (chg >= 0 ? "+" : "") + chg + "%";
             chgEl.style.color = chg >= 0 ? "var(--accent-green)" : "var(--accent-red)";
-            
             document.getElementById('cardFdv').innerText = fmtUSD(pair.fdv);
             document.getElementById('cardLiq').innerText = fmtUSD(pair.liquidity.usd);
             document.getElementById('cTok1').innerText = "THESTRAT";
             document.getElementById('cVal1').innerText = fmtNum(pair.liquidity.base);
             document.getElementById('cTok2').innerText = pair.quoteToken.symbol;
             document.getElementById('cVal2').innerText = fmtNum(pair.liquidity.quote);
-            
             document.getElementById('barMC').innerText = fmtUSD(pair.fdv);
             document.getElementById('barVol').innerText = fmtUSD(pair.volume.h24);
             document.getElementById('barChg').innerText = (chg >= 0 ? "+" : "") + chg + "%";
             document.getElementById('barChg').style.color = chg >= 0 ? "var(--accent-green)" : "var(--accent-red)";
-
             updateSwapInputs();
         }
 
@@ -1192,15 +1237,9 @@ input[type=number] { -moz-appearance: textfield; }
             document.getElementById('bSym').innerText = tout.sym;
             document.getElementById('bName').innerText = tout.name;
             document.getElementById('bIcon').src = tout.icon;
-
-          
             const helpBtn = document.getElementById('mobileInfoBtn');
-            if (tin.sym === "fBOMB") {
-                helpBtn.classList.add('show-btn');
-            } else {
-                helpBtn.classList.remove('show-btn');
-            }
-
+            if (tin.sym === "fBOMB") helpBtn.classList.add('show-btn');
+            else helpBtn.classList.remove('show-btn');
             fetchSwapBalances();
             calc();
         }
@@ -1214,19 +1253,9 @@ input[type=number] { -moz-appearance: textfield; }
 
         async function getBestRoute(amountInWei, tokenIn, tokenOut, routerContract) {
             const routeDir = [{ from: tokenIn, to: tokenOut, stable: false }];
-            try { 
-                const amounts = await routerContract.getAmountsOut(amountInWei, routeDir); 
-                return { route: routeDir, amounts }; 
-            } catch (e) {
-                console.log("Direct route failed, checking reserves...");
-            }
-            
+            try { const amounts = await routerContract.getAmountsOut(amountInWei, routeDir); return { route: routeDir, amounts }; } catch (e) { console.log("Direct route failed, checking reserves..."); }
             const routeWbnb = [{ from: tokenIn, to: ADDR_WBNB, stable: false }, { from: ADDR_WBNB, to: tokenOut, stable: false }];
-            try { 
-                const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb); 
-                return { route: routeWbnb, amounts }; 
-            } catch (e) {}
-
+            try { const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb); return { route: routeWbnb, amounts }; } catch (e) {}
             throw new Error("No Liquidity or Price Impact too High");
         }
 
@@ -1242,42 +1271,33 @@ input[type=number] { -moz-appearance: textfield; }
             if(!provider) { document.getElementById('outAmt').placeholder = "Connect Wallet"; return; }
             
             clearTimeout(quoteTimeout);
-quoteTimeout = setTimeout(async () => {
-    try {
-        const router = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, provider);
-        const tokenIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
-        const tokenOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
-        const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
-        const outAbi = (tokenOut === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
-        const tokenContract = new ethers.Contract(tokenIn, inAbi, provider);
-        const outContract = new ethers.Contract(tokenOut, outAbi, provider);
-        const decimals = await tokenContract.decimals();
-        const outDecimals = await outContract.decimals();
-        const amountInWei = ethers.parseUnits(val.toString(), decimals);
-        const res = await getBestRoute(amountInWei, tokenIn, tokenOut, router);
-        
-        const amountOutWei = res.amounts[res.amounts.length - 1];
-        const rawAmtOut = parseFloat(ethers.formatUnits(amountOutWei, outDecimals));
-        
-        
-        const slipFactor = (100 - slippage) / 100;
-        const minReceived = rawAmtOut * slipFactor;
-        
-        document.getElementById('outAmt').value = minReceived.toFixed(6);
-
-        
-        const priceIn = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
-        document.getElementById('sUsd').innerText = fmtUSD(val * priceIn);
-        
-        const priceOut = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
-        document.getElementById('bUsd').innerText = fmtUSD(minReceived * priceOut);
-
-       
-        document.getElementById('rateTxt').innerText = `1 ${isBuy?'THESTRAT':'fBOMB'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'fBOMB':'THESTRAT'}`;
-        document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
-
-    } catch(e) { console.log(e); }
-}, 500);
+            quoteTimeout = setTimeout(async () => {
+                try {
+                    const router = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, provider);
+                    const tokenIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
+                    const tokenOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                    const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
+                    const outAbi = (tokenOut === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
+                    const tokenContract = new ethers.Contract(tokenIn, inAbi, provider);
+                    const outContract = new ethers.Contract(tokenOut, outAbi, provider);
+                    const decimals = await tokenContract.decimals();
+                    const outDecimals = await outContract.decimals();
+                    const amountInWei = ethers.parseUnits(val.toString(), decimals);
+                    const res = await getBestRoute(amountInWei, tokenIn, tokenOut, router);
+                    const amountOutWei = res.amounts[res.amounts.length - 1];
+                    const rawAmtOut = parseFloat(ethers.formatUnits(amountOutWei, outDecimals));
+                    const slipFactor = (100 - slippage) / 100;
+                    const minReceived = rawAmtOut * slipFactor;
+                    
+                    document.getElementById('outAmt').value = minReceived.toFixed(6);
+                    const priceIn = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
+                    document.getElementById('sUsd').innerText = fmtUSD(val * priceIn);
+                    const priceOut = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
+                    document.getElementById('bUsd').innerText = fmtUSD(minReceived * priceOut);
+                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'THESTRAT':'fBOMB'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'fBOMB':'THESTRAT'}`;
+                    document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
+                } catch(e) { console.log(e); }
+            }, 500);
         }
 
         document.getElementById('mainActionBtn').addEventListener('click', async () => {
@@ -1295,73 +1315,58 @@ quoteTimeout = setTimeout(async () => {
                 const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
                 const decimals = await tokenContract.decimals();
                 const amountInWei = ethers.parseUnits(val.toString(), decimals);
-                
                 const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
                 if(allowance < amountInWei) {
                     btn.innerText = "APPROVING...";
                     const txApp = await tokenContract.approve(ADDR_ROUTER, ethers.MaxUint256);
                     await txApp.wait();
                 }
-
                 btn.innerText = "SWAPPING...";
                 const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
                 const expectedOut = routeRes.amounts[routeRes.amounts.length-1];
-                
                 const minOut = (expectedOut * BigInt((100 - slippage)*100)) / 10000n;
                 const deadline = Math.floor(Date.now()/1000) + 600;
-
                 const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
                     amountInWei, minOut, routeRes.route, userAddr, deadline, { gasLimit: 500000 }
                 );
                 await tx.wait();
                 alert("Swap Successful: " + tx.hash);
-                
                 fetchSwapBalances();
                 calc();
-
             } catch(e) { 
                 console.error(e); 
-                if(e.message.includes("require(false)") || e.code === "CALL_EXCEPTION") {
-                    alert("Swap Failed: Please increase Slippage (try 2-5%) via the settings gear icon.");
-                } else {
-                    alert("Swap Failed: " + (e.reason || e.message)); 
-                }
+                if(e.message.includes("require(false)") || e.code === "CALL_EXCEPTION") alert("Swap Failed: Please increase Slippage.");
+                else alert("Swap Failed: " + (e.reason || e.message)); 
             }
             btn.innerText = "SWAP";
             btn.disabled = false;
         });
-		function toggleAds() {
-    document.body.classList.toggle('show-ads');
-    
-    const btn = document.getElementById('mobileInfoBtn');
-    if (document.body.classList.contains('show-ads')) {
-        btn.innerText = "X";
-        btn.style.color = "var(--accent-red)";
-        btn.style.borderColor = "var(--accent-red)"; 
-    } else {
-        btn.innerText = "?";
-        btn.style.color = "var(--text-sub)";
-        btn.style.borderColor = "var(--text-sub)";
-    }
-}
 
-document.addEventListener('click', function(e) {
-    if (document.body.classList.contains('show-ads')) {
-        if (!e.target.closest('#leftAdBox') && 
-            !e.target.closest('#rightBadgeBox') && 
-            !e.target.closest('#mobileInfoBtn')) {
-            toggleAds();
+        function toggleAds() {
+            document.body.classList.toggle('show-ads');
+            const btn = document.getElementById('mobileInfoBtn');
+            if (document.body.classList.contains('show-ads')) {
+                btn.innerText = "X";
+                btn.style.color = "var(--accent-red)";
+                btn.style.borderColor = "var(--accent-red)"; 
+            } else {
+                btn.innerText = "?";
+                btn.style.color = "var(--text-sub)";
+                btn.style.borderColor = "var(--text-sub)";
+            }
         }
-    }
-});
-function closeAd(id) {
-        document.getElementById(id).style.display = 'none';
-    }
+        document.addEventListener('click', function(e) {
+            if (document.body.classList.contains('show-ads')) {
+                if (!e.target.closest('#leftAdBox') && !e.target.closest('#rightBadgeBox') && !e.target.closest('#mobileInfoBtn')) toggleAds();
+            }
+        });
+        function closeAd(id) { document.getElementById(id).style.display = 'none'; }
         function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
         function fmtNum(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n); }
 
         init();
-    </script>	
+    </script>
+	
     <div id="leftAdBox" class="ad-box">
 <div class="close-btn" onclick="toggleAds()">X</div>
         
