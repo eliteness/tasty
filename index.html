@@ -160,19 +160,19 @@
 <body class="text-white antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-brand-primary selection:text-white">
 
     <header class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05010a]/90 backdrop-blur-xl">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <img src="thenastrat_token_logo_white_gradient.png" alt="Icon" class="h-10 w-10">
-                <span class="font-display font-bold text-2xl tracking-tight bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                    Thena Strategy
-                </span>
-            </div>
-            <button id="connectBtn" onclick="connectWallet()" 
-                class="px-6 py-2.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl font-bold text-sm shadow-lg shadow-purple-900/20 hover:scale-105 hover:shadow-purple-900/40 transition-all duration-300">
-                CONNECT WALLET
-            </button>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <img src="thenastrat_token_logo_white_gradient.png" alt="Icon" class="h-8 w-8 sm:h-10 sm:w-10">
+            <span class="font-display font-bold text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                Thena Strategy
+            </span>
         </div>
-    </header>
+        <button id="connectBtn" onclick="connectWallet()" 
+            class="px-4 py-2 sm:px-6 sm:py-2.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-purple-900/20 hover:scale-105 hover:shadow-purple-900/40 transition-all duration-300 whitespace-nowrap">
+            CONNECT WALLET
+        </button>
+    </div>
+</header>
 
     
     <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
@@ -505,8 +505,7 @@
         </div>
     </div>
 
-    <div id="leftAdBox" class="fixed bottom-5 left-5 w-64 bg-brand-card/90 backdrop-blur border border-brand-primary/20 rounded-2xl p-4 shadow-2xl z-40 transition-all hover:-translate-y-1">
-        <button class="absolute top-2 right-2 text-gray-500 hover:text-white text-xs" onclick="document.getElementById('leftAdBox').classList.add('hidden')">✕</button>
+<div id="leftAdBox" class="hidden sm:block fixed bottom-5 left-5 w-64 bg-brand-card/90 backdrop-blur border border-brand-primary/20 rounded-2xl p-4 shadow-2xl z-40 transition-all hover:-translate-y-1">        <button class="absolute top-2 right-2 text-gray-500 hover:text-white text-xs" onclick="document.getElementById('leftAdBox').classList.add('hidden')">✕</button>
         <div class="flex gap-3 items-center mb-3">
             <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-10 h-10 rounded-full bg-white/10">
             <div class="font-bold text-sm leading-tight text-white">Need<br>fBOMB?</div>
@@ -554,43 +553,46 @@
         let isQueryMode = false;
 
         function switchTab(t) {
-            const swapBtn = document.getElementById('tab-swap');
-            const dashBtn = document.getElementById('tab-dashboard');
-            const swapView = document.getElementById('swap-view');
-            const dashView = document.getElementById('dashboard-view');
-            
-            const activeClass = ['bg-brand-primary', 'text-white', 'shadow-lg'];
-            const inactiveClass = ['text-gray-400', 'hover:text-white'];
+    const swapBtn = document.getElementById('tab-swap');
+    const dashBtn = document.getElementById('tab-dashboard');
+    const swapView = document.getElementById('swap-view');
+    const dashView = document.getElementById('dashboard-view');
+    
+    const activeClass = ['bg-brand-primary', 'text-white', 'shadow-lg'];
+    const inactiveClass = ['text-gray-400', 'hover:text-white'];
 
-            if(t === 'swap') {
-                swapBtn.classList.add(...activeClass);
-                swapBtn.classList.remove(...inactiveClass);
-                dashBtn.classList.remove(...activeClass);
-                dashBtn.classList.add(...inactiveClass);
-                
-                swapView.classList.remove('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute');
-                swapView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
-                
-                dashView.classList.remove('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
-                dashView.classList.add('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute');
-            } else {
-                dashBtn.classList.add(...activeClass);
-                dashBtn.classList.remove(...inactiveClass);
-                swapBtn.classList.remove(...activeClass);
-                swapBtn.classList.add(...inactiveClass);
+    const removePosClasses = (el) => {
+        el.classList.remove('translate-x-[20px]', 'translate-x-[-20px]', 'translate-x-0', 'opacity-0', 'opacity-100', 'pointer-events-none', 'scale-95', 'scale-100', 'absolute', 'relative', 'z-0', 'z-10');
+    };
 
-                dashView.classList.remove('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute');
-                dashView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
-                
-                swapView.classList.remove('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
-                swapView.classList.add('opacity-0', 'translate-x-[-20px]', 'pointer-events-none', 'scale-95', 'absolute');
-                
-                updateDashboard();
-                fetchUserStats();
-                setTimeout(() => { if(chartInstance) renderPriceChart(); else renderPriceChart(); }, 300);
-            }
-        }
+    if(t === 'swap') {
+        swapBtn.classList.add(...activeClass);
+        swapBtn.classList.remove(...inactiveClass);
+        dashBtn.classList.remove(...activeClass);
+        dashBtn.classList.add(...inactiveClass);
+        
+        removePosClasses(swapView);
+        swapView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
+        
+        removePosClasses(dashView);
+        dashView.classList.add('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute', 'z-0');
+    } else {
+        dashBtn.classList.add(...activeClass);
+        dashBtn.classList.remove(...inactiveClass);
+        swapBtn.classList.remove(...activeClass);
+        swapBtn.classList.add(...inactiveClass);
 
+        removePosClasses(dashView);
+        dashView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
+        
+        removePosClasses(swapView);
+        swapView.classList.add('opacity-0', 'translate-x-[-20px]', 'pointer-events-none', 'scale-95', 'absolute', 'z-0');
+        
+        updateDashboard();
+        fetchUserStats();
+        setTimeout(() => { if(chartInstance) renderPriceChart(); else renderPriceChart(); }, 300);
+    }
+}
         function toggleSettings() { 
             const panel = document.getElementById('settingsPanel');
             const gear = document.getElementById('settingsGear');
