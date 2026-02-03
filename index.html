@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thena Strategy | Elite DeFi</title>
+    <title>Thena Strategy</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
@@ -207,14 +207,15 @@
                                 </button>
                             </div>
 
-                            <div id="settingsPanel" class="settings-container bg-black/40 rounded-xl border-white/5 border-0">
-                                <label class="text-[10px] text-gray-400 font-medium mb-2 block uppercase tracking-wide">Slippage Tolerance</label>
-                                <div class="flex gap-2">
-                                    <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(0.5)">0.5%</button>
-                                    <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(1.0)">1.0%</button>
-                                    <input type="number" id="customSlip" placeholder="Custom %" class="flex-1 bg-transparent border border-brand-border rounded-lg text-center text-xs text-white focus:outline-none focus:border-brand-secondary transition-colors" oninput="setCustomSlip()">
-                                </div>
-                            </div>
+                           <div id="settingsPanel" class="settings-container bg-black/40 rounded-xl border-white/5 border-0">
+    <label class="text-[10px] text-gray-400 font-medium mb-2 block uppercase tracking-wide">Slippage Tolerance</label>
+    <div class="flex gap-2">
+        <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(12.0)">12%</button>
+        <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(13.0)">13%</button>
+        
+        <input type="number" id="customSlip" placeholder="Custom %" class="flex-1 bg-transparent border border-brand-border rounded-lg text-center text-xs text-white focus:outline-none focus:border-brand-secondary transition-colors" oninput="setCustomSlip()">
+    </div>
+</div>
 <div class="input-box rounded-2xl p-3.5 mb-1 relative group">
     <div class="flex justify-between mb-2 text-xs">
         <span class="text-gray-400 font-medium ml-1">Sell</span>
@@ -260,15 +261,15 @@
 </div>                                                   
                             <div class="mt-6 space-y-2 px-2">
                                 <div class="flex justify-between text-xs font-medium">
-                                    <span class="text-gray-500">Slippage</span>
-                                    <span id="slipDisplay" class="text-white">0.5%</span>
-                                </div>
+        <span class="text-gray-500">Transfer Tax</span>
+        <span class="text-brand-accent font-bold">10%</span>
+    </div>
                                 <div class="flex justify-between text-xs font-medium">
                                     <span class="text-gray-500">Rate</span>
                                     <span id="rateTxt" class="text-white">---</span>
                                 </div>
                                 <div class="flex justify-between text-xs font-medium">
-                                    <span class="text-gray-500">Expected Output</span>
+                                    <span class="text-gray-500">Minimum Output</span>
                                     <span id="quoteTxt" class="text-white">---</span>
                                 </div>
                             </div>
@@ -543,7 +544,7 @@
         let provider, signer, userAddr;
         let pair = null;
         let isBuy = true; 
-        let slippage = 0.5;
+        let slippage = 12.0;
         let quoteTimeout = null;
         let chartInstance = null;
         let queryTimeout = null;
@@ -620,7 +621,6 @@
                     b.classList.add('border-brand-border');
                 }
             });
-            document.getElementById('slipDisplay').innerText = slippage + "%";
             calc(); 
         }
 
@@ -757,9 +757,12 @@
         }
 
         async function init() {
-            try {
-                if(!provider) provider = new ethers.JsonRpcProvider(BSC_RPC);
-                updateDashboard();
+    try {
+        if(!provider) provider = new ethers.JsonRpcProvider(BSC_RPC);
+        
+        updateSlipUI(); 
+        
+        updateDashboard();
             } catch(e) { console.log("Init RPC error:", e); }
 
             try {
@@ -1044,14 +1047,20 @@ function toggleAds() {
                     const res = await getBestRoute(amountInWei, tokenIn, tokenOut, router);
                     const amountOutWei = res.amounts[res.amounts.length - 1];
                     const rawAmtOut = parseFloat(ethers.formatUnits(amountOutWei, outDecimals));
-                    const slipFactor = (100 - slippage) / 100;
-                    const minReceived = rawAmtOut * slipFactor;
-                    
-                    document.getElementById('outAmt').value = minReceived.toFixed(6);
-                    const priceIn = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
-                    document.getElementById('sUsd').innerText = fmtUSD(val * priceIn);
-                    const priceOut = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
-                    document.getElementById('bUsd').innerText = fmtUSD(minReceived * priceOut);
+const slipFactor = (100 - slippage) / 100;
+const minReceived = rawAmtOut * slipFactor;
+
+document.getElementById('outAmt').value = minReceived.toFixed(6);
+
+document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
+
+document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'THESTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'THESTRAT':'fBOMB'}`;
+
+const priceIn = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
+document.getElementById('sUsd').innerText = fmtUSD(val * priceIn);
+
+const priceOut = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
+document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
                     document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'THESTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'THESTRAT':'fBOMB'}`;
                     document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
                 } catch(e) { console.log(e); }
