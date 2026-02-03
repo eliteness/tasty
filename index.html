@@ -196,7 +196,7 @@
                 <div class="flex flex-col lg:flex-row justify-center items-start gap-7 mx-auto">
                     
                   
-                    <div class="w-full lg:w-[450px] flex flex-col gap-4">
+                    <div class="w-full lg:w-[500px] flex flex-col gap-7">
                         
                         <div class="glass-panel rounded-[24px] p-4 sm:p-5 relative">
                             
@@ -274,7 +274,7 @@
                     </div>
 
                     
-                    <div class="w-full lg:w-[450px] flex flex-col gap-4">
+                    <div class="w-full lg:w-[500px] flex flex-col gap-7">
                         <div class="glass-panel rounded-[24px] p-5 sm:p-6 h-full flex flex-col justify-between">
                             
                             <div>
@@ -308,7 +308,8 @@
                                     </div>
                                     
                                     <div class="flex flex-col gap-3">
-                                        <div class="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col gap-2">
+                                        <!-- THESTRAT Card: Changed bg-white/5 to bg-[#0a0510] -->
+                                        <div class="bg-[#0a0510] rounded-xl p-3 border border-white/5 flex flex-col gap-2">
                                             <div class="flex justify-between items-center">
                                                 <div class="flex items-center gap-2">
                                                     <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5">
@@ -321,7 +322,8 @@
                                             </div>
                                         </div>
 
-                                        <div class="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col gap-2">
+                                        <!-- fBOMB Card: Changed bg-white/5 to bg-[#0a0510] -->
+                                        <div class="bg-[#0a0510] rounded-xl p-3 border border-white/5 flex flex-col gap-2">
                                             <div class="flex justify-between items-center">
                                                 <div class="flex items-center gap-2">
                                                     <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-5 h-5">
@@ -423,33 +425,50 @@
                             </div>
                         </div>
 
-                        <div class="glass-panel rounded-[24px] p-5 sm:p-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">User Holdings</span>
-                                <span id="statusBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-400 font-medium border border-white/10">Not Connected</span>
-                            </div>
+                       <div class="glass-panel rounded-[24px] p-5 sm:p-6">
+    <div class="flex justify-between items-center mb-4">
+        <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">User Holdings</span>
+        <span id="statusBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-400 font-medium border border-white/10">Not Connected</span>
+    </div>
 
-                            <div class="bg-black/30 p-1 rounded-lg flex gap-1 mb-4">
-                                <button id="tabWallet" onclick="setQueryMode(false)" class="flex-1 py-1.5 text-xs font-semibold rounded-md bg-brand-primary text-white shadow-sm transition-all">My Wallet</button>
-                                <button id="tabQuery" onclick="setQueryMode(true)" class="flex-1 py-1.5 text-xs font-semibold rounded-md text-gray-400 hover:text-white hover:bg-white/5 transition-all">Query Mode</button>
-                            </div>
+    <!-- Toggle Tabs -->
+    <div class="bg-black/30 p-1 rounded-lg flex gap-1 mb-4">
+        <button id="tabWallet" onclick="setQueryMode(false)" class="flex-1 py-1.5 text-xs font-semibold rounded-md bg-brand-primary text-white shadow-sm transition-all">My Wallet</button>
+        <button id="tabQuery" onclick="setQueryMode(true)" class="flex-1 py-1.5 text-xs font-semibold rounded-md text-gray-400 hover:text-white hover:bg-white/5 transition-all">Query Mode</button>
+    </div>
 
-                            <div id="queryWrap" class="relative mb-4 hidden animate-fade-in-up">
-                                <svg class="absolute left-3 top-3 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                                <input type="text" id="queryInput" placeholder="Search 0xAddress..." oninput="handleQuery()" class="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-xs font-mono text-white focus:border-brand-secondary focus:outline-none transition-colors">
-                            </div>
+    <!-- Query Input (Hidden by default) -->
+    <div id="queryWrap" class="relative mb-4 hidden animate-fade-in-up">
+        <svg class="absolute left-3 top-3 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="queryInput" placeholder="Search 0xAddress..." oninput="handleQuery()" class="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-xs font-mono text-white focus:border-brand-secondary focus:outline-none transition-colors">
+    </div>
 
-                            <div id="balanceLabel" class="text-xs text-gray-500 mb-1">Balance</div>
-                            <div class="flex items-baseline gap-2 mb-4">
-                                <span id="userWallet" class="text-2xl sm:text-3xl font-display font-bold text-white">0.00</span>
-                                <span class="text-sm font-bold text-brand-secondary">THESTRAT</span>
-                            </div>
+    <!-- CENTERED BALANCES SECTION -->
+    <div class="flex flex-col gap-6 my-4">
+        
+        <!-- THESTRAT Balance -->
+        <div class="flex flex-col items-center justify-center">
+            <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">THESTRAT Balance</div>
+            <div class="flex items-center gap-3">
+                <span id="userWallet" class="text-4xl font-display font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(142,36,170,0.5)]">0.00</span>
+                <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2 py-1 rounded-lg">
+                    <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5 rounded-full">
+                    <span class="text-[10px] font-bold text-brand-secondary">THESTRAT</span>
+                </div>
+            </div>
+        </div>
 
-                            <button onclick="copyAddress()" class="w-full flex items-center justify-between px-4 py-3 bg-white/5 border border-dashed border-white/20 rounded-xl hover:bg-brand-primary/20 hover:border-brand-primary/50 hover:text-white text-gray-400 transition-all group">
-                                <span id="userAddrDisplay" class="font-mono text-xs">0x...</span>
-                                <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            </button>
-                        </div>
+        <!-- Decorative Divider -->
+        <div class="w-2/3 mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+       
+    </div>
+
+    <!-- Copy Address Button -->
+    <button onclick="copyAddress()" class="w-full mt-2 flex items-center justify-between px-4 py-3 bg-white/5 border border-dashed border-white/20 rounded-xl hover:bg-brand-primary/20 hover:border-brand-primary/50 hover:text-white text-gray-400 transition-all group">
+        <span id="userAddrDisplay" class="font-mono text-xs">0x...</span>
+        <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </button>
+</div>
                     </div>
                 </div>
             </div>
@@ -858,25 +877,41 @@
             });
         }
 
-        async function fetchUserStats() {
+       async function fetchUserStats() {
             if(!provider) return;
             let targetAddr = userAddr;
+            
             if(isQueryMode) {
                 const inputVal = document.getElementById('queryInput').value;
-                if(ethers.isAddress(inputVal)) targetAddr = inputVal;
-                else { document.getElementById('userWallet').innerText = "---"; return; }
-            } else { if(!userAddr) return; }
+                if(ethers.isAddress(inputVal)) {
+                    targetAddr = inputVal;
+                } else { 
+                    document.getElementById('userWallet').innerText = "---"; 
+                    document.getElementById('userEthena').innerText = "---"; 
+                    return; 
+                }
+            } else { 
+                if(!userAddr) return; 
+            }
+
             try {
                 const tokenContract = new ethers.Contract(ADDR_THESTRAT, MINIMAL_STRAT_ABI, provider);
                 const walletWei = await tokenContract.balanceOf(targetAddr);
                 document.getElementById('userWallet').innerText = parseFloat(ethers.formatUnits(walletWei, 18)).toFixed(2);
+
+                const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
+                const ethenaWei = await ethenaContract.balanceOf(targetAddr);
+                const ethenaEl = document.getElementById('userEthena');
+                if(ethenaEl) {
+                    ethenaEl.innerText = parseFloat(ethers.formatUnits(ethenaWei, 18)).toFixed(2);
+                }
+
             } catch(e) { console.log("User stats error", e); }
         }
 
         async function fetchSwapBalances() {
             if(!userAddr || !provider) return;
             try {
-                // Determine tokens based on current isBuy state
                 const tIn = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
                 const tOut = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
                 const cIn = new ethers.Contract(tIn, MINIMAL_STRAT_ABI, provider);
