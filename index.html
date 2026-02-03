@@ -1,1172 +1,606 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thena Strategy</title>
+    <title>Thena Strategy | Elite DeFi</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Courier Prime', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#05010a',
+                            card: '#12081f',
+                            border: '#2d1b4e',
+                            primary: '#8E24AA',
+                            secondary: '#AB47BC',
+                            accent: '#d946ef',
+                        },
+                        success: '#00E676',
+                        danger: '#FF1744',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '.5' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap');
-
-:root { 
-    --bg-body: #FFFFFF; 
-    --bg-card: #FFFFFF;
-    --bg-panel: #f0f0f0;
-    --text-main: #000000; 
-    --text-sub: #555555;
-    --border: #000000;
-    --accent-green: #00aa00;
-    --accent-red: #cc0000;
-    --chart-grid: #f0f0f0;
-}
-
-[data-theme="dark"] {
-    --bg-body: #111111; 
-    --bg-card: #1a1a1a;
-    --bg-panel: #2a2a2a;
-    --text-main: #ffffff; 
-    --text-sub: #aaaaaa;
-    --border: #555555;
-    --accent-green: #00e599;
-    --accent-red: #ff4444;
-    --chart-grid: #333333;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s, color 0.3s, border-color 0.3s; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-
-.header-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: transparent; }
-.logo-container { display: flex; align-items: center; gap: 15px; }
-.top-logo { height: 50px; width: auto; display: block; }
-[data-theme="dark"] .top-logo { filter: invert(1); }
-.logo-text { font-family: 'Merriweather', serif; font-weight: 900; font-size: 24px; letter-spacing: 1px; line-height: 1; margin-top: 4px; }
-.header-right { display: flex; gap: 15px; align-items: center; }
-
-.theme-btn {
-    background: var(--bg-card); border: 2px solid var(--border); color: var(--text-main);
-    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: 0.2s; flex-shrink: 0;
-}
-.theme-btn:hover { background: var(--text-main); color: var(--bg-body); }
-
-.connect-btn { 
-    background: var(--bg-card); color: var(--text-main); padding: 10px 24px; border: 2px solid var(--border); 
-    font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; transition: 0.2s;
-    display: flex; align-items: center; justify-content: center; white-space: nowrap;
-}
-.connect-btn:hover { background: var(--text-main); color: var(--bg-body); transform: translateY(-2px); box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
-
-.tab-container { display: flex; justify-content: center; gap: 0; margin-top: 20px; border-bottom: 2px solid var(--border); width: fit-content; margin: 20px auto 40px auto; }
-.tab-btn { background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border); border-bottom: none; padding: 10px 40px; font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 14px; margin: 0 5px; position: relative; top: 2px; transition: background 0.2s; }
-.tab-btn:hover { background: var(--bg-panel); }
-.tab-btn.active { background: var(--text-main); color: var(--bg-body); border-color: var(--border); }
-
-.main-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; flex: 1; }
-.view-section { display: none; }
-.view-section.active { display: block; }
-
-.swap-view-grid { display: flex; justify-content: center; align-items: flex-start; gap: 50px; flex-wrap: wrap; }
-.swap-column { flex: 1; max-width: 450px; min-width: 320px; }
-.swap-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.swap-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; }
-.settings-icon { cursor: pointer; width: 24px; height: 24px; transition: transform 0.3s ease; }
-.settings-icon:hover { transform: rotate(90deg); }
-
-[data-theme="dark"] .token-icon[src*="thenastrat"] { filter: invert(1); }
-input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input[type=number] { -moz-appearance: textfield; }
-
-.settings-panel { background: var(--bg-panel); border: 2px solid var(--border); padding: 15px; margin-bottom: 15px; display: none; }
-.settings-panel.open { display: block; }
-.slip-label { font-family: 'Courier Prime', monospace; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
-.slip-options { display: flex; gap: 8px; }
-.slip-btn { flex: 1; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); font-family: 'Courier Prime', monospace; font-size: 12px; padding: 6px; cursor: pointer; }
-.slip-btn.active { background: var(--text-main); color: var(--bg-body); }
-.slip-input { width: 60px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 6px; font-family: 'Courier Prime', monospace; font-size: 12px; text-align: center; }
-
-.trade-box { background: var(--bg-card); border: 2px solid var(--border); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 160px; position: relative; margin-bottom: 10px; }
-.trade-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.trade-label { font-family: 'Courier Prime', monospace; font-size: 14px; }
-.balance-display { font-family: 'Courier Prime', monospace; font-size: 11px; color: var(--text-sub); display: flex; gap: 5px; align-items: center; }
-
-.toast-container {
-    position: fixed;
-    /* Moved down from 20px to 80px to avoid covering the Connect button */
-    top: 80px; 
-    right: 20px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-
-.cube-loader {
-    
-    display: block;         
-    text-align: center;     
-    width: 100%;
-    height: 40px;
-    margin: 10px auto 25px auto;
-}
-
-.cube {
-    display: inline-block; 
-    vertical-align: middle; 
-    width: 12px;
-    height: 12px;
-    margin: 0 5px;          
-    background-color: var(--text-main);
-    animation: cube-wave 1.2s infinite ease-in-out;
-    border-radius: 0;
-}
-
-.cube1 { animation-delay: -1.2s; }
-.cube2 { animation-delay: -1.1s; }
-.cube3 { animation-delay: -1.0s; }
-.cube4 { animation-delay: -0.9s; }
-
-@keyframes cube-wave {
-    0%, 40%, 100% { 
-        transform: scaleY(0.4); 
-        opacity: 0.5;
-    }
-    20% { 
-        transform: scaleY(1.2); 
-        opacity: 1;
-    }
-}
-[data-theme="dark"] .modal-token-icon[src*="thenastrat"] { 
-    filter: invert(1) !important;       
-    background: transparent !important; 
-    border: 1px solid #aaaaaa;          
-}
-.modal-token-icon {
-    width: 60px; 
-    height: 60px;
-    border-radius: 50%;
-  
-    border: 2px solid var(--border);
-    background: var(--bg-panel);
-    object-fit: contain; /* Ensures the logo fits nicely inside */
-}
-
-[data-theme="dark"] .modal-token-icon[src*="thenastrat"] { 
-    filter: invert(1); 
-}
-
-.loader-spinner { display: none; }
-
-
-.custom-toast {
-    background: var(--bg-card);
-    border: 2px solid var(--border);
-    padding: 15px 20px;
-    min-width: 280px;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transform: translateX(120%);
-    transition: transform 0.3s ease;
-    font-family: 'Courier Prime', monospace;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.custom-toast.show { transform: translateX(0); }
-.custom-toast.success { border-left: 5px solid var(--accent-green); }
-.custom-toast.error { border-left: 5px solid var(--accent-red); }
-.custom-toast.info { border-left: 5px solid var(--text-main); }
-
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    z-index: 10000;
-    display: none;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-overlay.active { display: flex; }
-
-.modal-box {
-    background: var(--bg-card);
-    border: 2px solid var(--border);
-    padding: 30px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    position: relative;
-    box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
-}
-
-.modal-logos {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 25px;
-}
-
-.modal-token-icon {
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    background: var(--bg-panel);
-    object-fit: cover;
-}
-
-.modal-arrow-anim {
-    width: 24px; height: 24px;
-    animation: pulseArrow 1.5s infinite;
-}
-
-@keyframes pulseArrow {
-    0% { transform: translateX(0); opacity: 0.5; }
-    50% { transform: translateX(5px); opacity: 1; }
-    100% { transform: translateX(0); opacity: 0.5; }
-}
-
-.loader-spinner {
-    width: 40px; height: 40px;
-    border: 4px solid var(--bg-panel);
-    border-top: 4px solid var(--text-main);
-    border-radius: 50%;
-    margin: 0 auto 20px auto;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-.modal-status {
-    font-family: 'Merriweather', serif;
-    font-weight: 900;
-    font-size: 20px;
-    margin-bottom: 8px;
-}
-
-.modal-sub {
-    font-family: 'Courier Prime', monospace;
-    font-size: 12px;
-    color: var(--text-sub);
-}
-
-.modal-close {
-    margin-top: 20px;
-    background: var(--text-main);
-    color: var(--bg-body);
-    border: none;
-    padding: 10px 20px;
-    font-family: 'Courier Prime', monospace;
-    font-weight: 700;
-    cursor: pointer;
-    display: none; /* Hidden by default */
-}
-
-/* Success Animation in Modal */
-.success-checkmark {
-    width: 50px; height: 50px; margin: 0 auto 20px auto;
-    color: var(--accent-green);
-    display: none;
-}
-.error-x {
-    width: 50px; height: 50px; margin: 0 auto 20px auto;
-    color: var(--accent-red);
-    display: none;
-}
-.max-btn {
-    background: transparent; 
-    border: 1px solid var(--text-main); 
-    color: var(--text-main);
-    padding: 2px 6px;
-    cursor: pointer;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-left: 6px;
-    transition: all 0.2s ease;
-}
-.max-btn:hover {
-    background: var(--text-main);
-    color: var(--bg-body);
-    transform: translateY(-1px);
-}
-
-.trade-content { display: flex; justify-content: space-between; align-items: center; }
-.token-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.token-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); }
-.token-symbol { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
-.token-name { font-family: 'Courier Prime', monospace; font-size: 11px; color: var(--text-sub); }
-
-.input-amount { width: 100%; border: none; background: transparent; color: var(--text-main); font-family: 'Merriweather', serif; font-size: 24px; font-weight: 900; text-align: right; outline: none; padding: 0; }
-.usd-value { font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--text-sub); text-align: right; margin-top: 4px; }
-.arrow-wrapper { position: relative; height: 20px; margin-bottom: 10px; }
-.swap-arrow-btn { width: 36px; height: 36px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 5; transition: transform 0.2s; }
-.swap-arrow-btn:hover { background: var(--text-main); color: var(--bg-body); transform: translate(-50%, -50%) rotate(180deg); }
-.receipt-area { font-family: 'Courier Prime', monospace; font-size: 11px; margin: 15px 0; border-top: 1px dashed var(--border); padding-top: 10px; }
-.receipt-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-
-.action-btn { width: 100%; background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border); padding: 16px; font-family: 'Merriweather', serif; font-weight: 900; font-size: 16px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
-.action-btn:hover { background: var(--text-main); color: var(--bg-body); }
-.action-btn:disabled { background: #ccc !important; cursor: not-allowed; }
-
-.summary-column { flex: 1; max-width: 450px; min-width: 320px; }
-.info-card { border: 2px solid var(--border); background: var(--bg-card); padding: 30px; }
-.info-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
-.pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 22px; }
-.date-label { font-family: 'Courier Prime', monospace; font-size: 11px; margin-top: 6px; }
-.price-large { font-family: 'Merriweather', serif; font-weight: 900; font-size: 42px; text-align: right; line-height: 1; }
-.price-change { font-family: 'Courier Prime', monospace; font-size: 16px; text-align: right; color: var(--accent-green); margin-top: 8px; font-weight: bold; }
-.mini-grid { display: flex; gap: 15px; margin-bottom: 25px; }
-.mini-box { border: 1px solid var(--border); padding: 15px; flex: 1; }
-.mini-label { font-family: 'Courier Prime', monospace; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
-.mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
-.dashed-line { border-top: 1px dashed var(--border); margin: 25px 0; }
-.comp-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; }
-.comp-row { margin-bottom: 16px; }
-.comp-text { display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
-.comp-bar { width: 100%; height: 16px; border: 1px solid var(--border); background: var(--bg-card); padding: 2px; }
-.comp-fill { height: 100%; background: var(--text-main); width: 0%; transition: width 1s; }
-.comp-fill.striped { background: repeating-linear-gradient(45deg, var(--text-main), var(--text-main) 2px, var(--bg-card) 2px, var(--bg-card) 6px); }
-
-.dash-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-.dash-col-left { display: flex; flex-direction: column; gap: 20px; }
-.dash-col-right { display: flex; flex-direction: column; gap: 20px; }
-.chart-card { border: 2px solid var(--border); background: var(--bg-card); padding: 20px; height: 400px; display: flex; flex-direction: column; }
-.chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 15px; }
-.chart-title-group h2 { font-family: 'Merriweather', serif; font-weight: 900; font-size: 24px; margin-bottom: 5px; }
-.chart-subtitle { font-family: 'Courier Prime', monospace; font-size: 11px; text-transform: uppercase; }
-.chart-price-display { text-align: right; }
-.cp-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 32px; }
-.cp-change { font-family: 'Courier Prime', monospace; font-weight: 700; color: var(--accent-red); }
-.canvas-container { flex: 1; position: relative; width: 100%; }
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-.stat-card { background: var(--bg-card); border: 2px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 110px; }
-.stat-lbl { font-family: 'Courier Prime', monospace; font-size: 13px; letter-spacing: 1px; color: var(--text-sub); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
-.stat-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 28px; color: var(--text-main); line-height: 1; }
-
-.dash-card { border: 2px solid var(--border); background: var(--bg-card); padding: 25px; }
-.dash-card-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; margin-bottom: 5px; }
-.dash-card-sub { font-family: 'Courier Prime', monospace; font-size: 11px; color: #666; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px dashed #ccc; }
-.dash-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; }
-.dash-row:last-child { border-bottom: none; }
-.d-lbl { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 13px; }
-.d-sub { font-size: 10px; color: #888; margin-top: 2px; font-family: 'Inter', sans-serif; }
-.d-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; text-align: right; }
-.d-unit { font-size: 12px; font-weight: 400; color: #555; margin-left: 3px; }
-
-.user-profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.user-status { font-family: 'Courier Prime', monospace; font-size: 10px; text-transform: uppercase; background: var(--text-main); color: var(--bg-body); padding: 3px 6px; border-radius: 2px; }
-.user-status.disconnected { background: #ccc; color: #555; }
-.query-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border); }
-.query-toggle { display: flex; align-items: center; gap: 8px; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; cursor: pointer; user-select: none; }
-.query-toggle input { cursor: pointer; width: 14px; height: 14px; accent-color: var(--text-main); }
-.query-input-wrap { display: none; margin-top: 10px; }
-.query-input-wrap.show { display: block; }
-.query-field { width: 100%; padding: 8px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); font-family: 'Courier Prime', monospace; font-size: 12px; outline: none; }
-.user-balance-section { text-align: center; padding: 10px 0 20px 0; }
-.user-balance-lbl { font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--text-sub); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; }
-.user-balance-big { font-family: 'Merriweather', serif; font-weight: 900; font-size: 25px; line-height: 1; }
-.user-balance-sym { font-size: 16px; color: var(--text-main); font-weight: 700; margin-left: 4px; }
-.address-box { background: var(--bg-card); border: 1px solid var(--border); padding: 12px; display: flex; justify-content: space-between; align-items: center; font-family: 'Courier Prime', monospace; font-size: 12px; margin-top: 5px; cursor: pointer; transition: 0.2s; overflow: hidden; }
-.address-box:hover { background: var(--text-main); color: var(--bg-body); }
-.copy-icon { width: 14px; height: 14px; flex-shrink: 0; }
-
-
-.socials-row { 
-    padding: 120px 0 15px 0; 
-    
-    display: flex; 
-    justify-content: center; 
-    gap: 50px; 
-    align-items: center; 
-}
-
-.social-link { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center;
-    text-decoration: none; 
-    color: var(--text-main); 
-    
-    width: auto; 
-    height: auto; 
-    border: none;
-    background: transparent;
-    transition: transform 0.2s; 
-}
-
-.social-link:hover { 
-    transform: translateY(-3px); 
-    opacity: 0.8;
-}
-
-.social-icon {
-    margin-bottom: 10px;
-}
-
-.social-icon svg { 
-    width: 34px;   
-    height: 34px;  
-    fill: currentColor; 
-    display: block; 
-}
-
-.social-text { 
-    display: block; 
-    font-family: 'Courier Prime', monospace; 
-    font-size: 12px; 
-    font-weight: 700; 
-    text-transform: uppercase; 
-    letter-spacing: 1px;
-    line-height: 1;
-}
-
-.built-on-row { 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    gap: 10px; 
-    
-    padding: 5px 0 40px 0; 
-    
-    opacity: 0.8; 
-    transition: opacity 0.3s; 
-}
-.thena-icon-sm { width: 20px; height: 20px; display: block; }
-.built-text { font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-
-.close-btn {
-    position: absolute;
-    top: -8px; 
-    left: -8px; 
-    width: 20px;
-    height: 20px;
-    background: var(--bg-card);
-    border: 2px solid var(--border);
-    color: var(--text-main);
-    font-family: 'Courier Prime', monospace;
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 1;
-    cursor: pointer;
-    display: none; 
-    align-items: center;
-    justify-content: center;
-    z-index: 1001;
-    box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
-}
-.close-btn:hover { background: var(--accent-red); color: white; }
-
-@media (max-width: 768px) {
-    .close-btn { display: flex; } 
-}
-
-.float-badge {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-    background-color: var(--bg-card); 
-    border: 2px solid var(--border);
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.1); 
-    color: var(--text-main);
-    text-decoration: none;
-    display: block; 
-    padding: 0; 
-    overflow: visible; 
-    transition: transform 0.2s;
-}
-.float-badge:hover { transform: translateY(-2px); }
-
-.float-badge-inner {
-    position: relative;
-    overflow: hidden; 
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 18px;
-    width: 100%;
-    height: 100%;
-}
-
-.float-icon { width: 32px; height: 32px; object-fit: contain; z-index: 2; position: relative; }
-.float-watermark {
-    position: absolute; right: -10px; bottom: -15px; width: 80px;
-    opacity: 0.1; z-index: 0; pointer-events: none; filter: grayscale(100%);
-}
-.float-content { display: flex; flex-direction: column; z-index: 2; position: relative; }
-.float-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 13px; color: var(--text-main); }
-.float-sub { font-family: 'Courier Prime', monospace; font-size: 9px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; }
-
-.ad-box {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: var(--bg-card);
-    border: 2px solid var(--border);
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
-    z-index: 999;
-    display: flex;
-    flex-direction: column;
-    width: 180px;
-    transition: transform 0.2s;
-}
-.ad-box:hover { transform: translateY(-2px); }
-
-.ad-crop-zone {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    overflow: hidden; 
-    pointer-events: none;
-    z-index: 0;
-}
-.ad-watermark {
-    position: absolute; right: -20px; top: -10px; width: 100px;
-    opacity: 0.08; filter: grayscale(100%); 
-}
-
-.ad-body {
-    padding: 20px 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    position: relative;
-    z-index: 10; 
-    overflow: visible; 
-}
-
-.ad-main-icon {
-    width: 48px; height: 48px; border-radius: 50%;
-    border: 2px solid var(--border); background: var(--bg-card);
-    object-fit: cover;
-}
-.ad-title {
-    font-family: 'Merriweather', serif; font-weight: 900; font-size: 13px;
-    margin-top: 10px; line-height: 1.2;
-}
-
-.ad-dropdown { position: relative; display: inline-block; margin-top: 8px; width: 100%; }
-.ad-drop-btn {
-    font-family: 'Courier Prime', monospace; font-size: 10px;
-    background: var(--text-main); color: var(--bg-body);
-    font-weight: 700; text-transform: uppercase;
-    border: 1px solid var(--text-main); padding: 8px 12px;
-    cursor: pointer; width: 100%; display: flex; justify-content: space-between; align-items: center;
-}
-.ad-drop-content {
-    display: none; position: absolute; top: 100%; left: 0;
-    background-color: var(--bg-card); border: 2px solid var(--border);
-    min-width: 100%; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); z-index: 100;
-}
-.ad-drop-content a {
-    color: var(--text-main); padding: 8px 12px; text-decoration: none;
-    display: block; font-family: 'Courier Prime', monospace;
-    font-size: 9px; font-weight: 700; text-transform: uppercase;
-    border-bottom: 1px dashed var(--border); text-align: left;
-}
-.ad-drop-content a:last-child { border-bottom: none; }
-.ad-drop-content a:hover { background-color: var(--bg-panel); }
-.ad-dropdown:hover .ad-drop-content { display: block; }
-
-.ad-footer {
-    padding: 8px 12px;
-    background: var(--bg-panel);
-    border-top: 2px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    text-decoration: none;
-    position: relative; z-index: 2;
-}
-.ad-footer-lbl {
-    font-family: 'Courier Prime', monospace; font-size: 9px;
-    color: var(--text-sub); font-weight: 700;
-}
-
-.mclb-logo {
-    height: 20px; width: auto; display: block;
-    filter: brightness(0) grayscale(100%); opacity: 0.8; transition: transform 0.2s;
-}
-[data-theme="dark"] .mclb-logo { filter: brightness(0) invert(1); opacity: 1; }
-.ad-footer:hover .mclb-logo { transform: scale(1.1); opacity: 1; }
-
-@media (max-width: 1024px) {
-    .dash-layout { grid-template-columns: 1fr; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); } 
-}
-@media (max-width: 768px) {
-    .header-row { padding: 10px 20px; flex-direction: row; justify-content: space-between; align-items: center; gap: 0; }
-    .logo-container { flex-direction: column; align-items: flex-start; align-items: center; gap: 2px; margin-bottom: 0; }
-    .top-logo { height: 45px; width: auto; }
-    .logo-text { font-size: 15px; font-family: 'Courier Prime', monospace; text-transform: uppercase; margin-top: 0; line-height: 1.2; }
-    .header-right { width: auto; justify-content: flex-end; gap: 5px; }
-    .connect-btn { padding: 10px 14px; font-size: 20px; height: 50px; }
-    .theme-btn { width: 40px; height: 50px; }
-    .tab-container { width: 100%; display: flex; padding: 0 10px; }
-    .tab-btn { flex: 1; padding: 10px 0; font-size: 13px; text-align: center; }
-    .swap-view-grid { gap: 20px; }
-    .swap-column, .summary-column { min-width: 100%; max-width: 100%; }
-    .stats-grid { gap: 10px; }
-    .chart-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .chart-price-display { text-align: left; width: 100%; display: flex; justify-content: space-between; align-items: baseline; }
-    
-    .ad-box { display: flex; transform: scale(0.85); transform-origin: bottom left; left: 10px; bottom: 10px; }
-    .float-badge { transform: scale(0.85); transform-origin: bottom right; right: 10px; bottom: 10px; }
-}
-@media (max-width: 480px) {
-    .connect-btn { padding: 6px 10px; font-size: 10px; height: 34px; }
-    .theme-btn { width: 34px; height: 34px; }
-    .trade-box { padding: 15px; height: auto; gap: 15px; }
-    .trade-content { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .trade-content > div:last-child { width: 100% !important; text-align: left !important; }
-    .input-amount { text-align: left; font-size: 24px; margin-top: 5px; }
-    .usd-value { text-align: left; }
-    .swap-arrow-btn { width: 30px; height: 30px; }
-    .info-card { padding: 20px; }
-    .price-large { font-size: 32px; }
-    .mini-grid { flex-direction: column; gap: 10px; }
-    .stat-val { font-size: 22px; }
-    .cp-val { font-size: 24px; }
-    .chart-title-group h2 { font-size: 18px; }
-    .user-balance-big { font-size: 28px; }
-    .socials-row { gap: 20px; }
-}
-
-
-#mobileInfoBtn { 
-    display: none; 
-}
-
-@media (max-width: 768px) {
-    #leftAdBox, #rightBadgeBox { 
-        display: none !important; 
-    }
-
-    #mobileInfoBtn.show-btn {
-        display: flex !important; 
-        justify-content: center; 
-        align-items: center;
-        width: 20px; 
-        height: 20px;
-        background: transparent; 
-        color: var(--text-sub);
-        border: 1.5px solid var(--text-sub); 
-        border-radius: 50%;
-        font-family: 'Merriweather', serif; 
-        font-weight: 700; 
-        font-size: 12px;
-        line-height: 1;
-        cursor: pointer;
-        margin-left: 8px; 
-        transition: transform 0.2s;
-    }
-    #mobileInfoBtn.show-btn:active { transform: scale(0.9); }
-
-    body.show-ads #leftAdBox {
-        display: flex !important;
-        position: fixed;
-        top: 45%; 
-        left: 50%;
-        bottom: auto; 
-        transform: translate(-50%, -50%); 
-        z-index: 2010;
-        width: 280px; 
-        box-shadow: 0 0 25px rgba(0,0,0,0.5); 
-    }
-
-    body.show-ads::before {
-        content: '';
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.85); 
-        z-index: 2009;
-        backdrop-filter: blur(4px);
-    }
-
-    body.show-ads #leftAdBox {
-        display: flex !important;
-        flex-direction: column;
-        justify-content: space-between;
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw;
-        height: 100vh;
-        transform: none !important;
-        border: none;
-        border-radius: 0;
-        max-width: none;
-        z-index: 2020;
-        background: var(--bg-card);
-        padding: 0;
-    }
-
-    body.show-ads #leftAdBox .ad-body {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        max-width: 400px; 
-        margin: 0 auto;
-        padding: 0 30px;
-        position: relative; 
-        z-index: 10;
-    }
-
-    body.show-ads .ad-main-icon {
-        width: 100px; height: 100px; margin-bottom: 25px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    body.show-ads .ad-title {
-        font-size: 24px; margin-bottom: 30px; line-height: 1.4;
-    }
-    body.show-ads .ad-drop-btn {
-        padding: 18px 25px; font-size: 16px; letter-spacing: 1px;
-    }
-    body.show-ads .ad-drop-content a {
-        padding: 15px 20px; font-size: 14px;
-    }
-
-    body.show-ads .ad-crop-zone {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        overflow: hidden; pointer-events: none; z-index: 0;
-    }
-    body.show-ads .ad-watermark {
-        position: absolute; top: 50%; left: 50%;
-        width: 100vw; height: auto; max-width: none;
-        transform: translate(-50%, -50%); opacity: 0.1; 
-    }
-
-    body.show-ads #leftAdBox .close-btn {
-        position: absolute; top: 25px; right: 25px; left: auto;
-        width: 50px; height: 50px; font-size: 24px;
-        background: var(--bg-panel); border: 2px solid var(--border); z-index: 2025;
-    }
-
-    body.show-ads #leftAdBox .ad-footer {
-        width: 100%; padding: 30px;
-        background: var(--bg-panel); border-top: 2px solid var(--border);
-        display: flex; justify-content: space-between; align-items: center; z-index: 20;
-    }
-    body.show-ads .ad-footer-lbl { font-size: 18px !important; font-weight: 900; }
-    body.show-ads .mclb-logo { height: 40px !important; width: auto; }
-}
-
+        body {
+            background-color: #05010a;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(142, 36, 170, 0.1), transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(217, 70, 239, 0.05), transparent 40%);
+            background-attachment: fixed;
+        }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .glass-panel {
+            background: rgba(18, 8, 31, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .input-box {
+            background: #0a0510;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .input-box:focus-within {
+            background: #0f0518;
+            border-color: #8E24AA;
+        }
+
+        .settings-container {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 0;
+        }
+        .settings-container.open {
+            max-height: 120px;
+            opacity: 1;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-width: 1px;
+        }
+        .rotate-gear {
+            transition: transform 0.4s ease;
+        }
+        .rotate-gear.active {
+            transform: rotate(90deg);
+        }
+
+        .route-path-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+        .route-line-bg {
+            position: absolute;
+            left: 20px; right: 20px; top: 50%;
+            height: 2px;
+            background: #2d1b4e;
+            z-index: 0;
+        }
+        .route-line-active {
+            position: absolute;
+            left: 20px; right: 20px; top: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, #8E24AA, #d946ef);
+            box-shadow: 0 0 10px rgba(217, 70, 239, 0.5);
+            z-index: 0;
+            opacity: 0.8;
+        }
+        .route-dot {
+            position: relative;
+            z-index: 10;
+            background: #12081f;
+            border: 1px solid #8E24AA;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(142, 36, 170, 0.3);
+        }
+        .route-pill {
+            position: relative;
+            z-index: 10;
+            background: #05010a;
+            border: 1px solid #373a45;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #d946ef;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #05010a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
-<body>
+<body class="text-white antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-brand-primary selection:text-white">
 
-    <div class="header-row">
-        <div class="logo-container">
-            <img src="thenastrat_token_logo_black.png" alt="THESTRAT" class="top-logo">
-            <span class="logo-text">Thena Strategy</span>
-        </div>
-        <div class="header-right">
-            <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    <header class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05010a]/90 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="thenastrat_token_logo_white_gradient.png" alt="Icon" class="h-10 w-10">
+                <span class="font-display font-bold text-2xl tracking-tight bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                    Thena Strategy
+                </span>
+            </div>
+            <button id="connectBtn" onclick="connectWallet()" 
+                class="px-6 py-2.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl font-bold text-sm shadow-lg shadow-purple-900/20 hover:scale-105 hover:shadow-purple-900/40 transition-all duration-300">
+                CONNECT WALLET
             </button>
-            <button id="connectBtn" class="connect-btn" onclick="connectWallet()">CONNECT WALLET</button>
         </div>
-    </div>
+    </header>
 
-    <div class="tab-container">
-        <button class="tab-btn active" onclick="switchTab('swap')">SWAP</button>
-        <button class="tab-btn" onclick="switchTab('dashboard')">DASHBOARD</button>
-    </div>
-
-    <div class="main-container">
-
-        <div id="swap-view" class="view-section active">
-            <div class="swap-view-grid">
-                <div class="swap-column">
-                    <div class="swap-header-row">
-                        <div class="swap-title">Swap</div>
-                        <div class="settings-icon" onclick="toggleSettings()">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                        </div>
-                    </div>
-
-                    <div id="settingsPanel" class="settings-panel">
-                        <div class="slip-label">SLIPPAGE TOLERANCE</div>
-                        <div class="slip-options">
-                            <button class="slip-btn" onclick="setSlip(0.5)">0.5%</button>
-                            <button class="slip-btn" onclick="setSlip(1.0)">1.0%</button>
-                            <button class="slip-btn" onclick="setSlip(5.0)">5.0%</button>
-                            <input type="number" id="customSlip" class="slip-input" placeholder="Custom" oninput="setCustomSlip()">
-                        </div>
-                    </div>
-
-                   <div class="trade-box">
-                    <div class="trade-top-row">
-                        <div class="trade-label">Sell</div>
-                        <div class="balance-display">
-                            Balance: <span id="sBal">0</span>
-                            <button class="max-btn" onclick="setMax()">MAX</button>
-                        </div>
-                    </div>
-                    <div class="trade-content">
-                       
-<div class="token-info" onclick="setMode('sell')">
-    <img src="" id="sIcon" class="token-icon">
     
-    <div>
-        <div style="display: flex; align-items: center;">
-            <div class="token-symbol" id="sSym">---</div>
-            <div id="mobileInfoBtn" onclick="event.stopPropagation(); toggleAds()">?</div>
+    <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
+        
+        <div class="flex justify-center mb-8 sm:mb-12">
+            <div class="flex p-1 bg-white/5 border border-white/5 rounded-full backdrop-blur-md relative">
+                <button onclick="switchTab('swap')" id="tab-swap" class="relative px-6 sm:px-10 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-display font-bold transition-all duration-300 overflow-hidden bg-brand-primary text-white shadow-lg z-10">
+                    Swap
+                </button>
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="relative px-6 sm:px-10 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-display font-bold transition-all duration-300 text-gray-400 hover:text-white z-10">
+                    Dashboard
+                </button>
+            </div>
         </div>
-        <div class="token-name" id="sName">---</div>
-    </div>
-</div>
 
-                        <div style="text-align:right; width:50%;">
-                            <input type="number" id="inpAmt" class="input-amount" placeholder="0" oninput="calc()">
-                            <div class="usd-value" id="sUsd">$0.00</div>
-                        </div>
-                    </div>
-                </div>
-
-                    <div class="arrow-wrapper">
-                        <div class="swap-arrow-btn" onclick="toggleSwap()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-                        </div>
-                    </div>
-
-                    <div class="trade-box">
-                        <div class="trade-top-row">
-                            <div class="trade-label">Buy</div>
-                            <div class="balance-display">
-                                Balance: <span id="bBal">0</span>
+        <div class="relative w-full max-w-7xl mx-auto">
+            
+           
+            <div id="swap-view" class="relative transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-100 translate-x-0 scale-100 z-10 origin-top">
+                
+                <div class="flex flex-col lg:flex-row justify-center items-start gap-7 mx-auto">
+                    
+                  
+                    <div class="w-full lg:w-[450px] flex flex-col gap-4">
+                        
+                        <div class="glass-panel rounded-[24px] p-4 sm:p-5 relative">
+                            
+                            <div class="flex justify-between items-center mb-4 sm:mb-5">
+                                <h2 class="text-lg sm:text-xl font-display font-bold text-white">Swap</h2>
+                                <button onclick="toggleSettings()" class="text-gray-400 hover:text-white transition-colors">
+                                    <svg id="settingsGear" class="w-5 h-5 rotate-gear" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                </button>
                             </div>
-                        </div>
-                        <div class="trade-content">
-                            <div class="token-info" onclick="setMode('buy')">
-                                <img src="" id="bIcon" class="token-icon">
-                                <div>
-                                    <div class="token-symbol" id="bSym">---</div>
-                                    <div class="token-name" id="bName">---</div>
+
+                            <div id="settingsPanel" class="settings-container bg-black/40 rounded-xl border-white/5 border-0">
+                                <label class="text-[10px] text-gray-400 font-medium mb-2 block uppercase tracking-wide">Slippage Tolerance</label>
+                                <div class="flex gap-2">
+                                    <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(0.5)">0.5%</button>
+                                    <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(1.0)">1.0%</button>
+                                    <input type="number" id="customSlip" placeholder="Custom %" class="flex-1 bg-transparent border border-brand-border rounded-lg text-center text-xs text-white focus:outline-none focus:border-brand-secondary transition-colors" oninput="setCustomSlip()">
                                 </div>
                             </div>
-                            <div style="text-align:right; width:50%;">
-                                <input type="text" id="outAmt" class="input-amount" placeholder="0" readonly>
-                                <div class="usd-value" id="bUsd">$0.00</div>
+
+                            <div class="input-box rounded-2xl p-3.5 mb-1 relative group">
+                                <div class="flex justify-between mb-2 text-xs">
+                                    <span class="text-gray-400 font-medium ml-1">Sell</span>
+                                    <span class="text-gray-400">Bal: <span id="sBal" class="text-white font-mono">0.00</span> <span onclick="setMax()" class="cursor-pointer text-brand-accent hover:text-white ml-2 font-bold transition-colors">MAX</span></span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                                        <img src="thenastrat_token_logo_white_gradient.png" id="sIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
+                                        <span id="sSym" class="font-display font-bold text-sm sm:text-base">THESTRAT</span>
+                                    </div>
+                                    <input type="number" id="inpAmt" placeholder="0" oninput="calc()" class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none">
+                                </div>
+                                <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="sUsd">$0.00</div>
                             </div>
+
+                            <div class="relative h-2 flex items-center justify-center z-10">
+                                <button onclick="toggleSwap()" class="absolute bg-[#12081f] border border-[#2d1b4e] p-2 rounded-lg text-brand-primary hover:text-white hover:bg-brand-primary hover:border-brand-primary hover:rotate-180 transition-all duration-300 shadow-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                                </button>
+                            </div>
+
+                            <div class="input-box rounded-2xl p-3.5 mt-1">
+                                <div class="flex justify-between mb-2 text-xs">
+                                    <span class="text-gray-400 font-medium ml-1">Buy</span>
+                                    <span class="text-gray-400">Bal: <span id="bBal" class="text-white font-mono">0.00</span></span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                                        <img src="fBOMB_token_whiteblue_blackcircle.png" id="bIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
+                                        <span id="bSym" class="font-display font-bold text-sm sm:text-base">fBOMB</span>
+                                    </div>
+                                    <input type="text" id="outAmt" placeholder="0" readonly class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none cursor-default">
+                                </div>
+                                <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="bUsd">$0.00</div>
+                            </div>
+
+                            <div class="mt-6 space-y-2 px-2">
+                                <div class="flex justify-between text-xs font-medium">
+                                    <span class="text-gray-500">Slippage</span>
+                                    <span id="slipDisplay" class="text-white">0.5%</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-medium">
+                                    <span class="text-gray-500">Rate</span>
+                                    <span id="rateTxt" class="text-white">---</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-medium">
+                                    <span class="text-gray-500">Expected Output</span>
+                                    <span id="quoteTxt" class="text-white">---</span>
+                                </div>
+                            </div>
+
+                            <button id="mainActionBtn" class="w-full mt-6 py-3.5 sm:py-4 bg-brand-primary hover:bg-brand-secondary rounded-xl font-display font-bold text-base sm:text-lg text-white shadow-lg shadow-brand-primary/30 hover:shadow-brand-primary/50 hover:translate-y-[-2px] active:translate-y-[0px] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                CONNECT WALLET
+                            </button>
                         </div>
                     </div>
 
-                    <div class="receipt-area">
-                        <div class="receipt-row"><span>Slippage</span><span id="slipDisplay">0.5%</span></div>
-                        <div class="receipt-row"><span>Rate</span><span id="rateTxt">---</span></div>
-                        <div class="receipt-row"><span>Quote (Inc. Fees)</span><span id="quoteTxt">---</span></div>
-                    </div>
+                    
+                    <div class="w-full lg:w-[450px] flex flex-col gap-4">
+                        <div class="glass-panel rounded-[24px] p-5 sm:p-6 h-full flex flex-col justify-between">
+                            
+                            <div>
+                                <div class="mb-6">
+                                    <h3 id="cardPair" class="text-gray-400 font-display font-bold text-base sm:text-lg mb-1 tracking-wide">THESTRAT / fBOMB</h3>
+                                    <div class="flex items-end gap-3">
+                                        <div id="cardPrice" class="text-4xl sm:text-5xl font-display font-extrabold text-white tracking-tight leading-none">
+                                            $0.0001
+                                        </div>
+                                        <span id="cardChange" class="mb-1 px-2 py-0.5 rounded text-xs font-bold bg-danger/10 text-danger border border-danger/20">-0.00%</span>
+                                    </div>
+                                </div>
 
-                    <button id="mainActionBtn" class="action-btn">CONNECT WALLET</button>
+                                <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
+                                    <div class="bg-black/30 p-3 sm:p-4 rounded-2xl border border-white/5">
+                                        <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Market Cap</div>
+                                        <div id="cardFdv" class="text-lg sm:text-xl font-display font-bold text-white">$0</div>
+                                    </div>
+                                    <div class="bg-black/30 p-3 sm:p-4 rounded-2xl border border-white/5">
+                                        <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Liquidity</div>
+                                        <div id="cardLiq" class="text-lg sm:text-xl font-display font-bold text-white">$0</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0a0510] border border-white/5 rounded-2xl p-4 sm:p-5 mb-4">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Pool Composition</div>
+                                        <div id="poolDonut" class="w-8 h-8 rounded-full" style="background: conic-gradient(#8E24AA 0% 50%, #ffffff 50% 100%); box-shadow: 0 0 15px rgba(142,36,170,0.3);">
+                                            <div class="w-5 h-5 bg-[#0a0510] rounded-full absolute top-1.5 left-1.5"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex flex-col gap-3">
+                                        <div class="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col gap-2">
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex items-center gap-2">
+                                                    <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5">
+                                                    <span class="text-xs font-bold text-gray-300">THESTRAT</span>
+                                                </div>
+                                                <span id="cVal1" class="font-mono text-xs text-white font-bold">---</span>
+                                            </div>
+                                            <div class="h-1 bg-gray-800 rounded-full overflow-hidden">
+                                                <div id="bar1" class="h-full bg-brand-primary w-[50%] transition-all duration-500 shadow-[0_0_8px_#8E24AA]"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col gap-2">
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex items-center gap-2">
+                                                    <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-5 h-5">
+                                                    <span class="text-xs font-bold text-gray-300">fBOMB</span>
+                                                </div>
+                                                <span id="cVal2" class="font-mono text-xs text-white font-bold">---</span>
+                                            </div>
+                                            <div class="h-1 bg-gray-800 rounded-full overflow-hidden">
+                                                <div id="bar2" class="h-full bg-white w-[50%] transition-all duration-500 shadow-[0_0_8px_white]"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="w-full bg-[#0a0510] border border-white/10 rounded-2xl p-4 mt-auto relative overflow-visible">
+                                <div class="absolute -top-2.5 left-5 bg-[#0a0510] px-2 text-[9px] text-gray-500 font-bold uppercase tracking-widest z-20 border border-white/5 rounded-full">Smart Route</div>
+                                
+                                <div class="route-path-container h-8 mt-1">
+                                    <div class="route-line-bg"></div>
+                                    <div class="route-line-active animate-pulse-glow"></div>
+                                    <div class="route-dot w-7 h-7">
+                                        <img src="thenastrat_token_logo_white_gradient.png" class="w-3.5 h-3.5 rounded-full">
+                                    </div>
+                                    <div class="route-pill shadow-[0_0_10px_rgba(217,70,239,0.3)] text-[9px] py-1 px-3">
+                                        THENA V3
+                                    </div>
+                                    <div class="route-dot w-7 h-7" style="border-color: #d946ef; box-shadow: 0 0 15px rgba(217, 70, 239, 0.3);">
+                                        <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-3.5 h-3.5 rounded-full">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="summary-column">
-                    <div class="info-card">
-                        <div class="info-header">
-                            <div>
-                                <div class="pair-label" id="cardPair">... / ...</div>
-                                <div class="date-label" id="cardDate">...</div>
+            <div id="dashboard-view" class="absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-0 translate-x-[20px] scale-95 pointer-events-none z-0">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full pb-8">
+                    
+                    <div class="lg:col-span-2 flex flex-col gap-6">
+                        <div class="glass-panel rounded-[24px] p-4 sm:p-6 min-h-[350px] lg:min-h-[450px] relative flex flex-col">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h2 class="font-display font-bold text-base sm:text-lg text-white">Price Performance</h2>
+                                    <span class="text-xs text-gray-500">Last 30 Days</span>
+                                </div>
+                                <div class="text-right">
+                                    <div id="dashPriceVal" class="text-xl sm:text-2xl font-bold font-display">$0.00</div>
+                                    <div id="dashPriceChg" class="text-sm text-danger font-medium">-0.00%</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="price-large" id="cardPrice">$0.0000</div>
-                                <div class="price-change" id="cardChange">+0.00%</div>
-                            </div>
-                        </div>
-
-                        <div class="mini-grid">
-                            <div class="mini-box">
-                                <div class="mini-label">Market Cap</div>
-                                <div class="mini-val" id="cardFdv">---</div>
-                            </div>
-                            <div class="mini-box">
-                                <div class="mini-label">Liquidity USD</div>
-                                <div class="mini-val" id="cardLiq">---</div>
+                            <div class="flex-grow w-full relative h-[250px] sm:h-[350px]">
+                                <canvas id="priceChart"></canvas>
                             </div>
                         </div>
 
-                        <div class="dashed-line"></div>
-
-                        <div class="comp-title">Pool Composition</div>
-                        <div class="comp-row">
-                            <div class="comp-text"><span id="cTok1">---</span><span id="cVal1">0</span></div>
-                            <div class="comp-bar"><div class="comp-fill" id="cBar1" style="width:50%"></div></div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Market Cap</div>
+                                <div id="barMC" class="text-white font-bold font-display text-sm sm:text-base">---</div>
+                            </div>
+                            <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Volume (24h)</div>
+                                <div id="barVol" class="text-white font-bold font-display text-sm sm:text-base">---</div>
+                            </div>
+                            <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Burned</div>
+                                <div id="barBurn" class="text-white font-bold font-display text-sm sm:text-base">---</div>
+                            </div>
+                            <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Change</div>
+                                <div id="barChg" class="text-white font-bold font-display text-sm sm:text-base">---</div>
+                            </div>
                         </div>
-                        <div class="comp-row">
-                            <div class="comp-text"><span id="cTok2">---</span><span id="cVal2">0</span></div>
-                            <div class="comp-bar"><div class="comp-fill striped" id="cBar2" style="width:50%"></div></div>
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        
+                        <div class="bg-gradient-to-br from-brand-card to-[#2e1045] border border-brand-primary/30 rounded-[24px] p-5 sm:p-6 relative overflow-hidden group">
+                            <div class="absolute top-[-50%] right-[-50%] w-64 h-64 bg-brand-accent/20 rounded-full blur-3xl group-hover:bg-brand-accent/30 transition-all duration-700"></div>
+                            
+                            <div class="relative z-10">
+                                <div class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Protocol Treasury</div>
+                                <div id="repTotalValue" class="text-3xl sm:text-4xl font-display font-extrabold text-success mb-1 drop-shadow-lg">$0.00</div>
+                                <div class="text-xs text-brand-secondary mb-6 font-medium">Estimated Intrinsic Value</div>
+                                
+                                <div class="border-t border-white/10 pt-4 space-y-4">
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-gray-400">eTHENA Staked</span>
+                                        <span id="repStaked" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-gray-400">veTHE Equivalent</span>
+                                        <span id="repVe" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-[24px] p-5 sm:p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">User Holdings</span>
+                                <span id="statusBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-400 font-medium border border-white/10">Not Connected</span>
+                            </div>
+
+                            <div class="bg-black/30 p-1 rounded-lg flex gap-1 mb-4">
+                                <button id="tabWallet" onclick="setQueryMode(false)" class="flex-1 py-1.5 text-xs font-semibold rounded-md bg-brand-primary text-white shadow-sm transition-all">My Wallet</button>
+                                <button id="tabQuery" onclick="setQueryMode(true)" class="flex-1 py-1.5 text-xs font-semibold rounded-md text-gray-400 hover:text-white hover:bg-white/5 transition-all">Query Mode</button>
+                            </div>
+
+                            <div id="queryWrap" class="relative mb-4 hidden animate-fade-in-up">
+                                <svg class="absolute left-3 top-3 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="queryInput" placeholder="Search 0xAddress..." oninput="handleQuery()" class="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-xs font-mono text-white focus:border-brand-secondary focus:outline-none transition-colors">
+                            </div>
+
+                            <div id="balanceLabel" class="text-xs text-gray-500 mb-1">Balance</div>
+                            <div class="flex items-baseline gap-2 mb-4">
+                                <span id="userWallet" class="text-2xl sm:text-3xl font-display font-bold text-white">0.00</span>
+                                <span class="text-sm font-bold text-brand-secondary">THESTRAT</span>
+                            </div>
+
+                            <button onclick="copyAddress()" class="w-full flex items-center justify-between px-4 py-3 bg-white/5 border border-dashed border-white/20 rounded-xl hover:bg-brand-primary/20 hover:border-brand-primary/50 hover:text-white text-gray-400 transition-all group">
+                                <span id="userAddrDisplay" class="font-mono text-xs">0x...</span>
+                                <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="dashboard-view" class="view-section">
-            <div class="dash-layout">
-                <div class="dash-col-left">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title-group">
-                                <h2>eTHENA / fBOMB</h2>
-                                <div class="chart-subtitle">30 Day Price Action</div>
-                            </div>
-                            <div class="chart-price-display">
-                                <div class="cp-val" id="dashPriceVal">$0.0000</div>
-                                <div class="cp-change" id="dashPriceChg">-0.00%</div>
-                            </div>
-                        </div>
-                        <div class="canvas-container">
-                            <canvas id="priceChart"></canvas>
-                        </div>
-                    </div>
+    </main>
 
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-lbl">Market Cap</div>
-                            <div class="stat-val" id="barMC">$603,263</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-lbl">24h Volume</div>
-                            <div class="stat-val" id="barVol">$892</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-lbl">Burned</div>
-                            <div class="stat-val" id="barBurn">2.25%</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-lbl">24h Change</div>
-                            <div class="stat-val" id="barChg" style="color:var(--accent-red);">-1.57%</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="dash-col-right">
-                    <div class="dash-card">
-                        <div class="dash-card-title">Treasury Holdings</div>
-                        <div class="dash-card-sub">Protocol Owned Assets</div>
-
-                        <div class="dash-row">
-                            <div>
-                                <div class="d-lbl">eTHENA Owned</div>
-                                <div class="d-sub">Staked in Eliteness Protocol</div>
-                            </div>
-                            <div class="d-val" id="repStaked">Loading...</div>
-                        </div>
-
-                        <div class="dash-row">
-                            <div>
-                                <div class="d-lbl">Total veTHE Equivalent</div>
-                                <div class="d-sub">Based on Ratio ~2.53</div>
-                            </div>
-                            <div class="d-val" id="repVe">Loading...</div>
-                        </div>
-
-                        <div class="dash-row" style="border-bottom: none;">
-                            <div>
-                                <div class="d-lbl">Total Treasury Value</div>
-                                <div class="d-sub">Estimated USD</div>
-                            </div>
-                            <div class="d-val" style="color:var(--accent-green); font-size:18px;" id="repTotalValue">
-                                $0.00
-                            </div>
-                        </div>
-                        
-                        <div id="repClaimable" style="display:none;"></div>
-                    </div>
-
-                    <div class="dash-card">
-                        <div class="user-profile-header">
-                            <div class="dash-card-title">User Holdings</div>
-                            <div id="statusBadge" class="user-status disconnected">Not Connected</div>
-                        </div>
-                        
-                        <div class="query-section">
-                            <div class="query-toggle">
-                                <input type="checkbox" id="chkQuery" onchange="toggleQueryInput()">
-                                <label for="chkQuery">Query Address</label>
-                            </div>
-                            <div class="query-input-wrap" id="queryWrap">
-                                <input type="text" id="queryInput" class="query-field" placeholder="Paste address 0x..." oninput="handleQuery()">
-                            </div>
-                        </div>
-
-                        <div class="user-balance-section">
-                            <div class="user-balance-lbl" id="balanceLabel">AVAILABLE BALANCE</div>
-                            <div class="user-balance-big">
-                                <span id="userWallet">0.00</span><span class="user-balance-sym">THESTRAT</span>
-                            </div>
-                        </div>
-
-                        <div class="address-box" onclick="copyAddress()">
-                            <span id="userAddrDisplay">0x...</span>
-                            <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <footer class="relative z-10 mt-auto py-12 border-t border-white/5 bg-[#05010a]">
+        <div class="flex justify-center gap-8 mb-8">
+            <a href="#" class="text-gray-500 hover:text-brand-accent hover:-translate-y-1 transition-all"><svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="#" class="text-gray-500 hover:text-brand-accent hover:-translate-y-1 transition-all"><svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></a>
+            <a href="#" class="text-gray-500 hover:text-brand-accent hover:-translate-y-1 transition-all"><svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg></a>
         </div>
-
-        <div class="socials-row">
-            <a href="#" class="social-link" target="_blank" title="Twitter">
-                <div class="social-icon">
-                    <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                </div>
-                <span class="social-text">Twitter</span>
-            </a>
-            <a href="#" class="social-link" target="_blank" title="Docs">
-                <div class="social-icon">
-                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                </div>
-                <span class="social-text">Docs</span>
-            </a>
-            <a href="#" class="social-link" target="_blank" title="Telegram">
-                <div class="social-icon">
-                    <svg viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg>
-                </div>
-                <span class="social-text">Telegram</span>
-            </a>
+        <div class="flex justify-center items-center gap-2 text-xs text-gray-500 opacity-80">
+            <span>Powering the ecosystem on</span>
+            <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="w-4 h-4 hover:scale-110 transition-transform">
+            <span class="font-bold tracking-wide">THENA</span>
         </div>
+    </footer>
 
-        <div class="built-on-row">
-            <span class="built-text">Built on</span>
-            <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="thena-icon-sm">
-            <span class="built-text">Thena</span>
-        </div>
-<div id="toastContainer" class="toast-container"></div>
-<div id="swapModal" class="modal-overlay">
-    <div class="modal-box">
-        <div class="modal-logos">
-            <img src="" id="modalImgIn" class="modal-token-icon">
-            <svg class="modal-arrow-anim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            <img src="" id="modalImgOut" class="modal-token-icon">
-        </div>
-        
-        <div id="modalSpinner" class="cube-loader">
-            <div class="cube cube1"></div>
-            <div class="cube cube2"></div>
-            <div class="cube cube3"></div>
-            <div class="cube cube4"></div>
-        </div>
-        
-        <svg id="modalSuccess" class="success-checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        
-        <svg id="modalError" class="error-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+    <div id="toastContainer" class="fixed top-24 right-5 z-[100] flex flex-col gap-3 pointer-events-none max-w-sm w-full"></div>
 
-        <div class="modal-status" id="modalTitle">Processing...</div>
-        <div class="modal-sub" id="modalDesc">Please confirm in your wallet</div>
-        
-        <button class="modal-close" id="modalCloseBtn" onclick="hideModal()">CLOSE</button>
-    </div>
-</div>
+    <div id="swapModal" class="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm hidden flex justify-center items-center opacity-0 transition-opacity duration-300">
+        <div class="bg-[#1a0b2e] border border-brand-primary w-[90%] max-w-sm p-8 rounded-3xl text-center shadow-[0_0_50px_rgba(142,36,170,0.3)] transform scale-95 transition-transform duration-300 relative">
+            <div id="modalSpinner" class="w-12 h-12 border-4 border-white/10 border-t-brand-primary rounded-full animate-spin mx-auto mb-6"></div>
+            
+            <svg id="modalSuccess" class="hidden w-16 h-16 text-success mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <svg id="modalError" class="hidden w-16 h-16 text-danger mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
 
+            <div class="text-xl font-display font-bold text-white mb-2" id="modalTitle">Processing...</div>
+            <div class="text-sm text-gray-400 mb-6" id="modalDesc">Please confirm transaction in your wallet</div>
+            
+            <button id="modalCloseBtn" class="hidden bg-white/5 border border-white/10 text-white px-6 py-2 rounded-lg hover:bg-white/10 transition-colors" onclick="hideModal()">Close</button>
+        </div>
     </div>
 
- <script>
+    <div id="leftAdBox" class="fixed bottom-5 left-5 w-64 bg-brand-card/90 backdrop-blur border border-brand-primary/20 rounded-2xl p-4 shadow-2xl z-40 transition-all hover:-translate-y-1">
+        <button class="absolute top-2 right-2 text-gray-500 hover:text-white text-xs" onclick="document.getElementById('leftAdBox').classList.add('hidden')">✕</button>
+        <div class="flex gap-3 items-center mb-3">
+            <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-10 h-10 rounded-full bg-white/10">
+            <div class="font-bold text-sm leading-tight text-white">Need<br>fBOMB?</div>
+        </div>
+        <div class="space-y-2">
+            <a href="https://thena.fi/swap?outputCurrency=0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979" target="_blank" class="block text-center text-[10px] font-bold bg-white/5 hover:bg-brand-primary text-white py-2 rounded-lg transition-colors">Buy on THENA</a>
+            <a href="https://mclb.org/bridge" target="_blank" class="block text-center text-[10px] font-bold bg-white/5 hover:bg-brand-secondary text-white py-2 rounded-lg transition-colors">Bridge from MCLB.org</a>
+        </div>
+    </div>
+    
+    <div id="mobileInfoBtn" class="hidden" onclick="toggleAds()"></div>
+
+    <script>
         const ADDR_ROUTER   = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
         const ADDR_THESTRAT = "0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C"; 
         const ADDR_FBOMB    = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
         const ADDR_WBNB     = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-        
         const ADDR_TREASURY = "0x28aa4f9ffe21365473b64c161b566c3cdead0108"; 
         const ADDR_GAUGE    = "0xce6b9bae3c330e0455d1af0ae3996f496cdbf1f1"; 
         const ADDR_LP_PAIR  = "0x7245D36825acFE58dE64E1b4A5F6d95662628faA";
-        
         const ADDR_ETHENA   = "0xafbe3b8b0939a5538DE32f7752A78e08C8492295";
         const ADDR_THE      = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11"; 
         const ADDR_VETHE    = "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D"; 
 
         let VETHE_RATIO = 2.50; 
-
         const BSC_RPC = "https://bsc-dataseed.binance.org/";
 
         const IMG_BOMB = "fBOMB_token_whiteblue_blackcircle.png";
-        const IMG_THESTRAT = "thenastrat_token_logo_black.png";
+        const IMG_THESTRAT = "thenastrat_token_logo_white_gradient.png";
 
-        const MINIMAL_STRAT_ABI = [
-            "function approve(address spender, uint256 amount) external returns (bool)",
-            "function allowance(address owner, address spender) external view returns (uint256)",
-            "function decimals() external view returns (uint8)",
-            "function balanceOf(address account) external view returns (uint256)",
-            "function totalSupply() external view returns (uint256)"
-        ];
-
-        const ROUTER_ABI = [
-            "function getAmountsOut(uint amountIn, tuple(address from, address to, bool stable)[] memory routes) public view returns (uint[] memory amounts)",
-            "function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, tuple(address from, address to, bool stable)[] calldata routes, address to, uint deadline) external"
-        ];
-        
-        const ERC20_ABI = [
-            "function approve(address spender, uint256 amount) external returns (bool)",
-            "function allowance(address owner, address spender) external view returns (uint256)",
-            "function decimals() external view returns (uint8)",
-            "function balanceOf(address account) external view returns (uint256)"
-        ];
-        
-        const STAKING_ABI = [
-            "function balanceOf(address account) external view returns (uint256)",
-            "function earned(address account, address _rewardsToken) external view returns (uint256)",
-            "function totalSupply() external view returns (uint256)"
-        ];
-
-        const PAIR_ABI = [
-            "function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
-            "function totalSupply() external view returns (uint256)",
-            "function token0() external view returns (address)",
-            "function token1() external view returns (address)"
-        ];
-
-        const VETHE_ABI = [
-            "function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)",
-            "function locked(uint256 id) external view returns (int128 amount, uint256 end)",
-            "function balanceOf(address owner) external view returns (uint256)"
-        ];
+        const MINIMAL_STRAT_ABI = ["function approve(address spender, uint256 amount) external returns (bool)","function allowance(address owner, address spender) external view returns (uint256)","function decimals() external view returns (uint8)","function balanceOf(address account) external view returns (uint256)","function totalSupply() external view returns (uint256)"];
+        const ROUTER_ABI = ["function getAmountsOut(uint amountIn, tuple(address from, address to, bool stable)[] memory routes) public view returns (uint[] memory amounts)","function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, tuple(address from, address to, bool stable)[] calldata routes, address to, uint deadline) external"];
+        const ERC20_ABI = ["function approve(address spender, uint256 amount) external returns (bool)","function allowance(address owner, address spender) external view returns (uint256)","function decimals() external view returns (uint8)","function balanceOf(address account) external view returns (uint256)"];
+        const STAKING_ABI = ["function balanceOf(address account) external view returns (uint256)","function earned(address account, address _rewardsToken) external view returns (uint256)","function totalSupply() external view returns (uint256)"];
+        const PAIR_ABI = ["function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)","function totalSupply() external view returns (uint256)","function token0() external view returns (address)","function token1() external view returns (address)"];
+        const VETHE_ABI = ["function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)","function locked(uint256 id) external view returns (int128 amount, uint256 end)","function balanceOf(address owner) external view returns (uint256)"];
 
         let provider, signer, userAddr;
         let pair = null;
-        let isBuy = false;
+        let isBuy = false; 
         let slippage = 0.5;
         let quoteTimeout = null;
         let chartInstance = null;
-        let isDark = false;
         let queryTimeout = null;
-
-        function toggleTheme() {
-            isDark = !isDark;
-            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-            const btn = document.getElementById('themeBtn');
-            btn.innerHTML = isDark ? 
-                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>' : 
-                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
-            renderPriceChart();
-        }
+        let isQueryMode = false;
 
         function switchTab(t) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            const btnIdx = (t === 'swap') ? 0 : 1;
-            document.querySelectorAll('.tab-btn')[btnIdx].classList.add('active');
-            document.getElementById(t + '-view').classList.add('active');
-            if(t === 'dashboard') {
+            const swapBtn = document.getElementById('tab-swap');
+            const dashBtn = document.getElementById('tab-dashboard');
+            const swapView = document.getElementById('swap-view');
+            const dashView = document.getElementById('dashboard-view');
+            
+            const activeClass = ['bg-brand-primary', 'text-white', 'shadow-lg'];
+            const inactiveClass = ['text-gray-400', 'hover:text-white'];
+
+            if(t === 'swap') {
+                swapBtn.classList.add(...activeClass);
+                swapBtn.classList.remove(...inactiveClass);
+                dashBtn.classList.remove(...activeClass);
+                dashBtn.classList.add(...inactiveClass);
+                
+                swapView.classList.remove('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute');
+                swapView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
+                
+                dashView.classList.remove('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
+                dashView.classList.add('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute');
+            } else {
+                dashBtn.classList.add(...activeClass);
+                dashBtn.classList.remove(...inactiveClass);
+                swapBtn.classList.remove(...activeClass);
+                swapBtn.classList.add(...inactiveClass);
+
+                dashView.classList.remove('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute');
+                dashView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
+                
+                swapView.classList.remove('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
+                swapView.classList.add('opacity-0', 'translate-x-[-20px]', 'pointer-events-none', 'scale-95', 'absolute');
+                
                 updateDashboard();
                 fetchUserStats();
-                if(chartInstance) renderPriceChart(); 
-                else renderPriceChart(); 
+                setTimeout(() => { if(chartInstance) renderPriceChart(); else renderPriceChart(); }, 300);
             }
         }
 
-        function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('open'); }
-        function setSlip(val) { slippage = val; document.getElementById('customSlip').value = ""; updateSlipUI(); }
-        function setCustomSlip() { const val = parseFloat(document.getElementById('customSlip').value); if(!isNaN(val)) slippage = val; updateSlipUI(); }
+        function toggleSettings() { 
+            const panel = document.getElementById('settingsPanel');
+            const gear = document.getElementById('settingsGear');
+            panel.classList.toggle('open');
+            gear.classList.toggle('active');
+        }
+
+        function setSlip(val) { 
+            slippage = val; 
+            document.getElementById('customSlip').value = ""; 
+            updateSlipUI(); 
+        }
+
+        function setCustomSlip() { 
+            const val = parseFloat(document.getElementById('customSlip').value); 
+            if(!isNaN(val)) slippage = val; 
+            updateSlipUI(); 
+        }
+
         function updateSlipUI() { 
-            document.querySelectorAll('.slip-btn').forEach(b => {
-                b.classList.toggle('active', parseFloat(b.innerText) === slippage && document.getElementById('customSlip').value === "");
+            document.querySelectorAll('.slip-option').forEach(b => {
+                const isActive = parseFloat(b.innerText) === slippage && document.getElementById('customSlip').value === "";
+                if(isActive) {
+                    b.classList.add('bg-brand-primary', 'text-white', 'border-transparent');
+                    b.classList.remove('border-brand-border');
+                } else {
+                    b.classList.remove('bg-brand-primary', 'text-white', 'border-transparent');
+                    b.classList.add('border-brand-border');
+                }
             });
             document.getElementById('slipDisplay').innerText = slippage + "%";
             calc(); 
@@ -1175,20 +609,33 @@ input[type=number] { -moz-appearance: textfield; }
         function copyAddress() {
             if(!userAddr) return alert("Connect Wallet first");
             navigator.clipboard.writeText(userAddr);
-            alert("Address Copied!");
+            showToast("Address Copied", "success");
         }
 
-        function toggleQueryInput() {
-            const isChecked = document.getElementById('chkQuery').checked;
+        function setQueryMode(enabled) {
+            isQueryMode = enabled;
             const wrap = document.getElementById('queryWrap');
-            if(isChecked) {
-                wrap.classList.add('show');
-                document.getElementById('balanceLabel').innerText = "QUERY BALANCE";
+            const tabW = document.getElementById('tabWallet');
+            const tabQ = document.getElementById('tabQuery');
+            
+            if(enabled) {
+                wrap.classList.remove('hidden');
+                tabW.classList.remove('bg-brand-primary', 'text-white');
+                tabW.classList.add('text-gray-400', 'hover:text-white');
+                
+                tabQ.classList.add('bg-brand-primary', 'text-white');
+                tabQ.classList.remove('text-gray-400');
+                
+                document.getElementById('balanceLabel').innerText = "Query Balance";
                 document.getElementById('userWallet').innerText = "0.00";
             } else {
-                wrap.classList.remove('show');
+                wrap.classList.add('hidden');
+                tabW.classList.add('bg-brand-primary', 'text-white');
+                tabQ.classList.remove('bg-brand-primary', 'text-white');
+                tabQ.classList.add('text-gray-400');
+                
                 document.getElementById('queryInput').value = ""; 
-                document.getElementById('balanceLabel').innerText = "AVAILABLE BALANCE";
+                document.getElementById('balanceLabel').innerText = "Balance";
                 fetchUserStats(); 
             }
         }
@@ -1197,128 +644,101 @@ input[type=number] { -moz-appearance: textfield; }
             clearTimeout(queryTimeout);
             queryTimeout = setTimeout(() => { fetchUserStats(); }, 500);
         }
-	
-function setModalSuccess(txHash) {
-    document.getElementById('modalSpinner').style.display = 'none';
-    
-    document.getElementById('modalSuccess').style.display = 'block';
-    
-    document.getElementById('modalError').style.display = 'none';
 
-    document.querySelector('.modal-logos').style.display = 'none';
-
-    updateModalText("Transaction Complete", "Swap executed successfully!");
-    
-    const btn = document.getElementById('modalCloseBtn');
-    btn.style.display = 'inline-block';
-    
-    btn.onclick = function() { 
-        hideModal(); 
-    };
-}
-function showToast(msg, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `custom-toast ${type}`;
-    
-    let icon = '';
-    if(type === 'success') icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
-    else if(type === 'error') icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-    else icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
-
-    toast.innerHTML = `${icon} <span>${msg}</span>`;
-    container.appendChild(toast);
-
-    requestAnimationFrame(() => toast.classList.add('show'));
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
-
-function showModal(title, desc) {
-    const modal = document.getElementById('swapModal');
-    
-    document.getElementById('modalImgIn').src = document.getElementById('sIcon').src;
-    document.getElementById('modalImgOut').src = document.getElementById('bIcon').src;
-
-    document.getElementById('modalSpinner').style.display = 'block'; 
-    document.getElementById('modalSuccess').style.display = 'none';
-    document.getElementById('modalError').style.display = 'none';
-    document.getElementById('modalCloseBtn').style.display = 'none';
-
-    document.querySelector('.modal-logos').style.display = 'flex'; 
-    
-    updateModalText(title, desc);
-    modal.classList.add('active');
-}
-function updateModalText(title, desc) {
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalDesc').innerText = desc;
-}
-function setModalError(errMsg) {
-    document.getElementById('modalSpinner').style.display = 'none';
-    document.getElementById('modalError').style.display = 'block';
-    
-    document.querySelector('.modal-logos').style.display = 'none';
-
-    updateModalText("Transaction Failed", errMsg);
-    const btn = document.getElementById('modalCloseBtn');
-    btn.style.display = 'inline-block';
-    btn.onclick = function() { hideModal(); };
-}
-
-function setModalSuccess(txHash) {
-    document.getElementById('modalSpinner').style.display = 'none';
-    document.getElementById('modalSuccess').style.display = 'block';
-    document.querySelector('.modal-logos').style.display = 'none';
-    updateModalText("Transaction Complete", "Swap executed successfully!");
-    const btn = document.getElementById('modalCloseBtn');
-    btn.style.display = 'inline-block';
-    btn.onclick = function() { hideModal(); };
-}
-function hideModal() {
-    document.getElementById('swapModal').classList.remove('active');
-}
-       async function connectWallet() {
-    if(!window.ethereum) return showToast("Please install MetaMask!", "error");
-    try {
-        provider = new ethers.BrowserProvider(window.ethereum);
-        signer = await provider.getSigner();
-        userAddr = await signer.getAddress();
-        
-        const net = await provider.getNetwork();
-        if(net.chainId !== 56n) {
-            try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] }); }
-            catch(e) { return showToast("Switch to BSC Network", "error"); }
-            provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            let borderColor = type === 'success' ? 'border-success' : (type === 'error' ? 'border-danger' : 'border-brand-primary');
+            toast.className = `bg-[#140a1e] border-l-4 ${borderColor} text-white px-5 py-3 rounded-md shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0`;
+            
+            let icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+            toast.innerHTML = `<span class="font-bold text-lg">${icon}</span> <span class="text-sm font-medium">${msg}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            });
+            setTimeout(() => { 
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300); 
+            }, 4000);
         }
 
-        document.getElementById('connectBtn').innerText = userAddr.substring(0,6) + "..." + userAddr.substring(38);
-        document.getElementById('mainActionBtn').innerText = "SWAP";
-        
-        const badge = document.getElementById('statusBadge');
-        badge.innerText = "Active";
-        badge.classList.remove('disconnected');
-        badge.style.background = "#00aa00";
-        document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
+        function showModal(title, desc) {
+            const modal = document.getElementById('swapModal');
+            document.getElementById('modalSpinner').style.display = 'block'; 
+            document.getElementById('modalSuccess').classList.add('hidden');
+            document.getElementById('modalError').classList.add('hidden');
+            document.getElementById('modalCloseBtn').classList.add('hidden');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalDesc').innerText = desc;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+                modal.querySelector('div').classList.add('scale-100');
+            }, 10);
+        }
 
-        showToast("Wallet Connected", "success"); 
+        function setModalError(errMsg) {
+            document.getElementById('modalSpinner').style.display = 'none';
+            document.getElementById('modalError').classList.remove('hidden');
+            document.getElementById('modalTitle').innerText = "Failed";
+            document.getElementById('modalDesc').innerText = errMsg;
+            document.getElementById('modalCloseBtn').classList.remove('hidden');
+            document.getElementById('modalCloseBtn').style.display = 'inline-block';
+        }
 
-        calc();
-        updateDashboard();
-        fetchSwapBalances(); 
-        
-        if(document.getElementById('chkQuery').checked) handleQuery(); 
-        else fetchUserStats();
-        
-    } catch (e) { console.error(e); showToast("Connection failed", "error"); }
-}
+        function setModalSuccess(txHash) {
+            document.getElementById('modalSpinner').style.display = 'none';
+            document.getElementById('modalSuccess').classList.remove('hidden');
+            document.getElementById('modalTitle').innerText = "Success";
+            document.getElementById('modalDesc').innerText = "Transaction confirmed";
+            document.getElementById('modalCloseBtn').classList.remove('hidden');
+            document.getElementById('modalCloseBtn').style.display = 'inline-block';
+        }
+        function hideModal() { 
+            const modal = document.getElementById('swapModal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        async function connectWallet() {
+            if(!window.ethereum) return showToast("Install MetaMask", "error");
+            try {
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                userAddr = await signer.getAddress();
+                
+                const net = await provider.getNetwork();
+                if(net.chainId !== 56n) {
+                    try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] }); }
+                    catch(e) { return showToast("Switch to BSC", "error"); }
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+                }
+
+                document.getElementById('connectBtn').innerHTML = `${userAddr.substring(0,6)}...${userAddr.substring(38)}`;
+                document.getElementById('mainActionBtn').innerText = "SWAP";
+                
+                const badge = document.getElementById('statusBadge');
+                badge.innerText = "Connected";
+                badge.className = "text-[10px] px-2 py-0.5 rounded bg-success/20 text-success font-medium border border-success/30";
+                document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
+
+                showToast("Wallet Connected", "success"); 
+                calc();
+                updateDashboard();
+                fetchSwapBalances(); 
+                if(isQueryMode) handleQuery(); else fetchUserStats();
+                
+            } catch (e) { console.error(e); showToast("Connection failed", "error"); }
+        }
 
         async function init() {
-            document.getElementById('cardDate').innerText = new Date().toLocaleString();
             try {
                 if(!provider) provider = new ethers.JsonRpcProvider(BSC_RPC);
                 updateDashboard();
@@ -1344,68 +764,45 @@ function hideModal() {
                 const wbnbContract = new ethers.Contract(ADDR_WBNB, ERC20_ABI, provider);
                 const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
                 const veTheContract = new ethers.Contract(ADDR_VETHE, VETHE_ABI, provider);              
+                
                 const etSupplyWei = await ethenaContract.totalSupply();
                 const etSupply = parseFloat(ethers.formatUnits(etSupplyWei, 18));
-
                 const veBalance = await veTheContract.balanceOf(ADDR_ETHENA);
                 let totalVeLocked = 0;
-
                 if (Number(veBalance) > 0) {
                     const tokenId = await veTheContract.tokenOfOwnerByIndex(ADDR_ETHENA, 0);
                     const lockedStruct = await veTheContract.locked(tokenId);
                     totalVeLocked = parseFloat(ethers.formatUnits(lockedStruct[0], 18));
                 }
-
-                if (etSupply > 0 && totalVeLocked > 0) {
-                    VETHE_RATIO = totalVeLocked / etSupply;
-                    
-                }
+                if (etSupply > 0 && totalVeLocked > 0) { VETHE_RATIO = totalVeLocked / etSupply; }
                 
                 const stakedLPWei = await gaugeContract.balanceOf(ADDR_TREASURY);
                 const stakedLP = parseFloat(ethers.formatUnits(stakedLPWei, 18));
-
                 const totalLPSupplyWei = await pairContract.totalSupply();
                 const totalLP = parseFloat(ethers.formatUnits(totalLPSupplyWei, 18));
-                
                 const reserves = await pairContract.getReserves();
                 const reserveEthenaWei = reserves[1]; 
                 const totalEthenaPool = parseFloat(ethers.formatUnits(reserveEthenaWei, 18));
-
                 const poolShare = stakedLP / totalLP;
                 const myEthena = totalEthenaPool * poolShare;
-                
                 const myVeThe = myEthena * VETHE_RATIO;
 
                 const elemStaked = document.getElementById('repStaked');
-                if(elemStaked) elemStaked.innerHTML = myEthena.toLocaleString(undefined, {maximumFractionDigits:0}) + '<span class="d-unit">eTHENA</span>';
-
+                if(elemStaked) elemStaked.innerHTML = myEthena.toLocaleString(undefined, {maximumFractionDigits:0});
                 const elemVe = document.getElementById('repVe');
-                if(elemVe) elemVe.innerHTML = myVeThe.toLocaleString(undefined, {maximumFractionDigits:0}) + '<span class="d-unit">veTHE</span>';
+                if(elemVe) elemVe.innerHTML = myVeThe.toLocaleString(undefined, {maximumFractionDigits:0});
 
                 try {
                     const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
                     const data = await res.json();
-                    
                     if(data.pairs && data.pairs.length > 0) {
                         const priceOfThe = parseFloat(data.pairs[0].priceUsd);
-                        
                         const totalIntrinsicValue = myVeThe * priceOfThe;
-                        
                         const elemTotal = document.getElementById('repTotalValue');
-                        if(elemTotal) {
-                            elemTotal.innerText = fmtUSD(totalIntrinsicValue);
-                        }
+                        if(elemTotal) elemTotal.innerText = fmtUSD(totalIntrinsicValue);
                     } 
-                } catch(e) {
-                    console.log("Price fetch error", e);
-                }
-
-                const wbnbWei = await wbnbContract.balanceOf(ADDR_GAUGE);
-                const wbnbFmt = parseFloat(ethers.formatUnits(wbnbWei, 18)).toFixed(4);
-                if(document.getElementById('repClaimable')) {
-                    document.getElementById('repClaimable').innerHTML = wbnbFmt + '<span class="d-unit">WBNB</span>';
-                }
-
+                } catch(e) {}
+                
             } catch(e) { console.error("Dashboard Update Error:", e); }
         }
 
@@ -1413,24 +810,25 @@ function hideModal() {
             if(chartInstance) chartInstance.destroy();
             const ctx = document.getElementById('priceChart').getContext('2d');
             
-            const style = getComputedStyle(document.documentElement);
-            const lineColor = style.getPropertyValue('--text-main').trim();
-            const gridColor = style.getPropertyValue('--chart-grid').trim();
-            const textColor = style.getPropertyValue('--text-sub').trim();
+            const brandColor = "#8E24AA"; 
+            const textColor = "#B39DDB";
 
             let currentPrice = pair ? parseFloat(pair.priceUsd) : 0.1732;
             let dataPoints = [];
             let labels = [];
             let val = currentPrice * 0.85; 
             for(let i=0; i<30; i++) {
-                labels.push("Day " + (i+1));
+                labels.push("");
                 let change = (Math.random() - 0.4) * (currentPrice * 0.05);
                 val += change;
                 if(i===29) val = currentPrice;
                 dataPoints.push(val);
             }
             document.getElementById('dashPriceVal').innerText = "$" + currentPrice.toFixed(6);
-            document.getElementById('dashPriceChg').innerText = "-1.74%"; 
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(142, 36, 170, 0.5)');
+            gradient.addColorStop(1, 'rgba(142, 36, 170, 0)');
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
@@ -1439,20 +837,21 @@ function hideModal() {
                     datasets: [{
                         label: 'Price',
                         data: dataPoints,
-                        borderColor: lineColor,
+                        borderColor: brandColor,
+                        backgroundColor: gradient,
                         borderWidth: 2,
                         tension: 0.4,
                         pointRadius: 0,
-                        fill: false
+                        fill: true
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false } },
+                    plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false, backgroundColor: '#12081f', titleColor: '#fff', bodyColor: '#fff', borderColor:'#8E24AA', borderWidth:1 } },
                     scales: {
-                        x: { display: true, grid: { display: false }, ticks: { maxTicksLimit: 6, font:{family:'Courier Prime'}, color: textColor } },
-                        y: { display: true, position:'right', grid: { color: gridColor }, ticks: { callback: function(value){ return '$' + value.toFixed(4); }, font:{family:'Courier Prime'}, color: textColor } }
+                        x: { display: false },
+                        y: { display: true, position:'right', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: function(value){ return '$' + value.toFixed(4); }, font:{family:'Inter'}, color: textColor } }
                     },
                     interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
@@ -1461,21 +860,12 @@ function hideModal() {
 
         async function fetchUserStats() {
             if(!provider) return;
-            const isQuery = document.getElementById('chkQuery').checked;
             let targetAddr = userAddr;
-            if(isQuery) {
+            if(isQueryMode) {
                 const inputVal = document.getElementById('queryInput').value;
-                if(ethers.isAddress(inputVal)) {
-                    targetAddr = inputVal;
-                    document.getElementById('userAddrDisplay').innerText = targetAddr.substring(0,8) + "..." + targetAddr.substring(36);
-                } else {
-                    document.getElementById('userWallet').innerText = "---";
-                    return;
-                }
-            } else {
-                if(!userAddr) return;
-                document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
-            }
+                if(ethers.isAddress(inputVal)) targetAddr = inputVal;
+                else { document.getElementById('userWallet').innerText = "---"; return; }
+            } else { if(!userAddr) return; }
             try {
                 const tokenContract = new ethers.Contract(ADDR_THESTRAT, MINIMAL_STRAT_ABI, provider);
                 const walletWei = await tokenContract.balanceOf(targetAddr);
@@ -1486,13 +876,15 @@ function hideModal() {
         async function fetchSwapBalances() {
             if(!userAddr || !provider) return;
             try {
-                const tIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
-                const tOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                // Determine tokens based on current isBuy state
+                const tIn = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                const tOut = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
                 const cIn = new ethers.Contract(tIn, MINIMAL_STRAT_ABI, provider);
                 const cOut = new ethers.Contract(tOut, MINIMAL_STRAT_ABI, provider);
                 const [bIn, bOut] = await Promise.all([ cIn.balanceOf(userAddr), cOut.balanceOf(userAddr) ]);
                 const bInFmt = ethers.formatUnits(bIn, 18); 
                 const bOutFmt = ethers.formatUnits(bOut, 18);
+                
                 document.getElementById('sBal').innerText = parseFloat(bInFmt).toFixed(4);
                 document.getElementById('sBal').dataset.raw = bInFmt;
                 document.getElementById('bBal').innerText = parseFloat(bOutFmt).toFixed(4);
@@ -1511,34 +903,42 @@ function hideModal() {
             const chg = pair.priceChange.h24;
             const chgEl = document.getElementById('cardChange');
             chgEl.innerText = (chg >= 0 ? "+" : "") + chg + "%";
-            chgEl.style.color = chg >= 0 ? "var(--accent-green)" : "var(--accent-red)";
+            chgEl.className = chg >= 0 ? "mb-2 px-3 py-1 rounded-lg text-sm font-bold bg-success/10 text-success border border-success/20" : "mb-2 px-3 py-1 rounded-lg text-sm font-bold bg-danger/10 text-danger border border-danger/20";
+            document.getElementById('dashPriceChg').innerText = (chg >= 0 ? "+" : "") + chg + "%";
+            document.getElementById('dashPriceChg').className = chg >= 0 ? "text-sm text-success font-medium" : "text-sm text-danger font-medium";
+
             document.getElementById('cardFdv').innerText = fmtUSD(pair.fdv);
             document.getElementById('cardLiq').innerText = fmtUSD(pair.liquidity.usd);
-            document.getElementById('cTok1').innerText = "THESTRAT";
-            document.getElementById('cVal1').innerText = fmtNum(pair.liquidity.base);
-            document.getElementById('cTok2').innerText = pair.quoteToken.symbol;
-            document.getElementById('cVal2').innerText = fmtNum(pair.liquidity.quote);
+            
+            const liqBase = pair.liquidity.base;
+            const liqQuote = pair.liquidity.quote;
+            
+            document.getElementById('cVal1').innerText = fmtNum(liqBase);
+            document.getElementById('cVal2').innerText = fmtNum(liqQuote);
+            
             document.getElementById('barMC').innerText = fmtUSD(pair.fdv);
             document.getElementById('barVol').innerText = fmtUSD(pair.volume.h24);
+            document.getElementById('barBurn').innerText = "0"; 
             document.getElementById('barChg').innerText = (chg >= 0 ? "+" : "") + chg + "%";
-            document.getElementById('barChg').style.color = chg >= 0 ? "var(--accent-green)" : "var(--accent-red)";
+            document.getElementById('barChg').className = chg >= 0 ? "text-success font-bold font-display" : "text-danger font-bold font-display";
+            
             updateSwapInputs();
         }
 
         function updateSwapInputs() {
-            const tBase = { sym: "THESTRAT", name: "THESTRAT", icon: IMG_THESTRAT };
-            const tQuote = { sym: "fBOMB", name: "fBOMB", icon: IMG_BOMB };
-            const tin = isBuy ? tBase : tQuote;
-            const tout = isBuy ? tQuote : tBase;
+            const tStrat = { sym: "THESTRAT", name: "Thena Strategy", icon: IMG_THESTRAT };
+            const tBomb = { sym: "fBOMB", name: "fBOMB", icon: IMG_BOMB };
+            
+           
+            const tin = isBuy ? tBomb : tStrat;
+            const tout = isBuy ? tStrat : tBomb;
+            
             document.getElementById('sSym').innerText = tin.sym;
-            document.getElementById('sName').innerText = tin.name;
             document.getElementById('sIcon').src = tin.icon;
+            
             document.getElementById('bSym').innerText = tout.sym;
-            document.getElementById('bName').innerText = tout.name;
             document.getElementById('bIcon').src = tout.icon;
-            const helpBtn = document.getElementById('mobileInfoBtn');
-            if (tin.sym === "fBOMB") helpBtn.classList.add('show-btn');
-            else helpBtn.classList.remove('show-btn');
+
             fetchSwapBalances();
             calc();
         }
@@ -1552,10 +952,10 @@ function hideModal() {
 
         async function getBestRoute(amountInWei, tokenIn, tokenOut, routerContract) {
             const routeDir = [{ from: tokenIn, to: tokenOut, stable: false }];
-            try { const amounts = await routerContract.getAmountsOut(amountInWei, routeDir); return { route: routeDir, amounts }; } catch (e) { console.log("Direct route failed, checking reserves..."); }
+            try { const amounts = await routerContract.getAmountsOut(amountInWei, routeDir); return { route: routeDir, amounts }; } catch (e) { }
             const routeWbnb = [{ from: tokenIn, to: ADDR_WBNB, stable: false }, { from: ADDR_WBNB, to: tokenOut, stable: false }];
             try { const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb); return { route: routeWbnb, amounts }; } catch (e) {}
-            throw new Error("No Liquidity or Price Impact too High");
+            throw new Error("No Liquidity");
         }
 
         function calc() {
@@ -1567,14 +967,14 @@ function hideModal() {
                 document.getElementById('sUsd').innerHTML = "$0.00";
                 return;
             }
-            if(!provider) { document.getElementById('outAmt').placeholder = "Connect Wallet"; return; }
+            if(!provider) { document.getElementById('outAmt').placeholder = "Connect"; return; }
             
             clearTimeout(quoteTimeout);
             quoteTimeout = setTimeout(async () => {
                 try {
                     const router = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, provider);
-                    const tokenIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
-                    const tokenOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                    const tokenIn = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                    const tokenOut = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
                     const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
                     const outAbi = (tokenOut === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
                     const tokenContract = new ethers.Contract(tokenIn, inAbi, provider);
@@ -1589,150 +989,81 @@ function hideModal() {
                     const minReceived = rawAmtOut * slipFactor;
                     
                     document.getElementById('outAmt').value = minReceived.toFixed(6);
-                    const priceIn = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
+                    const priceIn = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
                     document.getElementById('sUsd').innerText = fmtUSD(val * priceIn);
-                    const priceOut = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
+                    const priceOut = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
                     document.getElementById('bUsd').innerText = fmtUSD(minReceived * priceOut);
-                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'THESTRAT':'fBOMB'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'fBOMB':'THESTRAT'}`;
+                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'THESTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'THESTRAT':'fBOMB'}`;
                     document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
                 } catch(e) { console.log(e); }
             }, 500);
         }
 
         document.getElementById('mainActionBtn').addEventListener('click', async () => {
-    if(!userAddr) return connectWallet();
-    const btn = document.getElementById('mainActionBtn');
-    const val = document.getElementById('inpAmt').value;
-    
-    if(!val) return showToast("Enter Amount", "error"); 
-    showModal("Processing", "Initializing transaction...");
-    
-    btn.innerText = "PROCESSING...";
-    btn.disabled = true;
-    
-    try {
-        const tokenIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
-        const tokenOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
-        const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
-        
-        const tokenContract = new ethers.Contract(tokenIn, inAbi, signer);
-        const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
-        
-        const decimals = await tokenContract.decimals();
-        const amountInWei = ethers.parseUnits(val.toString(), decimals);
-        
-        updateModalText("Checking Allowance", "Please wait...");
-        const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
-        
-        if(allowance < amountInWei) {
-            updateModalText("Approval Needed", "Please approve in wallet"); 
-            btn.innerText = "APPROVING...";
-            const txApp = await tokenContract.approve(ADDR_ROUTER, ethers.MaxUint256);
+            if(!userAddr) return connectWallet();
+            const btn = document.getElementById('mainActionBtn');
+            const val = document.getElementById('inpAmt').value;
             
-            updateModalText("Approving...", "Waiting for confirmation...");
-            await txApp.wait();
-            showToast("Approved Successfully", "success");
-        }
+            if(!val) return showToast("Enter Amount", "error"); 
+            showModal("Swapping", "Confirm transaction in wallet...");
+            
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            
+            try {
+                const tokenIn = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                const tokenOut = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
+                const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
+                
+                const tokenContract = new ethers.Contract(tokenIn, inAbi, signer);
+                const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
+                
+                const decimals = await tokenContract.decimals();
+                const amountInWei = ethers.parseUnits(val.toString(), decimals);
+                
+                document.getElementById('modalTitle').innerText = "Approving";
+                const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
+                
+                if(allowance < amountInWei) {
+                    const txApp = await tokenContract.approve(ADDR_ROUTER, ethers.MaxUint256);
+                    await txApp.wait();
+                }
 
-        btn.innerText = "SWAPPING...";
-        updateModalText("Sign Transaction", "Please confirm swap in wallet"); 
+                document.getElementById('modalTitle').innerText = "Confirm Swap";
+                const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
+                const expectedOut = routeRes.amounts[routeRes.amounts.length-1];
+                const minOut = (expectedOut * BigInt((100 - slippage)*100)) / 10000n;
+                const deadline = Math.floor(Date.now()/1000) + 600;
 
-        const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
-        const expectedOut = routeRes.amounts[routeRes.amounts.length-1];
-        const minOut = (expectedOut * BigInt((100 - slippage)*100)) / 10000n;
-        const deadline = Math.floor(Date.now()/1000) + 600;
-
-        const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-            amountInWei, minOut, routeRes.route, userAddr, deadline, { gasLimit: 500000 }
-        );
-        
-        updateModalText("Swapping...", "Transaction pending...");
-        await tx.wait();
-        
-        setModalSuccess(tx.hash);
-        showToast("Swap Successful", "success");
-        
-        fetchSwapBalances();
-        calc();
-    } catch(e) { 
-        console.error(e); 
-        let errorMsg = "Transaction failed";
-        if(e.message.includes("User denied")) errorMsg = "User rejected transaction";
-        else if(e.message.includes("require(false)") || e.code === "CALL_EXCEPTION") errorMsg = "Slippage too low";
-        else if(e.reason) errorMsg = e.reason;
-        
-        setModalError(errorMsg);
-        showToast("Swap Failed", "error");
-    }
-    
-    btn.innerText = "SWAP";
-    btn.disabled = false;
-});
+                const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                    amountInWei, minOut, routeRes.route, userAddr, deadline, { gasLimit: 500000 }
+                );
+                
+                document.getElementById('modalTitle').innerText = "Pending";
+                await tx.wait();
+                
+                setModalSuccess(tx.hash);
+                showToast("Swap Successful", "success");
+                fetchSwapBalances(); calc();
+            } catch(e) { 
+                console.error(e); 
+                let errorMsg = "Transaction failed";
+                if(e.message.includes("User denied")) errorMsg = "Rejected by user";
+                setModalError(errorMsg);
+                showToast("Failed", "error");
+            }
+            btn.innerText = "SWAP";
+            btn.disabled = false;
+        });
 
         function toggleAds() {
-            document.body.classList.toggle('show-ads');
-            const btn = document.getElementById('mobileInfoBtn');
-            if (document.body.classList.contains('show-ads')) {
-                btn.innerText = "X";
-                btn.style.color = "var(--accent-red)";
-                btn.style.borderColor = "var(--accent-red)"; 
-            } else {
-                btn.innerText = "?";
-                btn.style.color = "var(--text-sub)";
-                btn.style.borderColor = "var(--text-sub)";
-            }
+            const el = document.getElementById('leftAdBox');
+            el.classList.toggle('hidden');
         }
-        document.addEventListener('click', function(e) {
-            if (document.body.classList.contains('show-ads')) {
-                if (!e.target.closest('#leftAdBox') && !e.target.closest('#rightBadgeBox') && !e.target.closest('#mobileInfoBtn')) toggleAds();
-            }
-        });
-        function closeAd(id) { document.getElementById(id).style.display = 'none'; }
         function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
         function fmtNum(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n); }
 
         init();
     </script>
-	
-    <div id="leftAdBox" class="ad-box">
-<div class="close-btn" onclick="toggleAds()">X</div>
-        
-        <div class="ad-crop-zone">
-            <img src="https://thena.fi/favicon/apple-touch-icon.png" class="ad-watermark">
-        </div>
-
-        <div class="ad-body">
-            <img src="fBOMB_token_whiteblue_blackcircle.png" class="ad-main-icon">
-            <div class="ad-title">Don't have fBOMB on BNB?</div>
-            
-            <div class="ad-dropdown">
-                <button class="ad-drop-btn">GET fBOMB <span>&#9660;</span></button>
-                <div class="ad-drop-content">
-                    <a href="https://thena.fi/swap?outputCurrency=0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979" target="_blank">BUY ON THENA</a>
-                    <a href="https://mclb.org/bridge/fBomb" target="_blank">BRIDGE HERE</a>
-                </div>
-            </div>
-        </div>
-
-        <a href="https://mclb.org" target="_blank" class="ad-footer">
-            <span class="ad-footer-lbl">by MCLB.org</span>
-            <img src="https://mclb.org/assets/figma/mclb-logo.svg" alt="MCLB" class="mclb-logo">
-        </a>
-    </div>  
-    <div id="rightBadgeBox" class="right-badge-box">            
-    <a href="https://eliteness.network/ethena/" target="_blank" id="rightBadgeBox" class="float-badge">
-        <div class="close-btn" onclick="event.preventDefault(); event.stopPropagation(); closeAd('rightBadgeBox')">X</div>
-        
-        <div class="float-badge-inner">
-            <img src="https://ftm.guru/icons/eliteness.png" alt="" class="float-watermark">
-            <img src="https://ftm.guru/icons/ethena.png" alt="eTHENA" class="float-icon">
-            <div class="float-content">
-                <span class="float-title">Powered by eTHENA</span>
-                <span class="float-sub">by Eliteness Network</span>
-            </div>
-        </div>
-    </a>
-    </div>
-
 </body>
 </html>
