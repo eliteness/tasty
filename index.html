@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thena Strategy | Elite DeFi</title>
+    <title>Thena Strategy</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
@@ -216,15 +216,15 @@
                                 </div>
                             </div>
 
-                          <div class="input-box rounded-2xl p-3.5 mb-1 relative group">
+<div class="input-box rounded-2xl p-3.5 mb-1 relative group">
     <div class="flex justify-between mb-2 text-xs">
         <span class="text-gray-400 font-medium ml-1">Sell</span>
         <span class="text-gray-400">Bal: <span id="sBal" class="text-white font-mono">0.00</span> <span onclick="setMax()" class="cursor-pointer text-brand-accent hover:text-white ml-2 font-bold transition-colors">MAX</span></span>
     </div>
     <div class="flex items-center gap-3">
         <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
-            <img src="thenastrat_token_logo_white_gradient.png" id="sIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
-            <span id="sSym" class="font-display font-bold text-sm sm:text-base">THESTRAT</span>
+            <img src="fBOMB_token_whiteblue_blackcircle.png" id="sIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
+            <span id="sSym" class="font-display font-bold text-sm sm:text-base">fBOMB</span>
         </div>
 
         <button id="helpBtnSell" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">
@@ -236,21 +236,15 @@
     <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="sUsd">$0.00</div>
 </div>
 
-                            <div class="relative h-2 flex items-center justify-center z-10">
-                                <button onclick="toggleSwap()" class="absolute bg-[#12081f] border border-[#2d1b4e] p-2 rounded-lg text-brand-primary hover:text-white hover:bg-brand-primary hover:border-brand-primary hover:rotate-180 transition-all duration-300 shadow-xl">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-                                </button>
-                            </div>
-
-                           <div class="input-box rounded-2xl p-3.5 mt-1">
+<div class="input-box rounded-2xl p-3.5 mt-1">
     <div class="flex justify-between mb-2 text-xs">
         <span class="text-gray-400 font-medium ml-1">Buy</span>
         <span class="text-gray-400">Bal: <span id="bBal" class="text-white font-mono">0.00</span></span>
     </div>
     <div class="flex items-center gap-3">
         <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
-            <img src="fBOMB_token_whiteblue_blackcircle.png" id="bIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
-            <span id="bSym" class="font-display font-bold text-sm sm:text-base">fBOMB</span>
+            <img src="thenastrat_token_logo_white_gradient.png" id="bIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
+            <span id="bSym" class="font-display font-bold text-sm sm:text-base">THESTRAT</span>
         </div>
 
         <button id="helpBtnBuy" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">
@@ -261,6 +255,14 @@
     </div>
     <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="bUsd">$0.00</div>
 </div>
+
+                           <div class="relative h-2 flex items-center justify-center z-10">
+    <button id="swapArrowBtn" onclick="toggleSwap()" class="absolute bg-[#12081f] border border-[#2d1b4e] p-2 rounded-lg text-brand-primary hover:text-white hover:bg-brand-primary hover:border-brand-primary transition-all duration-300 shadow-xl">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </button>
+</div>
+
+                          
 
                             <div class="mt-6 space-y-2 px-2">
                                 <div class="flex justify-between text-xs font-medium">
@@ -1006,12 +1008,14 @@ function toggleAds() {
     }
 }
 
-        function toggleSwap() {
-            isBuy = !isBuy;
-            document.getElementById('inpAmt').value = "";
-            document.getElementById('outAmt').value = "";
-            updateSwapInputs();
-        }
+       function toggleSwap() {
+    isBuy = !isBuy;
+    document.getElementById('inpAmt').value = "";
+    document.getElementById('outAmt').value = "";
+        document.getElementById('swapArrowBtn').classList.toggle('rotate-180');
+    
+    updateSwapInputs();
+}
 
         async function getBestRoute(amountInWei, tokenIn, tokenOut, routerContract) {
             const routeDir = [{ from: tokenIn, to: tokenOut, stable: false }];
