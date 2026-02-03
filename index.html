@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thena Strategy</title>
+    <title>Thena Strategy | Treasury</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <style>
@@ -90,6 +90,194 @@ input[type=number] { -moz-appearance: textfield; }
 .trade-label { font-family: 'Courier Prime', monospace; font-size: 14px; }
 .balance-display { font-family: 'Courier Prime', monospace; font-size: 11px; color: var(--text-sub); display: flex; gap: 5px; align-items: center; }
 
+.toast-container {
+    position: fixed;
+    /* Moved down from 20px to 80px to avoid covering the Connect button */
+    top: 80px; 
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+.cube-loader {
+    
+    display: block;         
+    text-align: center;     
+    width: 100%;
+    height: 40px;
+    margin: 10px auto 25px auto;
+}
+
+.cube {
+    display: inline-block; 
+    vertical-align: middle; 
+    width: 12px;
+    height: 12px;
+    margin: 0 5px;          
+    background-color: var(--text-main);
+    animation: cube-wave 1.2s infinite ease-in-out;
+    border-radius: 0;
+}
+
+.cube1 { animation-delay: -1.2s; }
+.cube2 { animation-delay: -1.1s; }
+.cube3 { animation-delay: -1.0s; }
+.cube4 { animation-delay: -0.9s; }
+
+@keyframes cube-wave {
+    0%, 40%, 100% { 
+        transform: scaleY(0.4); 
+        opacity: 0.5;
+    }
+    20% { 
+        transform: scaleY(1.2); 
+        opacity: 1;
+    }
+}
+[data-theme="dark"] .modal-token-icon[src*="thenastrat"] { 
+    filter: invert(1) !important;       
+    background: transparent !important; 
+    border: 1px solid #aaaaaa;          
+}
+.modal-token-icon {
+    width: 60px; 
+    height: 60px;
+    border-radius: 50%;
+  
+    border: 2px solid var(--border);
+    background: var(--bg-panel);
+    object-fit: contain; /* Ensures the logo fits nicely inside */
+}
+
+[data-theme="dark"] .modal-token-icon[src*="thenastrat"] { 
+    filter: invert(1); 
+}
+
+.loader-spinner { display: none; }
+
+
+.custom-toast {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    padding: 15px 20px;
+    min-width: 280px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.custom-toast.show { transform: translateX(0); }
+.custom-toast.success { border-left: 5px solid var(--accent-green); }
+.custom-toast.error { border-left: 5px solid var(--accent-red); }
+.custom-toast.info { border-left: 5px solid var(--text-main); }
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+}
+
+.modal-logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.modal-token-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-panel);
+    object-fit: cover;
+}
+
+.modal-arrow-anim {
+    width: 24px; height: 24px;
+    animation: pulseArrow 1.5s infinite;
+}
+
+@keyframes pulseArrow {
+    0% { transform: translateX(0); opacity: 0.5; }
+    50% { transform: translateX(5px); opacity: 1; }
+    100% { transform: translateX(0); opacity: 0.5; }
+}
+
+.loader-spinner {
+    width: 40px; height: 40px;
+    border: 4px solid var(--bg-panel);
+    border-top: 4px solid var(--text-main);
+    border-radius: 50%;
+    margin: 0 auto 20px auto;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.modal-status {
+    font-family: 'Merriweather', serif;
+    font-weight: 900;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.modal-sub {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+.modal-close {
+    margin-top: 20px;
+    background: var(--text-main);
+    color: var(--bg-body);
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+}
+
+/* Success Animation in Modal */
+.success-checkmark {
+    width: 50px; height: 50px; margin: 0 auto 20px auto;
+    color: var(--accent-green);
+    display: none;
+}
+.error-x {
+    width: 50px; height: 50px; margin: 0 auto 20px auto;
+    color: var(--accent-red);
+    display: none;
+}
 .max-btn {
     background: transparent; 
     border: 1px solid var(--text-main); 
@@ -756,7 +944,6 @@ input[type=number] { -moz-appearance: textfield; }
                         </div>
                     </div>
                 </div>
-
                 <div class="dash-col-right">
                     <div class="dash-card">
                         <div class="dash-card-title">Treasury Holdings</div>
@@ -852,6 +1039,33 @@ input[type=number] { -moz-appearance: textfield; }
             <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="thena-icon-sm">
             <span class="built-text">Thena</span>
         </div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="swapModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-logos">
+            <img src="" id="modalImgIn" class="modal-token-icon">
+            <svg class="modal-arrow-anim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <img src="" id="modalImgOut" class="modal-token-icon">
+        </div>
+        
+        <div id="modalSpinner" class="cube-loader">
+            <div class="cube cube1"></div>
+            <div class="cube cube2"></div>
+            <div class="cube cube3"></div>
+            <div class="cube cube4"></div>
+        </div>
+        
+        <svg id="modalSuccess" class="success-checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        
+        <svg id="modalError" class="error-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+
+        <div class="modal-status" id="modalTitle">Processing...</div>
+        <div class="modal-sub" id="modalDesc">Please confirm in your wallet</div>
+        
+        <button class="modal-close" id="modalCloseBtn" onclick="hideModal()">CLOSE</button>
+    </div>
+</div>
+
     </div>
 
  <script>
@@ -868,7 +1082,7 @@ input[type=number] { -moz-appearance: textfield; }
         const ADDR_THE      = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11"; 
         const ADDR_VETHE    = "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D"; 
 
-        let VETHE_RATIO = 2.50; // test
+        let VETHE_RATIO = 2.50; 
 
         const BSC_RPC = "https://bsc-dataseed.binance.org/";
 
@@ -983,40 +1197,125 @@ input[type=number] { -moz-appearance: textfield; }
             clearTimeout(queryTimeout);
             queryTimeout = setTimeout(() => { fetchUserStats(); }, 500);
         }
+	
+function setModalSuccess(txHash) {
+    document.getElementById('modalSpinner').style.display = 'none';
+    
+    document.getElementById('modalSuccess').style.display = 'block';
+    
+    document.getElementById('modalError').style.display = 'none';
 
-        async function connectWallet() {
-            if(!window.ethereum) return alert("Please install MetaMask!");
-            try {
-                provider = new ethers.BrowserProvider(window.ethereum);
-                signer = await provider.getSigner();
-                userAddr = await signer.getAddress();
-                
-                const net = await provider.getNetwork();
-                if(net.chainId !== 56n) {
-                    try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] }); }
-                    catch(e) { return alert("Switch to BSC"); }
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    signer = await provider.getSigner();
-                }
+    document.querySelector('.modal-logos').style.display = 'none';
 
-                document.getElementById('connectBtn').innerText = userAddr.substring(0,6) + "..." + userAddr.substring(38);
-                document.getElementById('mainActionBtn').innerText = "SWAP";
-                
-                const badge = document.getElementById('statusBadge');
-                badge.innerText = "Active";
-                badge.classList.remove('disconnected');
-                badge.style.background = "#00aa00";
-                document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
+    updateModalText("Transaction Complete", "Swap executed successfully!");
+    
+    const btn = document.getElementById('modalCloseBtn');
+    btn.style.display = 'inline-block';
+    
+    btn.onclick = function() { 
+        hideModal(); 
+    };
+}
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `custom-toast ${type}`;
+    
+    let icon = '';
+    if(type === 'success') icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+    else if(type === 'error') icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    else icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
 
-                calc();
-                updateDashboard();
-                fetchSwapBalances(); 
-                
-                if(document.getElementById('chkQuery').checked) handleQuery(); 
-                else fetchUserStats();
-                
-            } catch (e) { console.error(e); }
+    toast.innerHTML = `${icon} <span>${msg}</span>`;
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+function showModal(title, desc) {
+    const modal = document.getElementById('swapModal');
+    
+    document.getElementById('modalImgIn').src = document.getElementById('sIcon').src;
+    document.getElementById('modalImgOut').src = document.getElementById('bIcon').src;
+
+    document.getElementById('modalSpinner').style.display = 'block'; 
+    document.getElementById('modalSuccess').style.display = 'none';
+    document.getElementById('modalError').style.display = 'none';
+    document.getElementById('modalCloseBtn').style.display = 'none';
+
+    document.querySelector('.modal-logos').style.display = 'flex'; 
+    
+    updateModalText(title, desc);
+    modal.classList.add('active');
+}
+function updateModalText(title, desc) {
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalDesc').innerText = desc;
+}
+function setModalError(errMsg) {
+    document.getElementById('modalSpinner').style.display = 'none';
+    document.getElementById('modalError').style.display = 'block';
+    
+    document.querySelector('.modal-logos').style.display = 'none';
+
+    updateModalText("Transaction Failed", errMsg);
+    const btn = document.getElementById('modalCloseBtn');
+    btn.style.display = 'inline-block';
+    btn.onclick = function() { hideModal(); };
+}
+
+function setModalSuccess(txHash) {
+    document.getElementById('modalSpinner').style.display = 'none';
+    document.getElementById('modalSuccess').style.display = 'block';
+    document.querySelector('.modal-logos').style.display = 'none';
+    updateModalText("Transaction Complete", "Swap executed successfully!");
+    const btn = document.getElementById('modalCloseBtn');
+    btn.style.display = 'inline-block';
+    btn.onclick = function() { hideModal(); };
+}
+function hideModal() {
+    document.getElementById('swapModal').classList.remove('active');
+}
+       async function connectWallet() {
+    if(!window.ethereum) return showToast("Please install MetaMask!", "error");
+    try {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+        userAddr = await signer.getAddress();
+        
+        const net = await provider.getNetwork();
+        if(net.chainId !== 56n) {
+            try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] }); }
+            catch(e) { return showToast("Switch to BSC Network", "error"); }
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
         }
+
+        document.getElementById('connectBtn').innerText = userAddr.substring(0,6) + "..." + userAddr.substring(38);
+        document.getElementById('mainActionBtn').innerText = "SWAP";
+        
+        const badge = document.getElementById('statusBadge');
+        badge.innerText = "Active";
+        badge.classList.remove('disconnected');
+        badge.style.background = "#00aa00";
+        document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
+
+        showToast("Wallet Connected", "success"); 
+
+        calc();
+        updateDashboard();
+        fetchSwapBalances(); 
+        
+        if(document.getElementById('chkQuery').checked) handleQuery(); 
+        else fetchUserStats();
+        
+    } catch (e) { console.error(e); showToast("Connection failed", "error"); }
+}
 
         async function init() {
             document.getElementById('cardDate').innerText = new Date().toLocaleString();
@@ -1301,46 +1600,74 @@ input[type=number] { -moz-appearance: textfield; }
         }
 
         document.getElementById('mainActionBtn').addEventListener('click', async () => {
-            if(!userAddr) return connectWallet();
-            const btn = document.getElementById('mainActionBtn');
-            const val = document.getElementById('inpAmt').value;
-            if(!val) return alert("Enter Amount");
-            btn.innerText = "PROCESSING...";
-            btn.disabled = true;
-            try {
-                const tokenIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
-                const tokenOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
-                const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
-                const tokenContract = new ethers.Contract(tokenIn, inAbi, signer);
-                const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
-                const decimals = await tokenContract.decimals();
-                const amountInWei = ethers.parseUnits(val.toString(), decimals);
-                const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
-                if(allowance < amountInWei) {
-                    btn.innerText = "APPROVING...";
-                    const txApp = await tokenContract.approve(ADDR_ROUTER, ethers.MaxUint256);
-                    await txApp.wait();
-                }
-                btn.innerText = "SWAPPING...";
-                const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
-                const expectedOut = routeRes.amounts[routeRes.amounts.length-1];
-                const minOut = (expectedOut * BigInt((100 - slippage)*100)) / 10000n;
-                const deadline = Math.floor(Date.now()/1000) + 600;
-                const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                    amountInWei, minOut, routeRes.route, userAddr, deadline, { gasLimit: 500000 }
-                );
-                await tx.wait();
-                alert("Swap Successful: " + tx.hash);
-                fetchSwapBalances();
-                calc();
-            } catch(e) { 
-                console.error(e); 
-                if(e.message.includes("require(false)") || e.code === "CALL_EXCEPTION") alert("Swap Failed: Please increase Slippage.");
-                else alert("Swap Failed: " + (e.reason || e.message)); 
-            }
-            btn.innerText = "SWAP";
-            btn.disabled = false;
-        });
+    if(!userAddr) return connectWallet();
+    const btn = document.getElementById('mainActionBtn');
+    const val = document.getElementById('inpAmt').value;
+    
+    if(!val) return showToast("Enter Amount", "error"); 
+    showModal("Processing", "Initializing transaction...");
+    
+    btn.innerText = "PROCESSING...";
+    btn.disabled = true;
+    
+    try {
+        const tokenIn = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
+        const tokenOut = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+        const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
+        
+        const tokenContract = new ethers.Contract(tokenIn, inAbi, signer);
+        const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
+        
+        const decimals = await tokenContract.decimals();
+        const amountInWei = ethers.parseUnits(val.toString(), decimals);
+        
+        updateModalText("Checking Allowance", "Please wait...");
+        const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
+        
+        if(allowance < amountInWei) {
+            updateModalText("Approval Needed", "Please approve in wallet"); 
+            btn.innerText = "APPROVING...";
+            const txApp = await tokenContract.approve(ADDR_ROUTER, ethers.MaxUint256);
+            
+            updateModalText("Approving...", "Waiting for confirmation...");
+            await txApp.wait();
+            showToast("Approved Successfully", "success");
+        }
+
+        btn.innerText = "SWAPPING...";
+        updateModalText("Sign Transaction", "Please confirm swap in wallet"); 
+
+        const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
+        const expectedOut = routeRes.amounts[routeRes.amounts.length-1];
+        const minOut = (expectedOut * BigInt((100 - slippage)*100)) / 10000n;
+        const deadline = Math.floor(Date.now()/1000) + 600;
+
+        const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            amountInWei, minOut, routeRes.route, userAddr, deadline, { gasLimit: 500000 }
+        );
+        
+        updateModalText("Swapping...", "Transaction pending...");
+        await tx.wait();
+        
+        setModalSuccess(tx.hash);
+        showToast("Swap Successful", "success");
+        
+        fetchSwapBalances();
+        calc();
+    } catch(e) { 
+        console.error(e); 
+        let errorMsg = "Transaction failed";
+        if(e.message.includes("User denied")) errorMsg = "User rejected transaction";
+        else if(e.message.includes("require(false)") || e.code === "CALL_EXCEPTION") errorMsg = "Slippage too low";
+        else if(e.reason) errorMsg = e.reason;
+        
+        setModalError(errorMsg);
+        showToast("Swap Failed", "error");
+    }
+    
+    btn.innerText = "SWAP";
+    btn.disabled = false;
+});
 
         function toggleAds() {
             document.body.classList.toggle('show-ads');
