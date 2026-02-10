@@ -67,15 +67,15 @@
     <style>
         body {
             background-color: #05010a;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 0% 0%, rgba(142, 36, 170, 0.1), transparent 40%),
                 radial-gradient(circle at 100% 100%, rgba(217, 70, 239, 0.05), transparent 40%);
             background-attachment: fixed;
         }
-        
-        input[type=number]::-webkit-inner-spin-button, 
+
+        input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        
+
         .glass-panel {
             background: rgba(18, 8, 31, 0.6);
             backdrop-filter: blur(12px);
@@ -177,16 +177,16 @@
                 Thena Strategy
             </span>
         </div>
-        <button id="connectBtn" onclick="connectWallet()" 
+        <button id="connectBtn" onclick="connectWallet()"
             class="px-4 py-2 sm:px-6 sm:py-2.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-purple-900/20 hover:scale-105 hover:shadow-purple-900/40 transition-all duration-300 whitespace-nowrap">
             CONNECT WALLET
         </button>
     </div>
 </header>
 
-    
+
     <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
-        
+
         <div class="flex justify-center mb-8 sm:mb-12">
             <div class="flex p-1 bg-white/5 border border-white/5 rounded-full backdrop-blur-md relative">
                 <button onclick="switchTab('swap')" id="tab-swap" class="relative px-6 sm:px-10 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-display font-bold transition-all duration-300 overflow-hidden bg-brand-primary text-white shadow-lg z-10">
@@ -199,17 +199,17 @@
         </div>
 
         <div class="relative w-full max-w-7xl mx-auto">
-            
-           
+
+
             <div id="swap-view" class="relative transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-100 translate-x-0 scale-100 z-10 origin-top">
-                
+
                 <div class="flex flex-col lg:flex-row justify-center items-start gap-7 mx-auto">
-                    
-                  
+
+
                     <div class="w-full lg:w-[460px] flex flex-col gap-7">
-                        
+
                         <div class="glass-panel rounded-[24px] p-4 sm:p-5 relative">
-                            
+
                             <div class="flex justify-between items-center mb-4 sm:mb-5">
                                 <h2 class="text-lg sm:text-xl font-display font-bold text-white">Swap</h2>
                                 <button onclick="toggleSettings()" class="text-gray-400 hover:text-white transition-colors">
@@ -222,7 +222,7 @@
     <div class="flex gap-2">
         <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(12.0)">12%</button>
         <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(13.0)">13%</button>
-        
+
         <input type="number" id="customSlip" placeholder="Custom %" class="flex-1 bg-transparent border border-brand-border rounded-lg text-center text-xs text-white focus:outline-none focus:border-brand-secondary transition-colors" oninput="setCustomSlip()">
     </div>
 </div>
@@ -268,7 +268,7 @@
         <input type="text" id="outAmt" placeholder="0" readonly class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none cursor-default">
     </div>
     <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="bUsd">$0.00</div>
-</div>                                                   
+</div>
                             <div class="mt-6 space-y-2 px-2">
                                 <div class="flex justify-between text-xs font-medium">
         <span class="text-gray-500">Transfer Tax</span>
@@ -288,18 +288,25 @@
                                 CONNECT WALLET
                             </button>
                         </div>
-                    </div>                   
+                    </div>
                     <div class="w-full lg:w-[500px] flex flex-col gap-7">
                         <div class="glass-panel rounded-[24px] p-5 sm:p-6 h-full flex flex-col justify-between">
-                            
+
                             <div>
                                 <div class="mb-6">
-                                    <h3 id="cardPair" class="text-gray-400 font-display font-bold text-base sm:text-lg mb-1 tracking-wide">THESTRAT / fBOMB</h3>
+                                    <h3 id="cardPair" class="text-gray-400 font-display font-bold text-base sm:text-lg mb-1 tracking-wide">
+                                    	THESTRAT / fBOMB
+                                    	<span id="cardChange" class="mb-1 px-2 py-0.5 rounded text-xs font-bold bg-danger/10 text-danger border border-danger/20">-0.00%</span>
+                                    </h3>
                                     <div class="flex items-end gap-3">
                                         <div id="cardPrice" class="text-4xl sm:text-5xl font-display font-extrabold text-white tracking-tight leading-none">
-                                            $0.0001
+                                            $-.--
                                         </div>
-                                        <span id="cardChange" class="mb-1 px-2 py-0.5 rounded text-xs font-bold bg-danger/10 text-danger border border-danger/20">-0.00%</span>
+                                    </div>
+                                    <div class="flex items-end gap-1">
+                                        <div id="cardPriceInTokens" class="text-xl sm:text-xl font-display font-extrabold text-white tracking-tight leading-none">
+                                            -.-- fBOMB
+                                        </div>
                                     </div>
                                 </div>
 
@@ -321,7 +328,7 @@
                                             <div class="w-5 h-5 bg-[#0a0510] rounded-full absolute top-1.5 left-1.5"></div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex flex-col gap-3">
                                         <div class="bg-[#0a0510] rounded-xl p-3 border border-white/5 flex flex-col gap-2">
                                             <div class="flex justify-between items-center">
@@ -351,10 +358,10 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="w-full bg-[#0a0510] border border-white/10 rounded-2xl p-4 mt-auto relative overflow-visible">
                                 <div class="absolute -top-2.5 left-5 bg-[#0a0510] px-2 text-[9px] text-gray-500 font-bold uppercase tracking-widest z-20 border border-white/5 rounded-full">Smart Route</div>
-                                
+
                                 <div class="route-path-container h-8 mt-1">
                                     <div class="route-line-bg"></div>
                                     <div class="route-line-active animate-pulse-glow"></div>
@@ -377,7 +384,7 @@
 
             <div id="dashboard-view" class="absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-0 translate-x-[20px] scale-95 pointer-events-none z-0">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full pb-8">
-                    
+
                     <div class="lg:col-span-2 flex flex-col gap-6">
                         <div class="glass-panel rounded-[24px] p-4 sm:p-6 min-h-[350px] lg:min-h-[450px] relative flex flex-col">
                             <div class="flex justify-between items-start mb-4">
@@ -416,15 +423,15 @@
                     </div>
 
                     <div class="flex flex-col gap-6">
-                        
+
                         <div class="bg-gradient-to-br from-brand-card to-[#2e1045] border border-brand-primary/30 rounded-[24px] p-5 sm:p-6 relative overflow-hidden group">
                             <div class="absolute top-[-50%] right-[-50%] w-64 h-64 bg-brand-accent/20 rounded-full blur-3xl group-hover:bg-brand-accent/30 transition-all duration-700"></div>
-                            
+
                             <div class="relative z-10">
                                 <div class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Protocol Treasury</div>
                                 <div id="repTotalValue" class="text-3xl sm:text-4xl font-display font-extrabold text-success mb-1 drop-shadow-lg">$0.00</div>
                                 <div class="text-xs text-brand-secondary mb-6 font-medium">Estimated Intrinsic Value</div>
-                                
+
                                 <div class="border-t border-white/10 pt-4 space-y-4">
                                     <div class="flex justify-between items-center text-sm">
                                         <span class="text-gray-400">eTHENA Staked</span>
@@ -455,7 +462,7 @@
     </div>
 
     <div class="flex flex-col gap-6 my-4">
-        
+
         <div class="flex flex-col items-center justify-center">
             <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">THESTRAT Balance</div>
             <div class="flex items-center gap-3">
@@ -468,7 +475,7 @@
         </div>
 
         <div class="w-2/3 mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-       
+
     </div>
 
     <button onclick="copyAddress()" class="w-full mt-2 flex items-center justify-between px-4 py-3 bg-white/5 border border-dashed border-white/20 rounded-xl hover:bg-brand-primary/20 hover:border-brand-primary/50 hover:text-white text-gray-400 transition-all group">
@@ -489,10 +496,16 @@
             <a href="https://thenastrategy.gitbook.io/thena-strategy/" class="text-gray-500 hover:text-brand-accent hover:-translate-y-1 transition-all"><svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></a>
             <a href="https://t.me/ThenaStrategy" class="text-gray-500 hover:text-brand-accent hover:-translate-y-1 transition-all"><svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg></a>
         </div>
-        <div class="flex justify-center items-center gap-2 text-xs text-gray-500 opacity-80">
-            <span>Powering the ecosystem on</span>
-            <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="w-4 h-4 hover:scale-110 transition-transform">
-            <span class="font-bold tracking-wide">THENA</span>
+        <div class="flex justify-center items-center gap-2 text-xs text-gray-500 opacity-80 mt-4 mb-4">
+            <span class="font-bold tracking-wide text-xs sm:text-xs">Powered by</span>
+        </div>
+        <div class="flex justify-center items-center gap-2 text-l text-gray-500 opacity-80">
+	        <img onclick="window.open('https://mclb.org')"  src="mclb.svg" alt="Thena" class="w-4 h-4 hover:scale-110 transition-transform">
+	        <span onclick="window.open('https://mclb.org')" class="font-bold tracking-wide">Millennium Club</span>
+	        <img onclick="window.open('https://thena.fi')"  src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="w-4 h-4 hover:scale-110 transition-transform">
+	        <span onclick="window.open('https://thena.fi')"  class="font-bold tracking-wide">THENA.fi</span>
+	        <img onclick="window.open('https://eliteness.network')"  src="https://ftm.guru/icons/eliteness.png" alt="Thena" class="w-4 h-4 hover:scale-110 transition-transform">
+	        <span onclick="window.open('https://eliteness.network')"  class="font-bold tracking-wide">Eliteness Network</span>
         </div>
     </footer>
 
@@ -501,13 +514,13 @@
     <div id="swapModal" class="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm hidden flex justify-center items-center opacity-0 transition-opacity duration-300">
         <div class="bg-[#1a0b2e] border border-brand-primary w-[90%] max-w-sm p-8 rounded-3xl text-center shadow-[0_0_50px_rgba(142,36,170,0.3)] transform scale-95 transition-transform duration-300 relative">
             <div id="modalSpinner" class="w-12 h-12 border-4 border-white/10 border-t-brand-primary rounded-full animate-spin mx-auto mb-6"></div>
-            
+
             <svg id="modalSuccess" class="hidden w-16 h-16 text-success mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             <svg id="modalError" class="hidden w-16 h-16 text-danger mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
 
             <div class="text-xl font-display font-bold text-white mb-2" id="modalTitle">Processing...</div>
             <div class="text-sm text-gray-400 mb-6" id="modalDesc">Please confirm transaction in your wallet</div>
-            
+
             <button id="modalCloseBtn" class="hidden bg-white/5 border border-white/10 text-white px-6 py-2 rounded-lg hover:bg-white/10 transition-colors" onclick="hideModal()">Close</button>
         </div>
     </div>
@@ -523,22 +536,22 @@
         <a href="https://mclb.org/bridge" target="_blank" class="block text-center text-[10px] font-bold bg-white/5 hover:bg-brand-secondary text-white py-2 rounded-lg transition-colors">Bridge from MCLB.org</a>
     </div>
 </div>
-    
+
     <div id="mobileInfoBtn" class="hidden" onclick="toggleAds()"></div>
 
     <script>
         const ADDR_ROUTER   = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
-        const ADDR_THESTRAT = "0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C"; 
+        const ADDR_THESTRAT = "0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C";
         const ADDR_FBOMB    = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
         const ADDR_WBNB     = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-        const ADDR_TREASURY = "0x28aa4f9ffe21365473b64c161b566c3cdead0108"; 
-        const ADDR_GAUGE    = "0xce6b9bae3c330e0455d1af0ae3996f496cdbf1f1"; 
-        const ADDR_LP_PAIR  = "0x7245D36825acFE58dE64E1b4A5F6d95662628faA";
+        const ADDR_TREASURY = "0x28aa4f9ffe21365473b64c161b566c3cdead0108";
+        const ADDR_GAUGE    = "0xce6b9bae3c330e0455d1af0ae3996f496cdbf1f1";
+        const ADDR_LP_PAIR  = "0x7309c3e4c48327E24f6641625afb5e4636704b80";//"0x7245D36825acFE58dE64E1b4A5F6d95662628faA";
         const ADDR_ETHENA   = "0xafbe3b8b0939a5538DE32f7752A78e08C8492295";
-        const ADDR_THE      = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11"; 
-        const ADDR_VETHE    = "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D"; 
+        const ADDR_THE      = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
+        const ADDR_VETHE    = "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D";
 
-        let VETHE_RATIO = 2.50; 
+        let VETHE_RATIO = 2.50;
         const BSC_RPC = "https://bsc-dataseed.binance.org/";
 
         const IMG_BOMB = "fBOMB_token_whiteblue_blackcircle.png";
@@ -553,7 +566,7 @@
 
         let provider, signer, userAddr;
         let pair = null;
-        let isBuy = true; 
+        let isBuy = true;
         let slippage = 12.0;
         let quoteTimeout = null;
         let chartInstance = null;
@@ -565,7 +578,7 @@
     const dashBtn = document.getElementById('tab-dashboard');
     const swapView = document.getElementById('swap-view');
     const dashView = document.getElementById('dashboard-view');
-    
+
     const activeClass = ['bg-brand-primary', 'text-white', 'shadow-lg'];
     const inactiveClass = ['text-gray-400', 'hover:text-white'];
 
@@ -578,10 +591,10 @@
         swapBtn.classList.remove(...inactiveClass);
         dashBtn.classList.remove(...activeClass);
         dashBtn.classList.add(...inactiveClass);
-        
+
         removePosClasses(swapView);
         swapView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
-        
+
         removePosClasses(dashView);
         dashView.classList.add('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute', 'z-0');
     } else {
@@ -592,35 +605,35 @@
 
         removePosClasses(dashView);
         dashView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
-        
+
         removePosClasses(swapView);
         swapView.classList.add('opacity-0', 'translate-x-[-20px]', 'pointer-events-none', 'scale-95', 'absolute', 'z-0');
-        
+
         updateDashboard();
         fetchUserStats();
         setTimeout(() => { if(chartInstance) renderPriceChart(); else renderPriceChart(); }, 300);
     }
 }
-        function toggleSettings() { 
+        function toggleSettings() {
             const panel = document.getElementById('settingsPanel');
             const gear = document.getElementById('settingsGear');
             panel.classList.toggle('open');
             gear.classList.toggle('active');
         }
 
-        function setSlip(val) { 
-            slippage = val; 
-            document.getElementById('customSlip').value = ""; 
-            updateSlipUI(); 
+        function setSlip(val) {
+            slippage = val;
+            document.getElementById('customSlip').value = "";
+            updateSlipUI();
         }
 
-        function setCustomSlip() { 
-            const val = parseFloat(document.getElementById('customSlip').value); 
-            if(!isNaN(val)) slippage = val; 
-            updateSlipUI(); 
+        function setCustomSlip() {
+            const val = parseFloat(document.getElementById('customSlip').value);
+            if(!isNaN(val)) slippage = val;
+            updateSlipUI();
         }
 
-        function updateSlipUI() { 
+        function updateSlipUI() {
             document.querySelectorAll('.slip-option').forEach(b => {
                 const isActive = parseFloat(b.innerText) === slippage && document.getElementById('customSlip').value === "";
                 if(isActive) {
@@ -631,7 +644,7 @@
                     b.classList.add('border-brand-border');
                 }
             });
-            calc(); 
+            calc();
         }
 
         function copyAddress() {
@@ -645,15 +658,15 @@
             const wrap = document.getElementById('queryWrap');
             const tabW = document.getElementById('tabWallet');
             const tabQ = document.getElementById('tabQuery');
-            
+
             if(enabled) {
                 wrap.classList.remove('hidden');
                 tabW.classList.remove('bg-brand-primary', 'text-white');
                 tabW.classList.add('text-gray-400', 'hover:text-white');
-                
+
                 tabQ.classList.add('bg-brand-primary', 'text-white');
                 tabQ.classList.remove('text-gray-400');
-                
+
                 document.getElementById('balanceLabel').innerText = "Query Balance";
                 document.getElementById('userWallet').innerText = "0.00";
             } else {
@@ -661,10 +674,10 @@
                 tabW.classList.add('bg-brand-primary', 'text-white');
                 tabQ.classList.remove('bg-brand-primary', 'text-white');
                 tabQ.classList.add('text-gray-400');
-                
-                document.getElementById('queryInput').value = ""; 
+
+                document.getElementById('queryInput').value = "";
                 document.getElementById('balanceLabel').innerText = "Balance";
-                fetchUserStats(); 
+                fetchUserStats();
             }
         }
 
@@ -678,29 +691,29 @@
             const toast = document.createElement('div');
             let borderColor = type === 'success' ? 'border-success' : (type === 'error' ? 'border-danger' : 'border-brand-primary');
             toast.className = `bg-[#140a1e] border-l-4 ${borderColor} text-white px-5 py-3 rounded-md shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0`;
-            
+
             let icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
             toast.innerHTML = `<span class="font-bold text-lg">${icon}</span> <span class="text-sm font-medium">${msg}</span>`;
-            
+
             container.appendChild(toast);
             requestAnimationFrame(() => {
                 toast.classList.remove('translate-x-full', 'opacity-0');
             });
-            setTimeout(() => { 
+            setTimeout(() => {
                 toast.classList.add('translate-x-full', 'opacity-0');
-                setTimeout(() => toast.remove(), 300); 
+                setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
 
         function showModal(title, desc) {
             const modal = document.getElementById('swapModal');
-            document.getElementById('modalSpinner').style.display = 'block'; 
+            document.getElementById('modalSpinner').style.display = 'block';
             document.getElementById('modalSuccess').classList.add('hidden');
             document.getElementById('modalError').classList.add('hidden');
             document.getElementById('modalCloseBtn').classList.add('hidden');
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalDesc').innerText = desc;
-            
+
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -726,7 +739,7 @@
             document.getElementById('modalCloseBtn').classList.remove('hidden');
             document.getElementById('modalCloseBtn').style.display = 'inline-block';
         }
-        function hideModal() { 
+        function hideModal() {
             const modal = document.getElementById('swapModal');
             modal.classList.add('opacity-0');
             modal.querySelector('div').classList.remove('scale-100');
@@ -740,7 +753,7 @@
                 provider = new ethers.BrowserProvider(window.ethereum);
                 signer = await provider.getSigner();
                 userAddr = await signer.getAddress();
-                
+
                 const net = await provider.getNetwork();
                 if(net.chainId !== 56n) {
                     try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] }); }
@@ -751,36 +764,37 @@
 
                 document.getElementById('connectBtn').innerHTML = `${userAddr.substring(0,6)}...${userAddr.substring(38)}`;
                 document.getElementById('mainActionBtn').innerText = "SWAP";
-                
+
                 const badge = document.getElementById('statusBadge');
                 badge.innerText = "Connected";
                 badge.className = "text-[10px] px-2 py-0.5 rounded bg-success/20 text-success font-medium border border-success/30";
                 document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
 
-                showToast("Wallet Connected", "success"); 
+                showToast("Wallet Connected", "success");
                 calc();
                 updateDashboard();
-                fetchSwapBalances(); 
+                fetchSwapBalances();
                 if(isQueryMode) handleQuery(); else fetchUserStats();
-                
+
             } catch (e) { console.error(e); showToast("Connection failed", "error"); }
         }
 
         async function init() {
     try {
         if(!provider) provider = new ethers.JsonRpcProvider(BSC_RPC);
-        
-        updateSlipUI(); 
-        
+
+        updateSlipUI();
+
         updateDashboard();
             } catch(e) { console.log("Init RPC error:", e); }
 
             try {
-                const res = await fetch("https://api.dexscreener.com/latest/dex/search?q=fbomb%20ethena");
+                //const res = await fetch("https://api.dexscreener.com/latest/dex/search?q=fbomb%20ethena");
+                const res = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/" + ADDR_LP_PAIR);
                 const data = await res.json();
                 if(data.pairs && data.pairs.length) {
                     pair = data.pairs[0];
-                    pair.baseToken.symbol = "THESTRAT"; 
+                    pair.baseToken.symbol = "THESTRAT";
                     updateAllUI();
                     renderPriceChart();
                 }
@@ -794,8 +808,8 @@
                 const pairContract = new ethers.Contract(ADDR_LP_PAIR, PAIR_ABI, provider);
                 const wbnbContract = new ethers.Contract(ADDR_WBNB, ERC20_ABI, provider);
                 const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
-                const veTheContract = new ethers.Contract(ADDR_VETHE, VETHE_ABI, provider);              
-                
+                const veTheContract = new ethers.Contract(ADDR_VETHE, VETHE_ABI, provider);
+
                 const etSupplyWei = await ethenaContract.totalSupply();
                 const etSupply = parseFloat(ethers.formatUnits(etSupplyWei, 18));
                 const veBalance = await veTheContract.balanceOf(ADDR_ETHENA);
@@ -806,13 +820,13 @@
                     totalVeLocked = parseFloat(ethers.formatUnits(lockedStruct[0], 18));
                 }
                 if (etSupply > 0 && totalVeLocked > 0) { VETHE_RATIO = totalVeLocked / etSupply; }
-                
+
                 const stakedLPWei = await gaugeContract.balanceOf(ADDR_TREASURY);
                 const stakedLP = parseFloat(ethers.formatUnits(stakedLPWei, 18));
                 const totalLPSupplyWei = await pairContract.totalSupply();
                 const totalLP = parseFloat(ethers.formatUnits(totalLPSupplyWei, 18));
                 const reserves = await pairContract.getReserves();
-                const reserveEthenaWei = reserves[1]; 
+                const reserveEthenaWei = reserves[1];
                 const totalEthenaPool = parseFloat(ethers.formatUnits(reserveEthenaWei, 18));
                 const poolShare = stakedLP / totalLP;
                 const myEthena = totalEthenaPool * poolShare;
@@ -831,23 +845,23 @@
                         const totalIntrinsicValue = myVeThe * priceOfThe;
                         const elemTotal = document.getElementById('repTotalValue');
                         if(elemTotal) elemTotal.innerText = fmtUSD(totalIntrinsicValue);
-                    } 
+                    }
                 } catch(e) {}
-                
+
             } catch(e) { console.error("Dashboard Update Error:", e); }
         }
 
         function renderPriceChart() {
             if(chartInstance) chartInstance.destroy();
             const ctx = document.getElementById('priceChart').getContext('2d');
-            
-            const brandColor = "#8E24AA"; 
+
+            const brandColor = "#8E24AA";
             const textColor = "#B39DDB";
 
             let currentPrice = pair ? parseFloat(pair.priceUsd) : 0.1732;
             let dataPoints = [];
             let labels = [];
-            let val = currentPrice * 0.85; 
+            let val = currentPrice * 0.85;
             for(let i=0; i<30; i++) {
                 labels.push("");
                 let change = (Math.random() - 0.4) * (currentPrice * 0.05);
@@ -892,18 +906,18 @@
        async function fetchUserStats() {
             if(!provider) return;
             let targetAddr = userAddr;
-            
+
             if(isQueryMode) {
                 const inputVal = document.getElementById('queryInput').value;
                 if(ethers.isAddress(inputVal)) {
                     targetAddr = inputVal;
-                } else { 
-                    document.getElementById('userWallet').innerText = "---"; 
-                    document.getElementById('userEthena').innerText = "---"; 
-                    return; 
+                } else {
+                    document.getElementById('userWallet').innerText = "---";
+                    document.getElementById('userEthena').innerText = "---";
+                    return;
                 }
-            } else { 
-                if(!userAddr) return; 
+            } else {
+                if(!userAddr) return;
             }
 
             try {
@@ -929,9 +943,9 @@
                 const cIn = new ethers.Contract(tIn, MINIMAL_STRAT_ABI, provider);
                 const cOut = new ethers.Contract(tOut, MINIMAL_STRAT_ABI, provider);
                 const [bIn, bOut] = await Promise.all([ cIn.balanceOf(userAddr), cOut.balanceOf(userAddr) ]);
-                const bInFmt = ethers.formatUnits(bIn, 18); 
+                const bInFmt = ethers.formatUnits(bIn, 18);
                 const bOutFmt = ethers.formatUnits(bOut, 18);
-                
+
                 document.getElementById('sBal').innerText = parseFloat(bInFmt).toFixed(4);
                 document.getElementById('sBal').dataset.raw = bInFmt;
                 document.getElementById('bBal').innerText = parseFloat(bOutFmt).toFixed(4);
@@ -946,42 +960,45 @@
         function updateAllUI() {
             if(!pair) return;
             document.getElementById('cardPair').innerText = `THESTRAT / ${pair.quoteToken.symbol}`;
-            document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(4);
+            document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(8);
+            document.getElementById('cardPriceInTokens').innerText = parseFloat(pair.priceNative).toFixed(8) + " fBOMB";
             const chg = pair.priceChange.h24;
-            const chgEl = document.getElementById('cardChange');
-            chgEl.innerText = (chg >= 0 ? "+" : "") + chg + "%";
-            chgEl.className = chg >= 0 ? "mb-2 px-3 py-1 rounded-lg text-sm font-bold bg-success/10 text-success border border-success/20" : "mb-2 px-3 py-1 rounded-lg text-sm font-bold bg-danger/10 text-danger border border-danger/20";
-            document.getElementById('dashPriceChg').innerText = (chg >= 0 ? "+" : "") + chg + "%";
-            document.getElementById('dashPriceChg').className = chg >= 0 ? "text-sm text-success font-medium" : "text-sm text-danger font-medium";
+            if(chg) {
+            	const chgEl = document.getElementById('cardChange');
+            	chgEl.innerText = (chg >= 0 ? "+" : "-") + chg + "%";
+            	chgEl.className = chg >= 0 ? "mb-2 px-3 py-1 rounded-lg text-sm font-bold bg-success/10 text-success border border-success/20" : "mb-2 px-3 py-1 rounded-lg text-sm font-bold bg-danger/10 text-danger border border-danger/20";
+            	document.getElementById('dashPriceChg').innerText = (chg >= 0 ? "+" : "-") + chg + "%";
+            	document.getElementById('dashPriceChg').className = chg >= 0 ? "text-sm text-success font-medium" : "text-sm text-danger font-medium";
+            }
 
             document.getElementById('cardFdv').innerText = fmtUSD(pair.fdv);
             document.getElementById('cardLiq').innerText = fmtUSD(pair.liquidity.usd);
-            
+
             const liqBase = pair.liquidity.base;
             const liqQuote = pair.liquidity.quote;
-            
+
             document.getElementById('cVal1').innerText = fmtNum(liqBase);
             document.getElementById('cVal2').innerText = fmtNum(liqQuote);
-            
+
             document.getElementById('barMC').innerText = fmtUSD(pair.fdv);
             document.getElementById('barVol').innerText = fmtUSD(pair.volume.h24);
-            document.getElementById('barBurn').innerText = "0"; 
+            document.getElementById('barBurn').innerText = "0";
             document.getElementById('barChg').innerText = (chg >= 0 ? "+" : "") + chg + "%";
             document.getElementById('barChg').className = chg >= 0 ? "text-success font-bold font-display" : "text-danger font-bold font-display";
-            
+
             updateSwapInputs();
         }
 
 function updateSwapInputs() {
     const tStrat = { sym: "THESTRAT", name: "Thena Strategy", icon: IMG_THESTRAT };
     const tBomb = { sym: "fBOMB", name: "fBOMB", icon: IMG_BOMB };
-    
+
     const tin = isBuy ? tBomb : tStrat;
     const tout = isBuy ? tStrat : tBomb;
-    
+
     document.getElementById('sSym').innerText = tin.sym;
     document.getElementById('sIcon').src = tin.icon;
-    
+
     document.getElementById('bSym').innerText = tout.sym;
     document.getElementById('bIcon').src = tout.icon;
 
@@ -1001,15 +1018,15 @@ function updateSwapInputs() {
 
 function toggleAds() {
     const el = document.getElementById('leftAdBox');
-    
+
     const isHidden = el.style.display === 'none' || el.classList.contains('hidden');
 
     if (isHidden) {
         el.classList.remove('hidden');
-        el.style.display = ''; 
+        el.style.display = '';
     } else {
         el.classList.add('hidden');
-        el.style.display = 'none'; 
+        el.style.display = 'none';
     }
 }
 
@@ -1018,7 +1035,7 @@ function toggleAds() {
     document.getElementById('inpAmt').value = "";
     document.getElementById('outAmt').value = "";
         document.getElementById('swapArrowBtn').classList.toggle('rotate-180');
-    
+
     updateSwapInputs();
 }
 
@@ -1035,12 +1052,12 @@ function toggleAds() {
             if(!val || val<=0) {
                 document.getElementById('outAmt').value = "";
                 document.getElementById('quoteTxt').innerText = "---";
-                document.getElementById('bUsd').innerHTML = "$0.00"; 
+                document.getElementById('bUsd').innerHTML = "$0.00";
                 document.getElementById('sUsd').innerHTML = "$0.00";
                 return;
             }
             if(!provider) { document.getElementById('outAmt').placeholder = "Connect"; return; }
-            
+
             clearTimeout(quoteTimeout);
             quoteTimeout = setTimeout(async () => {
                 try {
@@ -1081,27 +1098,27 @@ document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
             if(!userAddr) return connectWallet();
             const btn = document.getElementById('mainActionBtn');
             const val = document.getElementById('inpAmt').value;
-            
-            if(!val) return showToast("Enter Amount", "error"); 
+
+            if(!val) return showToast("Enter Amount", "error");
             showModal("Swapping", "Confirm transaction in wallet...");
-            
+
             btn.innerText = "Processing...";
             btn.disabled = true;
-            
+
             try {
                 const tokenIn = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
                 const tokenOut = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
                 const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
-                
+
                 const tokenContract = new ethers.Contract(tokenIn, inAbi, signer);
                 const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
-                
+
                 const decimals = await tokenContract.decimals();
                 const amountInWei = ethers.parseUnits(val.toString(), decimals);
-                
+
                 document.getElementById('modalTitle').innerText = "Approving";
                 const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
-                
+
                 if(allowance < amountInWei) {
                     const txApp = await tokenContract.approve(ADDR_ROUTER, ethers.MaxUint256);
                     await txApp.wait();
@@ -1116,15 +1133,15 @@ document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
                 const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
                     amountInWei, minOut, routeRes.route, userAddr, deadline, { gasLimit: 500000 }
                 );
-                
+
                 document.getElementById('modalTitle').innerText = "Pending";
                 await tx.wait();
-                
+
                 setModalSuccess(tx.hash);
                 showToast("Swap Successful", "success");
                 fetchSwapBalances(); calc();
-            } catch(e) { 
-                console.error(e); 
+            } catch(e) {
+                console.error(e);
                 let errorMsg = "Transaction failed";
                 if(e.message.includes("User denied")) errorMsg = "Rejected by user";
                 setModalError(errorMsg);
@@ -1134,7 +1151,7 @@ document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
             btn.disabled = false;
         });
 
-        
+
         function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
         function fmtNum(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n); }
 
