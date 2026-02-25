@@ -295,8 +295,8 @@
 
                             <div>
                                 <div class="mb-6">
-                                    <h3 id="cardPair" class="text-gray-400 font-display font-bold text-base sm:text-lg mb-1 tracking-wide">
-                                    	theSTRAT / fBOMB
+                                    <h3 class="text-gray-400 font-display font-bold text-base sm:text-lg mb-1 tracking-wide">
+                                    	<span id="cardPair">theSTRAT / fBOMB<span>
                                     	<span id="cardChange" class="mb-1 px-2 py-0.5 rounded text-xs font-bold bg-danger/10 text-danger border border-danger/20">-0.00%</span>
                                     </h3>
                                     <div class="flex items-end gap-3">
@@ -961,7 +961,7 @@
 
         function updateAllUI() {
             if(!pair) return;
-            document.getElementById('cardPair').innerText = `theSTRAT / ${pair.quoteToken.symbol}`;
+            //document.getElementById('cardPair').innerText = `theSTRAT / ${pair.quoteToken.symbol}`;
             document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(8);
             document.getElementById('cardPriceInTokens').innerText = parseFloat(pair.priceNative).toFixed(8) + " fBOMB";
             const chg = pair.priceChange.h24;
