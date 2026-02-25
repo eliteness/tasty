@@ -4,14 +4,14 @@
     <title>Thena Strategy</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Every trade buys veTHE. veTHE rewards buy and burn $THESTRAT. Built on Thena.">
+    <meta name="description" content="Every trade buys veTHE. veTHE rewards buy and burn theSTRAT. Built on Thena.">
     <meta property="og:title" content="Thena Strategy">
-    <meta property="og:description" content="Every trade buys veTHE. veTHE rewards buy and burn $THESTRAT. Built on Thena.">
+    <meta property="og:description" content="Every trade buys veTHE. veTHE rewards buy and burn theSTRAT. Built on Thena.">
     <meta property="og:image" content="https://eliteness.network/tasty/thenastrat_banner_1.png">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Thena Strategy">
-    <meta name="twitter:description" content="Every trade buys veTHE. veTHE rewards buy and burn $THESTRAT. Built on Thena.">
+    <meta name="twitter:description" content="Every trade buys veTHE. veTHE rewards buy and burn THESTRAT. Built on Thena.">
     <meta name="twitter:image" content="https://eliteness.network/tasty/thenastrat_banner_1.png">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -259,7 +259,7 @@
     <div class="flex items-center gap-3">
         <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
             <img src="thenastrat_token_logo_white_gradient.png" id="bIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
-            <span id="bSym" class="font-display font-bold text-sm sm:text-base">THESTRAT</span>
+            <span id="bSym" class="font-display font-bold text-sm sm:text-base">theSTRAT</span>
         </div>
 
         <button id="helpBtnBuy" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">
@@ -296,7 +296,7 @@
                             <div>
                                 <div class="mb-6">
                                     <h3 id="cardPair" class="text-gray-400 font-display font-bold text-base sm:text-lg mb-1 tracking-wide">
-                                    	THESTRAT / fBOMB
+                                    	theSTRAT / fBOMB
                                     	<span id="cardChange" class="mb-1 px-2 py-0.5 rounded text-xs font-bold bg-danger/10 text-danger border border-danger/20">-0.00%</span>
                                     </h3>
                                     <div class="flex items-end gap-3">
@@ -335,7 +335,7 @@
                                             <div class="flex justify-between items-center">
                                                 <div class="flex items-center gap-2">
                                                     <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5">
-                                                    <span class="text-xs font-bold text-gray-300">THESTRAT</span>
+                                                    <span class="text-xs font-bold text-gray-300">theSTRAT</span>
                                                 </div>
                                                 <span id="cVal1" class="font-mono text-xs text-white font-bold">---</span>
                                             </div>
@@ -465,12 +465,12 @@
     <div class="flex flex-col gap-6 my-4">
 
         <div class="flex flex-col items-center justify-center">
-            <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">THESTRAT Balance</div>
+            <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">theSTRAT Balance</div>
             <div class="flex items-center gap-3">
                 <span id="userWallet" class="text-4xl font-display font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(142,36,170,0.5)]">0.00</span>
                 <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2 py-1 rounded-lg">
                     <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5 rounded-full">
-                    <span class="text-[10px] font-bold text-brand-secondary">THESTRAT</span>
+                    <span class="text-[10px] font-bold text-brand-secondary">theSTRAT</span>
                 </div>
             </div>
         </div>
@@ -542,7 +542,7 @@
 
     <script>
         const ADDR_ROUTER   = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
-        const ADDR_THESTRAT = "0x28da45415B602B69b97DE6CF6aA75458358e270c";//"0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C";
+        const ADDR_THESTRAT = "0x31fCA0083A2b0b99aB044EB21625ACC6Ed87e4fe";//"0x28da45415B602B69b97DE6CF6aA75458358e270c";//"0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C";
         const ADDR_FBOMB    = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
         const ADDR_WBNB     = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
         const ADDR_TREASURY = "0x28aa4f9ffe21365473b64c161b566c3cdead0108";
@@ -796,7 +796,7 @@
                 const data = await res.json();
                 if(data.pairs && data.pairs.length) {
                     pair = data.pairs[0];
-                    pair.baseToken.symbol = "THESTRAT";
+                    pair.baseToken.symbol = "theSTRAT";
                     updateAllUI();
                     renderPriceChart();
                 }
@@ -961,7 +961,7 @@
 
         function updateAllUI() {
             if(!pair) return;
-            document.getElementById('cardPair').innerText = `THESTRAT / ${pair.quoteToken.symbol}`;
+            document.getElementById('cardPair').innerText = `theSTRAT / ${pair.quoteToken.symbol}`;
             document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(8);
             document.getElementById('cardPriceInTokens').innerText = parseFloat(pair.priceNative).toFixed(8) + " fBOMB";
             const chg = pair.priceChange.h24;
@@ -992,7 +992,7 @@
         }
 
 function updateSwapInputs() {
-    const tStrat = { sym: "THESTRAT", name: "Thena Strategy", icon: IMG_THESTRAT };
+    const tStrat = { sym: "theSTRAT", name: "Thena Strategy", icon: IMG_THESTRAT };
     const tBomb = { sym: "fBOMB", name: "fBOMB", icon: IMG_BOMB };
 
     const tin = isBuy ? tBomb : tStrat;
@@ -1083,14 +1083,14 @@ document.getElementById('outAmt').value = minReceived.toFixed(6);
 
 document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
 
-document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'THESTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'THESTRAT':'fBOMB'}`;
+document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'theSTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'theSTRAT':'fBOMB'}`;
 
 const priceIn = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
 document.getElementById('sUsd').innerText = fmtUSD(val * priceIn);
 
 const priceOut = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
 document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
-                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'THESTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'THESTRAT':'fBOMB'}`;
+                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'theSTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'theSTRAT':'fBOMB'}`;
                     document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
                 } catch(e) { console.log(e); }
             }, 500);
