@@ -433,16 +433,28 @@
                                 <div id="repTotalValue" class="text-3xl sm:text-4xl font-display font-extrabold text-success mb-1 drop-shadow-lg">$0.00</div>
                                 <div class="text-xs text-brand-secondary mb-6 font-medium">Estimated Intrinsic Value</div>
 
-                                <div class="border-t border-white/10 pt-4 space-y-4">
-                                    <div class="flex justify-between items-center text-sm">
-                                        <span class="text-gray-400">eTHENA Staked</span>
-                                        <span id="repStaked" class="font-mono font-bold text-white">0</span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-sm">
-                                        <span class="text-gray-400">veTHE Equivalent</span>
-                                        <span id="repVe" class="font-mono font-bold text-white">0</span>
-                                    </div>
-                                </div>
+<div class="border-t border-white/10 pt-4 space-y-3">
+    <div id="rowFbombLp" class="flex justify-between items-center text-sm hidden">
+        <span class="text-gray-400">fBOMB (in LP)</span>
+        <span id="repFbombLp" class="font-mono font-bold text-white">0</span>
+    </div>
+    <div id="rowEthenaHeld" class="flex justify-between items-center text-sm hidden">
+        <span class="text-gray-400">eTHENA (Held)</span>
+        <span id="repEthenaHeld" class="font-mono font-bold text-white">0</span>
+    </div>
+    <div id="rowEthenaStaked" class="flex justify-between items-center text-sm hidden">
+        <span class="text-gray-400">eTHENA (Staked)</span>
+        <span id="repEthenaStaked" class="font-mono font-bold text-white">0</span>
+    </div>
+    <div id="rowStakeThe" class="flex justify-between items-center text-sm hidden">
+        <span class="text-gray-400">stakeTHENA</span>
+        <span id="repStakeThe" class="font-mono font-bold text-white">0</span>
+    </div>
+    <div id="rowVeThe" class="flex justify-between items-center text-sm hidden">
+        <span class="text-gray-400">veTHE</span>
+        <span id="repVeThe" class="font-mono font-bold text-white">0</span>
+    </div>
+</div>
                             </div>
                         </div>
 
@@ -552,6 +564,7 @@
         const ADDR_ETHENA   = "0xafbe3b8b0939a5538DE32f7752A78e08C8492295";
         const ADDR_THE      = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
         const ADDR_VETHE    = "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D";
+const ADDR_STAKETHENA = "0x5b8ce6d591c914a56cb019b3decb63ede22708c8"; 
 
         let VETHE_RATIO = 2.50;
         const BSC_RPC = "https://bsc-dataseed.binance.org/";
@@ -563,7 +576,13 @@
         const ROUTER_ABI = ["function getAmountsOut(uint amountIn, tuple(address from, address to, bool stable)[] memory routes) public view returns (uint[] memory amounts)","function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, tuple(address from, address to, bool stable)[] calldata routes, address to, uint deadline) external"];
         const ERC20_ABI = ["function approve(address spender, uint256 amount) external returns (bool)","function allowance(address owner, address spender) external view returns (uint256)","function decimals() external view returns (uint8)","function balanceOf(address account) external view returns (uint256)"];
         const STAKING_ABI = ["function balanceOf(address account) external view returns (uint256)","function earned(address account, address _rewardsToken) external view returns (uint256)","function totalSupply() external view returns (uint256)"];
-        const PAIR_ABI = ["function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)","function totalSupply() external view returns (uint256)","function token0() external view returns (address)","function token1() external view returns (address)"];
+const PAIR_ABI = [
+    "function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+    "function totalSupply() external view returns (uint256)",
+    "function token0() external view returns (address)",
+    "function token1() external view returns (address)",
+    "function balanceOf(address account) external view returns (uint256)" 
+];
         const VETHE_ABI = ["function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)","function locked(uint256 id) external view returns (int128 amount, uint256 end)","function balanceOf(address owner) external view returns (uint256)"];
 
         let provider, signer, userAddr;
@@ -804,55 +823,86 @@
         }
 
         async function updateDashboard() {
-            if(!provider) return;
-            try {
-                const gaugeContract = new ethers.Contract(ADDR_GAUGE, STAKING_ABI, provider);
-                const pairContract = new ethers.Contract(ADDR_LP_PAIR, PAIR_ABI, provider);
-                const wbnbContract = new ethers.Contract(ADDR_WBNB, ERC20_ABI, provider);
-                const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
-                const veTheContract = new ethers.Contract(ADDR_VETHE, VETHE_ABI, provider);
+    if (!provider) return;
+    try {
+        const gaugeContract = new ethers.Contract(ADDR_GAUGE, STAKING_ABI, provider);
+        const pairContract = new ethers.Contract(ADDR_LP_PAIR, PAIR_ABI, provider);
+        const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
+        const veTheContract = new ethers.Contract(ADDR_VETHE, VETHE_ABI, provider);
+        const stakeTheContract = new ethers.Contract(ADDR_STAKETHENA, MINIMAL_STRAT_ABI, provider);
 
-                const etSupplyWei = await ethenaContract.totalSupply();
-                const etSupply = parseFloat(ethers.formatUnits(etSupplyWei, 18));
-                const veBalance = await veTheContract.balanceOf(ADDR_ETHENA);
-                let totalVeLocked = 0;
-                if (Number(veBalance) > 0) {
-                    const tokenId = await veTheContract.tokenOfOwnerByIndex(ADDR_ETHENA, 0);
-                    const lockedStruct = await veTheContract.locked(tokenId);
-                    totalVeLocked = parseFloat(ethers.formatUnits(lockedStruct[0], 18));
-                }
-                if (etSupply > 0 && totalVeLocked > 0) { VETHE_RATIO = totalVeLocked / etSupply; }
+        let priceThe = 0;
+        let priceFbomb = 0;
+        try {
+            const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
+            const data = await res.json();
+            if (data.pairs && data.pairs.length > 0) {
+                priceThe = parseFloat(data.pairs[0].priceUsd);
+            }
+            if (pair && pair.priceNative && parseFloat(pair.priceNative) > 0) {
+                priceFbomb = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
+            }
+        } catch (e) { console.log("Price fetch error:", e); }
 
-                const stakedLPWei = await gaugeContract.balanceOf(ADDR_TREASURY);
-                const stakedLP = parseFloat(ethers.formatUnits(stakedLPWei, 18));
-                const totalLPSupplyWei = await pairContract.totalSupply();
-                const totalLP = parseFloat(ethers.formatUnits(totalLPSupplyWei, 18));
-                const reserves = await pairContract.getReserves();
-                const reserveEthenaWei = reserves[1];
-                const totalEthenaPool = parseFloat(ethers.formatUnits(reserveEthenaWei, 18));
-                const poolShare = stakedLP / totalLP;
-                const myEthena = totalEthenaPool * poolShare;
-                const myVeThe = myEthena * VETHE_RATIO;
+        const msigLpWei = await pairContract.balanceOf(ADDR_MSIG);
+        const msigLp = parseFloat(ethers.formatUnits(msigLpWei, 18));
 
-                const elemStaked = document.getElementById('repStaked');
-                if(elemStaked) elemStaked.innerHTML = myEthena.toLocaleString(undefined, {maximumFractionDigits:0});
-                const elemVe = document.getElementById('repVe');
-                if(elemVe) elemVe.innerHTML = myVeThe.toLocaleString(undefined, {maximumFractionDigits:0});
+        const msigEthenaWei = await ethenaContract.balanceOf(ADDR_MSIG);
+        const msigEthena = parseFloat(ethers.formatUnits(msigEthenaWei, 18));
 
+        const msigStakedWei = await gaugeContract.balanceOf(ADDR_MSIG);
+        const msigStaked = parseFloat(ethers.formatUnits(msigStakedWei, 18));
+
+        const msigStakeTheWei = await stakeTheContract.balanceOf(ADDR_MSIG);
+        const msigStakeThe = parseFloat(ethers.formatUnits(msigStakeTheWei, 18));
+
+        const msigVeCount = await veTheContract.balanceOf(ADDR_MSIG);
+        let msigVeLocked = 0;
+        if (Number(msigVeCount) > 0) {
+            for (let i = 0; i < Number(msigVeCount); i++) {
                 try {
-                    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
-                    const data = await res.json();
-                    if(data.pairs && data.pairs.length > 0) {
-                        const priceOfThe = parseFloat(data.pairs[0].priceUsd);
-                        const totalIntrinsicValue = myVeThe * priceOfThe;
-                        const elemTotal = document.getElementById('repTotalValue');
-                        if(elemTotal) elemTotal.innerText = fmtUSD(totalIntrinsicValue);
-                    }
-                } catch(e) {}
-
-            } catch(e) { console.error("Dashboard Update Error:", e); }
+                    const tid = await veTheContract.tokenOfOwnerByIndex(ADDR_MSIG, i);
+                    const lock = await veTheContract.locked(tid);
+                    msigVeLocked += parseFloat(ethers.formatUnits(lock[0], 18));
+                } catch (err) {}
+            }
         }
 
+        let msigFbombInLp = 0;
+        if (msigLp > 0) {
+            const totalLpWei = await pairContract.totalSupply();
+            const reserves = await pairContract.getReserves();
+            const token0 = await pairContract.token0();
+            const reserveFbombWei = (token0.toLowerCase() === ADDR_FBOMB.toLowerCase()) ? reserves[0] : reserves[1];
+            msigFbombInLp = (msigLp / parseFloat(ethers.formatUnits(totalLpWei, 18))) * parseFloat(ethers.formatUnits(reserveFbombWei, 18));
+        }
+
+        const updateRow = (rowId, valId, amount, price) => {
+            const row = document.getElementById(rowId);
+            const label = document.getElementById(valId);
+            if (row && label) {
+                if (amount > 0.01) { 
+                    const usdValue = amount * price;
+                    label.innerText = `${fmtUSD(usdValue)} (${fmtNum(amount)})`;
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            }
+        };
+
+        updateRow('rowFbombLp',     'repFbombLp',     msigFbombInLp, priceFbomb);
+        updateRow('rowEthenaHeld',   'repEthenaHeld',   msigEthena,    priceThe);
+        updateRow('rowEthenaStaked', 'repEthenaStaked', msigStaked,    priceThe);
+        updateRow('rowStakeThe',     'repStakeThe',     msigStakeThe,  priceThe);
+        updateRow('rowVeThe',        'repVeThe',        msigVeLocked,  priceThe);
+
+        const totalValue = (msigFbombInLp * priceFbomb) + ((msigEthena + msigStaked + msigStakeThe + msigVeLocked) * priceThe);
+        const elemTotal = document.getElementById('repTotalValue');
+        if (elemTotal) elemTotal.innerText = fmtUSD(totalValue);
+
+    } catch (e) { console.error("Dashboard Update Error:", e); }
+}
         function renderPriceChart() {
             if(chartInstance) chartInstance.destroy();
             const ctx = document.getElementById('priceChart').getContext('2d');
