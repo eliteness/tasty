@@ -398,9 +398,12 @@
                                     <div id="dashPriceChg" class="text-sm text-danger font-medium">-0.00%</div>
                                 </div>
                             </div>
-                            <div class="flex-grow w-full relative h-[250px] sm:h-[350px]">
-                                <canvas id="priceChart"></canvas>
-                            </div>
+                           <div class="flex-grow w-full relative min-h-[450px] mt-2 rounded-xl overflow-hidden border border-white/5">
+<iframe
+  src="https://dexscreener.com/bsc/0x3d63abc40402d0f7291917A85E0E4c46Fb1A37b4?embed=1&theme=dark&trades=0&info=0&interval=30D&quote=fBOMB"
+  style="position:absolute;width:100%;height:100%;top:0;left:0;border:0;"
+></iframe>
+</div>
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -632,7 +635,8 @@ const PAIR_ABI = [
 
         updateDashboard();
         fetchUserStats();
-        setTimeout(() => { if(chartInstance) renderPriceChart(); else renderPriceChart(); }, 300);
+		updateAllUI(); 
+
     }
 }
         function toggleSettings() {
@@ -817,7 +821,6 @@ const PAIR_ABI = [
                     pair = data.pairs[0];
                     pair.baseToken.symbol = "theSTRAT";
                     updateAllUI();
-                    renderPriceChart();
                 }
             } catch(e) {}
         }
@@ -948,8 +951,16 @@ const PAIR_ABI = [
                     plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false, backgroundColor: '#12081f', titleColor: '#fff', bodyColor: '#fff', borderColor:'#8E24AA', borderWidth:1 } },
                     scales: {
                         x: { display: false },
-                        y: { display: true, position:'right', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: function(value){ return '$' + value.toFixed(4); }, font:{family:'Inter'}, color: textColor } }
-                    },
+y: { 
+    display: true, 
+    position:'right', 
+    grid: { color: 'rgba(255,255,255,0.05)' }, 
+    ticks: { 
+        callback: function(value){ return '$' + value.toFixed(8); }, // Changed from 4 to 8
+        font:{family:'Inter'}, 
+        color: textColor 
+    } 
+}                    },
                     interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
             });
@@ -1013,6 +1024,7 @@ const PAIR_ABI = [
             if(!pair) return;
             //document.getElementById('cardPair').innerText = `theSTRAT / ${pair.quoteToken.symbol}`;
             document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(8);
+			    document.getElementById('dashPriceVal').innerText = "$" + parseFloat(pair.priceUsd).toFixed(8);
             document.getElementById('cardPriceInTokens').innerText = parseFloat(pair.priceNative).toFixed(8) + " fBOMB";
             const chg = pair.priceChange.h24;
             if(chg) {
