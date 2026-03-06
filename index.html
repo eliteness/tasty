@@ -1377,7 +1377,7 @@ document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
 
                 setModalSuccess(tx.hash);
                 showToast("Swap Successful", "success");
-if (isBuy) {
+if (isBuy && pair) { 
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0]; 
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
@@ -1385,18 +1385,21 @@ if (isBuy) {
     const fBombSold = parseFloat(document.getElementById('inpAmt').value);
     const stratReceived = parseFloat(document.getElementById('outAmt').value);
     
+   
+    const entryPrice = parseFloat(pair.priceUsd).toFixed(8);
+
     const fBombPriceUsd = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
-    const usdVolume = (fBombSold * fBombPriceUsd).toFixed(2);
+    const rawTotalUsd = fBombSold * fBombPriceUsd;
     
-    const pricePerStrat = (usdVolume / stratReceived).toFixed(7);
+    const usdVolume = rawTotalUsd < 0.01 ? rawTotalUsd.toFixed(4) : rawTotalUsd.toFixed(2);
 
     const newTrade = {
         date: dateStr,
         time: timeStr,
         type: "Buy",
-        usdVolume: usdVolume,
+        usdVolume: usdVolume,     
         tokenAmount: stratReceived.toString(),
-        price: pricePerStrat,
+        price: entryPrice,       
         maker: userAddr.toLowerCase(),
         link: `https://bscscan.com/tx/${tx.hash}`
     };
