@@ -165,12 +165,24 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #05010a; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+		.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(142, 36, 170, 0.3);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(142, 36, 170, 0.6);
+}
     </style>
 </head>
 <body class="text-white antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-brand-primary selection:text-white">
 
     <header class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05010a]/90 backdrop-blur-xl">
-    <!--<div align="center"><h2>This is a TEST dapp and uses a TEST token. Do NOT use real money. Real launch will be later in Feb. 2026. Please follow the Socials linked below for latest updates</h2></div>-->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <div class="flex items-center gap-2 sm:gap-3">
             <img src="thenastrat_token_logo_white_gradient.png" alt="Icon" class="h-8 w-8 sm:h-10 sm:w-10">
@@ -500,6 +512,20 @@
         <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
     </button>
 </div>
+
+<div class="glass-panel rounded-[24px] p-5 sm:p-6 mt-6 flex flex-col h-[500px]">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Buy History</span>
+            <div class="text-[9px] text-brand-secondary">Showing All Records</div>
+        </div>
+        <span id="txCountBadge" class="text-[10px] px-2 py-0.5 rounded bg-success/10 text-success font-bold border border-success/20">0 Buys</span>
+    </div>
+
+    <div id="txHistoryList" class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+        <div class="text-center py-20 text-gray-600 text-xs italic">Connect wallet to view history</div>
+    </div>
+</div>
                     </div>
                 </div>
             </div>
@@ -557,6 +583,107 @@
     <div id="mobileInfoBtn" class="hidden" onclick="toggleAds()"></div>
 
     <script>
+	let allTransactions = []; 
+
+async function loadTransactionsCSV() {
+    try {
+        const response = await fetch('pasttransactions.csv');
+        const csvText = await response.text();
+        
+        const lines = csvText.trim().split('\n');
+        allTransactions = lines.slice(1).map(line => {
+            const values = line.split(',');
+            if (values.length < 8) return null;
+            return {
+                date: values[0], time: values[1], type: values[2],
+                usdVolume: values[3], tokenAmount: values[4], price: values[5],
+                maker: values[6].toLowerCase(), link: values[7]
+            };
+        }).filter(t => t !== null);
+        
+        const localTrades = JSON.parse(localStorage.getItem('my_new_trades') || "[]");
+        allTransactions = [...localTrades, ...allTransactions];
+
+        console.log("Total Transactions Loaded:", allTransactions.length);
+    } catch (e) {
+        console.error("Error loading CSV:", e);
+    }
+}
+
+
+function displayUserHistory(address) {
+    const listContainer = document.getElementById('txHistoryList');
+    const badge = document.getElementById('txCountBadge');
+    
+    if (!address) {
+        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-xs italic">Connect wallet to view history</div>`;
+        badge.innerText = "0 Buys";
+        badge.className = "text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-500 font-bold border border-white/10";
+        return;
+    }
+
+    const userBuys = allTransactions.filter(t => 
+        t.maker === address.toLowerCase() && 
+        t.type.toLowerCase() === 'buy'
+    );
+    
+    badge.innerText = `${userBuys.length} Buy${userBuys.length === 1 ? '' : 's'}`;
+    badge.className = "text-[10px] px-2 py-0.5 rounded bg-success/10 text-success font-bold border border-success/20";
+
+    if (userBuys.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-[11px]">No Buy transactions found for this address in records.</div>`;
+        return;
+    }
+
+    userBuys.sort((a,b) => new Date(b.date + " " + b.time) - new Date(a.date + " " + a.time));
+
+    listContainer.innerHTML = userBuys.map(tx => {
+        const usdPrice = parseFloat(tx.price);
+        const totalUsd = parseFloat(tx.usdVolume);
+        const tokenAmt = parseFloat(tx.tokenAmount);
+        
+        
+        let fbombPriceLabel = "--- fBOMB";
+        if (pair && pair.priceNative) {
+            fbombPriceLabel = parseFloat(pair.priceNative).toFixed(4) + " fBOMB";
+        }
+
+        return `
+            <div class="bg-black/40 border border-white/5 rounded-xl p-3 hover:border-brand-primary/40 transition-all group">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col">
+                        <span class="text-white text-[11px] font-bold">${tx.date}</span>
+                        <span class="text-gray-500 text-[9px]">${tx.time}</span>
+                    </div>
+                    <a href="${tx.link}" target="_blank" class="text-brand-primary hover:text-white transition-colors" title="View on BscScan">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-[11px]">
+                        <span class="text-gray-400">Entry Price</span>
+                        <div class="text-right">
+                            <div class="text-success font-bold">$${usdPrice.toFixed(6)}</div>
+                            <div class="text-[9px] text-gray-500">${fbombPriceLabel}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-gray-400">Amount</span>
+                        <span class="text-white font-mono">${tokenAmt.toLocaleString()} theSTRAT</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] pt-2 mt-1 border-t border-white/5">
+                        <span class="text-gray-500 font-medium text-[9px] uppercase tracking-tighter">Total Spent</span>
+                        <span class="text-brand-secondary font-bold">$${totalUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
         const ADDR_ROUTER   = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
         const ADDR_THESTRAT = "0x31fCA0083A2b0b99aB044EB21625ACC6Ed87e4fe";//"0x28da45415B602B69b97DE6CF6aA75458358e270c";//"0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C";
         const ADDR_FBOMB    = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
@@ -815,25 +942,28 @@ const GAUGE_ABI = [
         }
 
         async function init() {
+    await loadTransactionsCSV();
+
     try {
         if(!provider) provider = new ethers.JsonRpcProvider(BSC_RPC);
-
         updateSlipUI();
-
         updateDashboard();
-            } catch(e) { console.log("Init RPC error:", e); }
+    } catch(e) { console.log("Init RPC error:", e); }
 
-            try {
-                //const res = await fetch("https://api.dexscreener.com/latest/dex/search?q=fbomb%20ethena");
-                const res = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/" + ADDR_LP_PAIR);
-                const data = await res.json();
-                if(data.pairs && data.pairs.length) {
-                    pair = data.pairs[0];
-                    pair.baseToken.symbol = "theSTRAT";
-                    updateAllUI();
-                }
-            } catch(e) {}
+    try {
+        const res = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/" + ADDR_LP_PAIR);
+        const data = await res.json();
+        if(data.pairs && data.pairs.length) {
+            pair = data.pairs[0];
+            pair.baseToken.symbol = "theSTRAT";
+            updateAllUI();
         }
+    } catch(e) {}
+
+    // TRIGGER THE MOCK TEST
+  //  console.log("Running Mock Test for address...");
+ //   displayUserHistory("0x6Efee96287B5e1a2Ef966E25baE15a54BDE9b83E");
+}
 
      async function updateDashboard() {
     if (!provider) return;
@@ -1037,6 +1167,7 @@ y: {
                 if(ethenaEl) {
                     ethenaEl.innerText = parseFloat(ethers.formatUnits(ethenaWei, 18)).toFixed(2);
                 }
+        displayUserHistory(targetAddr); 
 
             } catch(e) { console.log("User stats error", e); }
         }
@@ -1246,6 +1377,38 @@ document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
 
                 setModalSuccess(tx.hash);
                 showToast("Swap Successful", "success");
+if (isBuy) {
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; 
+    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+
+    const fBombSold = parseFloat(document.getElementById('inpAmt').value);
+    const stratReceived = parseFloat(document.getElementById('outAmt').value);
+    
+    const fBombPriceUsd = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
+    const usdVolume = (fBombSold * fBombPriceUsd).toFixed(2);
+    
+    const pricePerStrat = (usdVolume / stratReceived).toFixed(7);
+
+    const newTrade = {
+        date: dateStr,
+        time: timeStr,
+        type: "Buy",
+        usdVolume: usdVolume,
+        tokenAmount: stratReceived.toString(),
+        price: pricePerStrat,
+        maker: userAddr.toLowerCase(),
+        link: `https://bscscan.com/tx/${tx.hash}`
+    };
+
+    allTransactions.unshift(newTrade); 
+    
+    let localTrades = JSON.parse(localStorage.getItem('my_new_trades') || "[]");
+    localTrades.push(newTrade);
+    localStorage.setItem('my_new_trades', JSON.stringify(localTrades));
+
+    displayUserHistory(userAddr);
+}
                 fetchSwapBalances(); calc();
             } catch(e) {
                 console.error(e);
