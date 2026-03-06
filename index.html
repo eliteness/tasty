@@ -1382,17 +1382,13 @@ if (isBuy) {
     const dateStr = now.toISOString().split('T')[0]; 
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 
-   const fBombSold = parseFloat(document.getElementById('inpAmt').value);
+    const fBombSold = parseFloat(document.getElementById('inpAmt').value);
     const stratReceived = parseFloat(document.getElementById('outAmt').value);
     
     const fBombPriceUsd = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
+    const usdVolume = (fBombSold * fBombPriceUsd).toFixed(2);
     
-    const rawUsdVolume = fBombSold * fBombPriceUsd;
-    
-    const pricePerStrat = (rawUsdVolume / stratReceived).toFixed(8);
-
-
-    const usdVolume = rawUsdVolume < 0.01 ? rawUsdVolume.toFixed(4) : rawUsdVolume.toFixed(2);
+    const pricePerStrat = (usdVolume / stratReceived).toFixed(7);
 
     const newTrade = {
         date: dateStr,
