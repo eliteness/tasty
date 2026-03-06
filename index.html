@@ -198,7 +198,7 @@
 </header>
 
 
-    <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
+<main class="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
 
         <div class="flex justify-center mb-8 sm:mb-12">
             <div class="flex p-1 bg-white/5 border border-white/5 rounded-full backdrop-blur-md relative">
@@ -395,7 +395,7 @@
                 </div>
             </div>
 
-            <div id="dashboard-view" class="absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-0 translate-x-[20px] scale-95 pointer-events-none z-0">
+            <div id="dashboard-view" class="hidden absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-0 translate-x-[20px] scale-95 pointer-events-none z-0">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full pb-8">
 
                     <div class="lg:col-span-2 flex flex-col gap-6">
@@ -740,40 +740,40 @@ const GAUGE_ABI = [
     const swapView = document.getElementById('swap-view');
     const dashView = document.getElementById('dashboard-view');
 
-    const activeClass = ['bg-brand-primary', 'text-white', 'shadow-lg'];
-    const inactiveClass = ['text-gray-400', 'hover:text-white'];
+    const activeBtn = ['bg-brand-primary', 'text-white', 'shadow-lg'];
+    const inactiveBtn = ['text-gray-400', 'hover:text-white'];
 
-    const removePosClasses = (el) => {
-        el.classList.remove('translate-x-[20px]', 'translate-x-[-20px]', 'translate-x-0', 'opacity-0', 'opacity-100', 'pointer-events-none', 'scale-95', 'scale-100', 'absolute', 'relative', 'z-0', 'z-10');
-    };
+    if (t === 'swap') {
+        swapBtn.classList.add(...activeBtn);
+        swapBtn.classList.remove(...inactiveBtn);
+        dashBtn.classList.remove(...activeBtn);
+        dashBtn.classList.add(...inactiveBtn);
 
-    if(t === 'swap') {
-        swapBtn.classList.add(...activeClass);
-        swapBtn.classList.remove(...inactiveClass);
-        dashBtn.classList.remove(...activeClass);
-        dashBtn.classList.add(...inactiveClass);
+        dashView.classList.replace('relative', 'absolute');
+        dashView.classList.add('opacity-0', 'translate-x-[20px]', 'scale-95', 'pointer-events-none');
+        dashView.classList.remove('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
 
-        removePosClasses(swapView);
-        swapView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
+        swapView.classList.replace('absolute', 'relative');
+        swapView.classList.remove('opacity-0', 'translate-x-[-20px]', 'scale-95', 'pointer-events-none', 'hidden');
+        swapView.classList.add('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
 
-        removePosClasses(dashView);
-        dashView.classList.add('opacity-0', 'translate-x-[20px]', 'pointer-events-none', 'scale-95', 'absolute', 'z-0');
     } else {
-        dashBtn.classList.add(...activeClass);
-        dashBtn.classList.remove(...inactiveClass);
-        swapBtn.classList.remove(...activeClass);
-        swapBtn.classList.add(...inactiveClass);
+        dashBtn.classList.add(...activeBtn);
+        dashBtn.classList.remove(...inactiveBtn);
+        swapBtn.classList.remove(...activeBtn);
+        swapBtn.classList.add(...inactiveBtn);
 
-        removePosClasses(dashView);
-        dashView.classList.add('opacity-100', 'translate-x-0', 'z-10', 'scale-100', 'relative');
+        swapView.classList.replace('relative', 'absolute');
+        swapView.classList.add('opacity-0', 'translate-x-[-20px]', 'scale-95', 'pointer-events-none');
+        swapView.classList.remove('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
 
-        removePosClasses(swapView);
-        swapView.classList.add('opacity-0', 'translate-x-[-20px]', 'pointer-events-none', 'scale-95', 'absolute', 'z-0');
+        dashView.classList.replace('absolute', 'relative');
+        dashView.classList.remove('opacity-0', 'translate-x-[20px]', 'scale-95', 'pointer-events-none', 'hidden');
+        dashView.classList.add('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
 
         updateDashboard();
         fetchUserStats();
-		updateAllUI(); 
-
+        updateAllUI();
     }
 }
         function toggleSettings() {
@@ -1382,13 +1382,17 @@ if (isBuy) {
     const dateStr = now.toISOString().split('T')[0]; 
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 
-    const fBombSold = parseFloat(document.getElementById('inpAmt').value);
+   const fBombSold = parseFloat(document.getElementById('inpAmt').value);
     const stratReceived = parseFloat(document.getElementById('outAmt').value);
     
     const fBombPriceUsd = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
-    const usdVolume = (fBombSold * fBombPriceUsd).toFixed(2);
     
-    const pricePerStrat = (usdVolume / stratReceived).toFixed(7);
+    const rawUsdVolume = fBombSold * fBombPriceUsd;
+    
+    const pricePerStrat = (rawUsdVolume / stratReceived).toFixed(8);
+
+
+    const usdVolume = rawUsdVolume < 0.01 ? rawUsdVolume.toFixed(4) : rawUsdVolume.toFixed(2);
 
     const newTrade = {
         date: dateStr,
