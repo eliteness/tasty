@@ -492,7 +492,7 @@
 
     <div class="flex flex-col gap-6 my-4">
 
-        <div class="flex flex-col items-center justify-center">
+       <div class="flex flex-col items-center justify-center">
             <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">theSTRAT Balance</div>
             <div class="flex items-center gap-3">
                 <span id="userWallet" class="text-4xl font-display font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(142,36,170,0.5)]">0.00</span>
@@ -501,6 +501,7 @@
                     <span class="text-[10px] font-bold text-brand-secondary">theSTRAT</span>
                 </div>
             </div>
+            <div id="userWalletUsd" class="text-sm font-mono text-gray-400 mt-2">$0.00 USD</div>
         </div>
 
         <div class="w-2/3 mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
@@ -621,10 +622,7 @@ function displayUserHistory(address) {
         return;
     }
 
-    const userTrades = allTransactions.filter(t => 
-        t.maker === address.toLowerCase()
-    );
-    
+    const userTrades = allTransactions.filter(t => t.maker === address.toLowerCase());
     badge.innerText = `${userTrades.length} Trade${userTrades.length === 1 ? '' : 's'}`;
 
     if (userTrades.length === 0) {
@@ -634,6 +632,8 @@ function displayUserHistory(address) {
 
     userTrades.sort((a,b) => new Date(b.date + " " + b.time) - new Date(a.date + " " + a.time));
 
+    const currentPrice = pair && pair.priceUsd ? parseFloat(pair.priceUsd) : 0;
+
     listContainer.innerHTML = userTrades.map(tx => {
         const usdPrice = parseFloat(tx.price);
         const totalUsd = parseFloat(tx.usdVolume);
@@ -642,6 +642,33 @@ function displayUserHistory(address) {
         
         const typeColor = isSell ? 'text-danger' : 'text-success';
         const typeBg = isSell ? 'bg-danger/10' : 'bg-success/10';
+
+        let currentValueHtml = '';
+        if (currentPrice > 0) {
+            const currentUsdValue = tokenAmt * currentPrice;
+            
+            if (!isSell) {
+                const diff = currentUsdValue - totalUsd;
+                const pnlPercent = totalUsd > 0 ? (diff / totalUsd) * 100 : 0;
+                const pnlColor = diff >= 0 ? 'text-success' : 'text-danger';
+                const sign = diff >= 0 ? '+' : '';
+                
+                currentValueHtml = `
+                <div class="flex justify-between items-center text-[10px] pt-1">
+                    <span class="text-gray-400 font-medium text-[9px] uppercase tracking-tighter">Current Value</span>
+                    <div class="text-right">
+                        <span class="text-white font-bold">$${currentUsdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <span class="${pnlColor} ml-1 font-bold text-[9px]">(${sign}${pnlPercent.toFixed(2)}%)</span>
+                    </div>
+                </div>`;
+            } else {
+                currentValueHtml = `
+                <div class="flex justify-between items-center text-[10px] pt-1">
+                    <span class="text-gray-400 font-medium text-[9px] uppercase tracking-tighter">Value (If Held)</span>
+                    <span class="text-white font-bold">$${currentUsdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>`;
+            }
+        }
 
         return `
             <div class="bg-black/40 border border-white/5 rounded-xl p-3 hover:border-brand-primary/40 transition-all group">
@@ -675,12 +702,12 @@ function displayUserHistory(address) {
                         <span class="text-gray-500 font-medium text-[9px] uppercase tracking-tighter">${isSell ? 'Total Received' : 'Total Spent'}</span>
                         <span class="text-brand-secondary font-bold">$${totalUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</span>
                     </div>
+                    ${currentValueHtml}
                 </div>
             </div>
         `;
     }).join('');
 }
-
         const ADDR_ROUTER   = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
         const ADDR_THESTRAT = "0x31fCA0083A2b0b99aB044EB21625ACC6Ed87e4fe";//"0x28da45415B602B69b97DE6CF6aA75458358e270c";//"0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C";
         const ADDR_FBOMB    = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
@@ -1126,7 +1153,7 @@ y: {
     position:'right', 
     grid: { color: 'rgba(255,255,255,0.05)' }, 
     ticks: { 
-        callback: function(value){ return '$' + value.toFixed(8); }, // Changed from 4 to 8
+        callback: function(value){ return '$' + value.toFixed(8); }, 
         font:{family:'Inter'}, 
         color: textColor 
     } 
@@ -1156,7 +1183,14 @@ y: {
             try {
                 const tokenContract = new ethers.Contract(ADDR_THESTRAT, MINIMAL_STRAT_ABI, provider);
                 const walletWei = await tokenContract.balanceOf(targetAddr);
-                document.getElementById('userWallet').innerText = parseFloat(ethers.formatUnits(walletWei, 18)).toFixed(2);
+const balanceNum = parseFloat(ethers.formatUnits(walletWei, 18));
+document.getElementById('userWallet').innerText = balanceNum.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+if (pair && pair.priceUsd) {
+    const usdVal = balanceNum * parseFloat(pair.priceUsd);
+    const usdEl = document.getElementById('userWalletUsd');
+    if (usdEl) usdEl.innerText = "$" + usdVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USD";
+}
 
                 const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
                 const ethenaWei = await ethenaContract.balanceOf(targetAddr);
@@ -1389,7 +1423,6 @@ if (pair) {
     if (isBuy) {
         tradeType = "Buy";
         tokenAmount = valOut; 
-        // Calculate USD volume based on fBOMB price
         const fBombPriceUsd = stratPriceUsd / parseFloat(pair.priceNative);
         usdVolume = (valIn * fBombPriceUsd).toFixed(2);
     } else {
