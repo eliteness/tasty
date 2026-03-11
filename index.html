@@ -516,10 +516,10 @@
 <div class="glass-panel rounded-[24px] p-5 sm:p-6 mt-6 flex flex-col h-[500px]">
     <div class="flex justify-between items-center mb-4">
         <div>
-            <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Buy History</span>
+<span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Trade History</span>
             <div class="text-[9px] text-brand-secondary">Showing All Records</div>
         </div>
-        <span id="txCountBadge" class="text-[10px] px-2 py-0.5 rounded bg-success/10 text-success font-bold border border-success/20">0 Buys</span>
+<span id="txCountBadge" class="text-[10px] px-2 py-0.5 rounded bg-success/10 text-success font-bold border border-success/20">0 Trades</span>
     </div>
 
     <div id="txHistoryList" class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar">
@@ -617,45 +617,43 @@ function displayUserHistory(address) {
     
     if (!address) {
         listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-xs italic">Connect wallet to view history</div>`;
-        badge.innerText = "0 Buys";
-        badge.className = "text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-500 font-bold border border-white/10";
+        badge.innerText = "0 Trades";
         return;
     }
 
-    const userBuys = allTransactions.filter(t => 
-        t.maker === address.toLowerCase() && 
-        t.type.toLowerCase() === 'buy'
+    const userTrades = allTransactions.filter(t => 
+        t.maker === address.toLowerCase()
     );
     
-    badge.innerText = `${userBuys.length} Buy${userBuys.length === 1 ? '' : 's'}`;
-    badge.className = "text-[10px] px-2 py-0.5 rounded bg-success/10 text-success font-bold border border-success/20";
+    badge.innerText = `${userTrades.length} Trade${userTrades.length === 1 ? '' : 's'}`;
 
-    if (userBuys.length === 0) {
-        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-[11px]">No Buy transactions found for this address in records.</div>`;
+    if (userTrades.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-[11px]">No transactions found for this address.</div>`;
         return;
     }
 
-    userBuys.sort((a,b) => new Date(b.date + " " + b.time) - new Date(a.date + " " + a.time));
+    userTrades.sort((a,b) => new Date(b.date + " " + b.time) - new Date(a.date + " " + a.time));
 
-    listContainer.innerHTML = userBuys.map(tx => {
+    listContainer.innerHTML = userTrades.map(tx => {
         const usdPrice = parseFloat(tx.price);
         const totalUsd = parseFloat(tx.usdVolume);
         const tokenAmt = parseFloat(tx.tokenAmount);
+        const isSell = tx.type.toLowerCase() === 'sell';
         
-        
-        let fbombPriceLabel = "--- fBOMB";
-        if (pair && pair.priceNative) {
-            fbombPriceLabel = parseFloat(pair.priceNative).toFixed(4) + " fBOMB";
-        }
+        const typeColor = isSell ? 'text-danger' : 'text-success';
+        const typeBg = isSell ? 'bg-danger/10' : 'bg-success/10';
 
         return `
             <div class="bg-black/40 border border-white/5 rounded-xl p-3 hover:border-brand-primary/40 transition-all group">
                 <div class="flex justify-between items-start mb-2">
                     <div class="flex flex-col">
-                        <span class="text-white text-[11px] font-bold">${tx.date}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white text-[11px] font-bold">${tx.date}</span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded ${typeBg} ${typeColor} font-bold uppercase">${tx.type}</span>
+                        </div>
                         <span class="text-gray-500 text-[9px]">${tx.time}</span>
                     </div>
-                    <a href="${tx.link}" target="_blank" class="text-brand-primary hover:text-white transition-colors" title="View on BscScan">
+                    <a href="${tx.link}" target="_blank" class="text-brand-primary hover:text-white transition-colors">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -664,10 +662,9 @@ function displayUserHistory(address) {
                 
                 <div class="space-y-1.5">
                     <div class="flex justify-between items-center text-[11px]">
-                        <span class="text-gray-400">Entry Price</span>
+                        <span class="text-gray-400">Execution Price</span>
                         <div class="text-right">
-                            <div class="text-success font-bold">$${usdPrice.toFixed(6)}</div>
-                            <div class="text-[9px] text-gray-500">${fbombPriceLabel}</div>
+                            <div class="${typeColor} font-bold">$${usdPrice.toFixed(6)}</div>
                         </div>
                     </div>
                     <div class="flex justify-between text-[11px]">
@@ -675,7 +672,7 @@ function displayUserHistory(address) {
                         <span class="text-white font-mono">${tokenAmt.toLocaleString()} theSTRAT</span>
                     </div>
                     <div class="flex justify-between items-center text-[10px] pt-2 mt-1 border-t border-white/5">
-                        <span class="text-gray-500 font-medium text-[9px] uppercase tracking-tighter">Total Spent</span>
+                        <span class="text-gray-500 font-medium text-[9px] uppercase tracking-tighter">${isSell ? 'Total Received' : 'Total Spent'}</span>
                         <span class="text-brand-secondary font-bold">$${totalUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</span>
                     </div>
                 </div>
@@ -1377,29 +1374,37 @@ document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
 
                 setModalSuccess(tx.hash);
                 showToast("Swap Successful", "success");
-if (isBuy && pair) { 
+if (pair) { 
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0]; 
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 
-    const fBombSold = parseFloat(document.getElementById('inpAmt').value);
-    const stratReceived = parseFloat(document.getElementById('outAmt').value);
+    const valIn = parseFloat(document.getElementById('inpAmt').value);
+    const valOut = parseFloat(document.getElementById('outAmt').value);
     
-   
-    const entryPrice = parseFloat(pair.priceUsd).toFixed(8);
+    const stratPriceUsd = parseFloat(pair.priceUsd);
+    
+    let usdVolume, tokenAmount, tradeType;
 
-    const fBombPriceUsd = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
-    const rawTotalUsd = fBombSold * fBombPriceUsd;
-    
-    const usdVolume = rawTotalUsd < 0.01 ? rawTotalUsd.toFixed(4) : rawTotalUsd.toFixed(2);
+    if (isBuy) {
+        tradeType = "Buy";
+        tokenAmount = valOut; 
+        // Calculate USD volume based on fBOMB price
+        const fBombPriceUsd = stratPriceUsd / parseFloat(pair.priceNative);
+        usdVolume = (valIn * fBombPriceUsd).toFixed(2);
+    } else {
+        tradeType = "Sell";
+        tokenAmount = valIn; 
+        usdVolume = (valIn * stratPriceUsd).toFixed(2);
+    }
 
     const newTrade = {
         date: dateStr,
         time: timeStr,
-        type: "Buy",
+        type: tradeType,
         usdVolume: usdVolume,     
-        tokenAmount: stratReceived.toString(),
-        price: entryPrice,       
+        tokenAmount: tokenAmount.toString(),
+        price: stratPriceUsd.toFixed(8),       
         maker: userAddr.toLowerCase(),
         link: `https://bscscan.com/tx/${tx.hash}`
     };
