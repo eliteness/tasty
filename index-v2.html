@@ -1,334 +1,883 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
+    <title>Thena Strategy</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eTHENA Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Every trade buys veTHE. veTHE rewards buy and burn theSTRAT. Built on Thena.">
+    <meta property="og:title" content="Thena Strategy">
+    <meta property="og:description" content="Every trade buys veTHE. veTHE rewards buy and burn theSTRAT. Built on Thena.">
+    <meta property="og:image" content="https://eliteness.network/tasty/thenastrat_banner_1.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Thena Strategy">
+    <meta name="twitter:description" content="Every trade buys veTHE. veTHE rewards buy and burn THESTRAT. Built on Thena.">
+    <meta name="twitter:image" content="https://eliteness.network/tasty/thenastrat_banner_1.png">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
-    <style>
-        /* FONTS */
-        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;600;700&family=Merriweather:wght@700;900&display=swap');
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        :root { --bg-body: #FFFFFF; --text-main: #000000; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-
-        /* HEADER */
-        .header-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: transparent; }
-        .logo-container { display: flex; align-items: center; gap: 15px; }
-        .top-logo { height: 50px; width: auto; display: block; }
-        .logo-text { font-family: 'Merriweather', serif; font-weight: 900; font-size: 24px; letter-spacing: 1px; }
-        .connect-btn { background: #fff; color: #000; padding: 8px 24px; border: 2px solid #000; font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .connect-btn:hover { background: #000; color: #fff; }
-
-        /* TABS */
-        .tab-container { display: flex; justify-content: center; gap: 0; margin-top: 20px; border-bottom: 2px solid #000; width: fit-content; margin: 20px auto 20px auto; }
-        .tab-btn { background: #fff; border: 2px solid #000; border-bottom: none; padding: 10px 40px; font-family: 'Courier Prime', monospace; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 14px; margin: 0 5px; position: relative; top: 2px; }
-        .tab-btn.active { background: #000; color: #fff; }
-
-        /* LAYOUTS */
-        .main-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .view-section { display: none; }
-        .view-section.active { display: block; }
-
-        /* SWAP GRID */
-        .swap-view-grid { display: flex; justify-content: center; align-items: flex-start; gap: 50px; flex-wrap: wrap; }
-        .swap-column { flex: 1; max-width: 450px; min-width: 320px; }
-        .swap-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .swap-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 18px; }
-        .settings-icon { cursor: pointer; width: 24px; height: 24px; transition: transform 0.3s ease; }
-        .settings-icon:hover { transform: rotate(90deg); }
-
-        .settings-panel { background: #f0f0f0; border: 2px solid #000; padding: 15px; margin-bottom: 15px; display: none; }
-        .settings-panel.open { display: block; }
-        .slip-label { font-family: 'Courier Prime', monospace; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
-        .slip-options { display: flex; gap: 8px; }
-        .slip-btn { flex: 1; background: #fff; border: 1px solid #000; font-family: 'Courier Prime', monospace; font-size: 12px; padding: 6px; cursor: pointer; }
-        .slip-btn.active { background: #000; color: #fff; }
-        .slip-input { width: 60px; border: 1px solid #000; padding: 6px; font-family: 'Courier Prime', monospace; font-size: 12px; text-align: center; }
-
-        .trade-box { background: #fff; border: 2px solid #000; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 140px; position: relative; margin-bottom: 10px; }
-        .trade-label { font-family: 'Courier Prime', monospace; font-size: 14px; margin-bottom: 10px; }
-        .trade-content { display: flex; justify-content: space-between; align-items: center; }
-        .token-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .token-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #000; }
-        .token-symbol { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
-        .token-name { font-family: 'Courier Prime', monospace; font-size: 11px; color: #555; }
-        
-        .input-amount { width: 100%; border: none; background: transparent; font-family: 'Merriweather', serif; font-size: 24px; font-weight: 900; text-align: right; outline: none; padding: 0; }
-        .usd-value { font-family: 'Courier Prime', monospace; font-size: 12px; color: #555; text-align: right; margin-top: 4px; }
-        
-        .arrow-wrapper { position: relative; height: 20px; margin-bottom: 10px; }
-        .swap-arrow-btn { width: 36px; height: 36px; background: #fff; border: 1px solid #000; border-radius: 50%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 5; }
-        .swap-arrow-btn:hover { background: #000; color: #fff; }
-
-        .receipt-area { font-family: 'Courier Prime', monospace; font-size: 11px; margin: 15px 0; border-top: 1px dashed #ccc; padding-top: 10px; }
-        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        
-        .action-btn { width: 100%; background: #fff; color: #000; border: 2px solid #000; padding: 16px; font-family: 'Merriweather', serif; font-weight: 900; font-size: 16px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
-        .action-btn:hover { background: #000; color: #fff; }
-        /* Disable hover when disabled */
-        .action-btn:disabled { background: #ccc !important; cursor: not-allowed; }
-
-        .summary-column { flex: 1; max-width: 450px; min-width: 320px; }
-        .info-card { border: 2px solid #000; background: #fff; padding: 30px; }
-        .info-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
-        .pair-label { font-family: 'Merriweather', serif; font-weight: 900; font-size: 22px; }
-        .date-label { font-family: 'Courier Prime', monospace; font-size: 11px; margin-top: 6px; }
-        .price-large { font-family: 'Merriweather', serif; font-weight: 900; font-size: 42px; text-align: right; line-height: 1; }
-        .price-change { font-family: 'Courier Prime', monospace; font-size: 16px; text-align: right; color: #00aa00; margin-top: 8px; font-weight: bold; }
-        .mini-grid { display: flex; gap: 15px; margin-bottom: 25px; }
-        .mini-box { border: 1px solid #000; padding: 15px; flex: 1; }
-        .mini-label { font-family: 'Courier Prime', monospace; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
-        .mini-val { font-family: 'Merriweather', serif; font-weight: 900; font-size: 20px; }
-        .dashed-line { border-top: 1px dashed #000; margin: 25px 0; }
-        .comp-title { font-family: 'Merriweather', serif; font-weight: 900; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; }
-        .comp-row { margin-bottom: 16px; }
-        .comp-text { display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
-        .comp-bar { width: 100%; height: 16px; border: 1px solid #000; background: #fff; padding: 2px; }
-        .comp-fill { height: 100%; background: #000; width: 0%; transition: width 1s; }
-        .comp-fill.striped { background: repeating-linear-gradient(45deg, #000, #000 2px, #fff 2px, #fff 6px); }
-
-        /* ANALYSIS VIEW */
-        .analysis-card { border: 2px solid #000; background: #fff; width: 100%; }
-        .an-header { padding: 24px; border-bottom: 1px solid #000; display: flex; justify-content: space-between; align-items: flex-end; }
-        .an-chart-container { height: 350px; width: 100%; background: #fdfdfd; border-bottom: 1px solid #000; position: relative; padding: 10px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid #000; }
-        .stat-cell { border-right: 1px solid #000; padding: 15px; }
-        .stat-cell:last-child { border-right: none; }
-        .stat-cell:nth-child(3n) { border-right: none; }
-        .stat-cell:nth-child(-n+3) { border-bottom: 1px solid #000; }
-        .an-footer { padding: 24px; }
-    </style>
-</head>
-<body>
-
-    <div class="header-row">
-        <div class="logo-container">
-            <img src="https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FeTHENA.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5" alt="eTHENA" class="top-logo">
-            <span class="logo-text">eTHENA</span>
-        </div>
-        
-        <button id="connectBtn" class="connect-btn" onclick="connectWallet()">CONNECT WALLET</button>
-    </div>
-
-    <div class="tab-container">
-        <button class="tab-btn active" onclick="switchTab('swap')">SWAP</button>
-        <button class="tab-btn" onclick="switchTab('analysis')">ANALYSIS</button>
-    </div>
-
-    <div class="main-container">
-
-        <div id="swap-view" class="view-section active">
-            <div class="swap-view-grid">
-                
-                <div class="swap-column">
-                    <div class="swap-header-row">
-                        <div class="swap-title">Swap</div>
-                        <div class="settings-icon" onclick="toggleSettings()">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                        </div>
-                    </div>
-
-                    <div id="settingsPanel" class="settings-panel">
-                        <div class="slip-label">SLIPPAGE TOLERANCE</div>
-                        <div class="slip-options">
-                            <button class="slip-btn" onclick="setSlip(0.1)">0.1%</button>
-                            <button class="slip-btn active" onclick="setSlip(0.5)">0.5%</button>
-                            <button class="slip-btn" onclick="setSlip(1.0)">1.0%</button>
-                            <input type="number" id="customSlip" class="slip-input" placeholder="Custom" oninput="setCustomSlip()">
-                        </div>
-                    </div>
-
-                    <div class="trade-box">
-                        <div class="trade-label">Sell</div>
-                        <div class="trade-content">
-                            <div class="token-info" onclick="setMode('sell')">
-                                <img src="" id="sIcon" class="token-icon">
-                                <div>
-                                    <div class="token-symbol" id="sSym">---</div>
-                                    <div class="token-name" id="sName">---</div>
-                                </div>
-                            </div>
-                            <div style="text-align:right; width:50%;">
-                                <input type="number" id="inpAmt" class="input-amount" placeholder="0" oninput="calc()">
-                                <div class="usd-value" id="sUsd">$0.00</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="arrow-wrapper">
-                        <div class="swap-arrow-btn" onclick="toggleSwap()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-                        </div>
-                    </div>
-
-                    <div class="trade-box">
-                        <div class="trade-label">Buy</div>
-                        <div class="trade-content">
-                            <div class="token-info" onclick="setMode('buy')">
-                                <img src="" id="bIcon" class="token-icon">
-                                <div>
-                                    <div class="token-symbol" id="bSym">---</div>
-                                    <div class="token-name" id="bName">---</div>
-                                </div>
-                            </div>
-                            <div style="text-align:right; width:50%;">
-                                <input type="text" id="outAmt" class="input-amount" placeholder="0" readonly>
-                                <div class="usd-value" id="bUsd">$0.00</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="receipt-area">
-                        <div class="receipt-row"><span>Slippage</span><span id="slipDisplay">0.5%</span></div>
-                        <div class="receipt-row"><span>Rate</span><span id="rateTxt">---</span></div>
-                        <div class="receipt-row"><span>Quote (Inc. Fees)</span><span id="quoteTxt">---</span></div>
-                    </div>
-
-                    <button id="mainActionBtn" class="action-btn">CONNECT WALLET</button>
-                </div>
-
-                <div class="summary-column">
-                    <div class="info-card">
-                        <div class="info-header">
-                            <div>
-                                <div class="pair-label" id="cardPair">... / ...</div>
-                                <div class="date-label" id="cardDate">...</div>
-                            </div>
-                            <div>
-                                <div class="price-large" id="cardPrice">$0.0000</div>
-                                <div class="price-change" id="cardChange">+0.00%</div>
-                            </div>
-                        </div>
-
-                        <div class="mini-grid">
-                            <div class="mini-box">
-                                <div class="mini-label">Market Cap</div>
-                                <div class="mini-val" id="cardFdv">---</div>
-                            </div>
-                            <div class="mini-box">
-                                <div class="mini-label">Liquidity USD</div>
-                                <div class="mini-val" id="cardLiq">---</div>
-                            </div>
-                        </div>
-
-                        <div class="dashed-line"></div>
-
-                        <div class="comp-title">Pool Composition</div>
-                        <div class="comp-row">
-                            <div class="comp-text"><span id="cTok1">---</span><span id="cVal1">0</span></div>
-                            <div class="comp-bar"><div class="comp-fill" id="cBar1" style="width:50%"></div></div>
-                        </div>
-                        <div class="comp-row">
-                            <div class="comp-text"><span id="cTok2">---</span><span id="cVal2">0</span></div>
-                            <div class="comp-bar"><div class="comp-fill striped" id="cBar2" style="width:50%"></div></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <div id="analysis-view" class="view-section">
-            <div class="analysis-card">
-                <div class="an-header">
-                    <div>
-                        <div class="pair-label" id="anPair">... / ...</div>
-                        <div class="date-label">30 Day Price Action</div>
-                    </div>
-                    <div>
-                        <div class="price-large" id="anPrice">$0.0000</div>
-                        <div class="price-change" id="anChange">+0.00%</div>
-                    </div>
-                </div>
-
-                <div class="an-chart-container">
-                    <canvas id="customChart"></canvas>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-cell">
-                        <div class="mini-label">Market Cap</div>
-                        <div class="mini-val" id="anFdv">---</div>
-                    </div>
-                    <div class="stat-cell">
-                        <div class="mini-label">Liquidity USD</div>
-                        <div class="mini-val" id="anLiq">---</div>
-                    </div>
-                    <div class="stat-cell">
-                        <div class="mini-label">24H Volume</div>
-                        <div class="mini-val" id="anVol">---</div>
-                    </div>
-                    <div class="stat-cell">
-                        <div class="mini-label">Transactions (24h)</div>
-                        <div class="mini-val" id="anTxns">---</div>
-                    </div>
-                    <div class="stat-cell">
-                        <div class="mini-label">Pair Age</div>
-                        <div class="mini-val" id="anAge">---</div>
-                    </div>
-                    <div class="stat-cell">
-                        <div class="mini-label">DEX</div>
-                        <div class="mini-val" id="anDex">---</div>
-                    </div>
-                </div>
-
-                <div class="an-footer">
-                    <div class="comp-title">Liquidity Composition</div>
-                    <div class="comp-row">
-                        <div class="comp-text"><span id="anTok1">---</span><span id="anVal1">0</span></div>
-                        <div class="comp-bar"><div class="comp-fill" id="anBar1" style="width:50%"></div></div>
-                    </div>
-                    <div class="comp-row">
-                        <div class="comp-text"><span id="anTok2">---</span><span id="anVal2">0</span></div>
-                        <div class="comp-bar"><div class="comp-fill striped" id="anBar2" style="width:50%"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 
     <script>
-        const ADDR_ROUTER = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
-        const ADDR_ETHENA = "0xafbe3b8b0939a5538DE32f7752A78e08C8492295";
-        const ADDR_FBOMB  = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
-        const ADDR_WBNB   = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Courier Prime', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#05010a',
+                            card: '#12081f',
+                            border: '#2d1b4e',
+                            primary: '#8E24AA',
+                            secondary: '#AB47BC',
+                            accent: '#d946ef',
+                        },
+                        success: '#00E676',
+                        danger: '#FF1744',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '.5' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
-        const IMG_BOMB = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FfBOMB.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
-        const IMG_ETHENA = "https://thena.fi/_next/image?url=https%3A%2F%2Fcdn.thena.fi%2Flogos%2FeTHENA.png&w=1920&q=75&dpl=dpl_6GpgTuCCNC4xHwdbe5brB6yEqQX5";
+    <style>
+        @media (min-width: 1600px) { html { font-size: 18px; } }
+        @media (min-width: 2000px) { html { font-size: 22px; } }
+        @media (min-width: 2560px) { html { font-size: 28px; } }
+        @media (min-width: 3840px) { html { font-size: 42px; } }
 
-        const ROUTER_ABI = [
-            "function getAmountsOut(uint amountIn, tuple(address from, address to, bool stable)[] memory routes) public view returns (uint[] memory amounts)",
-            "function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, tuple(address from, address to, bool stable)[] calldata routes, address to, uint deadline) external"
-        ];
-        const ERC20_ABI = [
-            "function approve(address spender, uint256 amount) external returns (bool)",
-            "function allowance(address owner, address spender) external view returns (uint256)",
-            "function decimals() external view returns (uint8)",
-            "function balanceOf(address account) external view returns (uint256)"
-        ];
+        
+        .main-content-wrapper {
+            min-height: 75vh;
+            display: flex;
+            flex-direction: column;
+            /* Removed justify-content: center so the button stops jumping */
+            /* Added a consistent top margin instead */
+            margin-top: 6vh; 
+        }
+		
+        body {
+            background-color: #05010a;
+            /* Added a subtle static base gradient so it's never purely black */
+            background-image: radial-gradient(circle at 50% 50%, rgba(30, 10, 40, 0.6), transparent 100%);
+            background-attachment: fixed;
+        }
+
+        /* Animated Background Elements */
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(10%, 15%) scale(1.2); }
+            66% { transform: translate(-10%, 5%) scale(0.8); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .bg-animated-layer {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1; /* Pushes it securely behind all content */
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px); /* Reduced blur slightly so the color shows more */
+            opacity: 0.7; /* Much higher visibility */
+            animation: floatOrb 20s infinite ease-in-out alternate;
+        }
+
+        .bg-orb-1 {
+            width: 50vw; height: 50vw;
+            /* Much stronger color: #8E24AA */
+            background: radial-gradient(circle, rgba(142, 36, 170, 0.6) 0%, transparent 70%);
+            top: -10%; left: -10%;
+        }
+
+        .bg-orb-2 {
+            width: 55vw; height: 55vw;
+            /* Stronger accent color: #d946ef */
+            background: radial-gradient(circle, rgba(217, 70, 239, 0.4) 0%, transparent 70%);
+            bottom: -10%; right: -10%;
+            animation-delay: -7s;
+            animation-duration: 25s;
+        }
+
+        .bg-orb-3 {
+            width: 40vw; height: 40vw;
+            /* Secondary color for the middle: #AB47BC */
+            background: radial-gradient(circle, rgba(171, 71, 188, 0.3) 0%, transparent 70%);
+            top: 30%; left: 30%;
+            animation-delay: -12s;
+            animation-duration: 22s;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .glass-panel {
+            background: rgba(18, 8, 31, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .input-box {
+            background: #0a0510;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .input-box:focus-within {
+            background: #0f0518;
+            border-color: #8E24AA;
+        }
+
+        .settings-container {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 0;
+        }
+        .settings-container.open {
+            max-height: 10rem; 
+            opacity: 1;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-width: 1px;
+        }
+        .rotate-gear {
+            transition: transform 0.4s ease;
+        }
+        .rotate-gear.active {
+            transform: rotate(90deg);
+        }
+
+        .route-path-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+        .route-line-bg {
+            position: absolute;
+            left: 20px; right: 20px; top: 50%;
+            height: 2px;
+            background: #2d1b4e;
+            z-index: 0;
+        }
+        .route-line-active {
+            position: absolute;
+            left: 20px; right: 20px; top: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, #8E24AA, #d946ef);
+            box-shadow: 0 0 10px rgba(217, 70, 239, 0.5);
+            z-index: 0;
+            opacity: 0.8;
+        }
+        .route-dot {
+            position: relative;
+            z-index: 10;
+            background: #12081f;
+            border: 1px solid #8E24AA;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(142, 36, 170, 0.3);
+        }
+        .route-pill {
+            position: relative;
+            z-index: 10;
+            background: #05010a;
+            border: 1px solid #373a45;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #d946ef;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #05010a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+		.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(142, 36, 170, 0.3); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(142, 36, 170, 0.6); }
+    </style>
+</head>
+<body class="text-white antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-brand-primary selection:text-white">
+
+    <div class="bg-animated-layer">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+    </div>
+
+    <header class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05010a]/80 backdrop-blur-xl">
+        <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <img src="thenastrat_token_logo_white_gradient.png" alt="Icon" class="h-8 w-8 sm:h-10 sm:w-10">
+                <span class="font-display font-bold text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                    Thena Strategy
+                </span>
+            </div>
+            <button id="connectBtn" onclick="connectWallet()"
+                class="px-4 py-2 sm:px-6 sm:py-2.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-purple-900/20 hover:scale-105 hover:shadow-purple-900/40 transition-all duration-300 whitespace-nowrap">
+                CONNECT WALLET
+            </button>
+        </div>
+    </header>
+
+<main class="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 main-content-wrapper">
+        
+    <div class="flex justify-center mb-8 sm:mb-12">
+            <div class="flex p-1 bg-white/5 border border-white/5 rounded-full backdrop-blur-md relative">
+                <button onclick="switchTab('swap')" id="tab-swap" class="relative px-6 sm:px-10 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-display font-bold transition-all duration-300 overflow-hidden bg-brand-primary text-white shadow-lg z-10">
+                    Swap
+                </button>
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="relative px-6 sm:px-10 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-display font-bold transition-all duration-300 text-gray-400 hover:text-white z-10">
+                    Dashboard
+                </button>
+            </div>
+        </div>
+
+    <div class="relative w-full max-w-[85rem] max-w-scaled mx-auto">
+
+            <div id="swap-view" class="relative transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-100 translate-x-0 scale-100 z-10 origin-top">
+<div class="flex flex-col lg:flex-row justify-center items-start gap-10 mx-auto">
+
+    <div class="w-full lg:w-[35rem] flex flex-col gap-7">
+                        <div class="glass-panel rounded-[24px] p-4 sm:p-5 relative">
+                            <div class="flex justify-between items-center mb-4 sm:mb-5">
+                                <h2 class="text-lg sm:text-xl font-display font-bold text-white">Swap</h2>
+                                <button onclick="toggleSettings()" class="text-gray-400 hover:text-white transition-colors">
+                                    <svg id="settingsGear" class="w-5 h-5 rotate-gear" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                </button>
+                            </div>
+
+                            <div id="settingsPanel" class="settings-container bg-black/40 rounded-xl border-white/5 border-0">
+                                <label class="text-[0.65rem] text-gray-400 font-medium mb-3 block uppercase tracking-widest">Slippage Tolerance</label>
+                                <div class="flex gap-2">
+                                    <button class="slip-option flex-1 py-2.5 rounded-lg text-sm font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(12.0)">12%</button>
+                                    <button class="slip-option flex-1 py-2.5 rounded-lg text-sm font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(13.0)">13%</button>
+                                    <input type="number" id="customSlip" placeholder="Custom %" class="flex-1 w-0 bg-transparent border border-brand-border rounded-lg text-center text-sm text-white focus:outline-none focus:border-brand-secondary transition-colors" oninput="setCustomSlip()">
+                                </div>
+                            </div>
+                            <div class="input-box rounded-2xl p-3.5 mb-1 relative group">
+                                <div class="flex justify-between mb-2 text-xs">
+                                    <span class="text-gray-400 font-medium ml-1">Sell</span>
+                                    <span class="text-gray-400">Bal: <span id="sBal" class="text-white font-mono">0.00</span> <span onclick="setMax()" class="cursor-pointer text-brand-accent hover:text-white ml-2 font-bold transition-colors">MAX</span></span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                                        <img src="fBOMB_token_whiteblue_blackcircle.png" id="sIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
+                                        <span id="sSym" class="font-display font-bold text-sm sm:text-base">fBOMB</span>
+                                    </div>
+                                    <button id="helpBtnSell" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">?</button>
+                                    <input type="number" id="inpAmt" placeholder="0" oninput="calc()" class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none">
+                                </div>
+                                <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="sUsd">$0.00</div>
+                            </div>
+                            
+                            <div class="relative h-2 flex items-center justify-center z-10">
+                                <button id="swapArrowBtn" onclick="toggleSwap()" class="absolute bg-[#12081f] border border-[#2d1b4e] p-2 rounded-lg text-brand-primary hover:text-white hover:bg-brand-primary hover:border-brand-primary transition-all duration-300 shadow-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                                </button>
+                            </div>
+                            
+                            <div class="input-box rounded-2xl p-3.5 mt-1">
+                                <div class="flex justify-between mb-2 text-xs">
+                                    <span class="text-gray-400 font-medium ml-1">Buy</span>
+                                    <span class="text-gray-400">Bal: <span id="bBal" class="text-white font-mono">0.00</span></span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                                        <img src="thenastrat_token_logo_white_gradient.png" id="bIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
+                                        <span id="bSym" class="font-display font-bold text-sm sm:text-base">theSTRAT</span>
+                                    </div>
+                                    <button id="helpBtnBuy" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">?</button>
+                                    <input type="text" id="outAmt" placeholder="0" readonly class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none cursor-default">
+                                </div>
+                                <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="bUsd">$0.00</div>
+                            </div>
+                            
+                            <div class="mt-6 space-y-2 px-2">
+                                <div class="flex justify-between text-xs font-medium">
+                                    <span class="text-gray-500">Transfer Tax</span>
+                                    <span class="text-brand-accent font-bold">10%</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-medium">
+                                    <span class="text-gray-500">Rate</span>
+                                    <span id="rateTxt" class="text-white">---</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-medium">
+                                    <span class="text-gray-500">Minimum Output</span>
+                                    <span id="quoteTxt" class="text-white">---</span>
+                                </div>
+                            </div>
+
+                            <button id="mainActionBtn" class="w-full mt-6 py-3.5 sm:py-4 bg-brand-primary hover:bg-brand-secondary rounded-xl font-display font-bold text-base sm:text-lg text-white shadow-lg shadow-brand-primary/30 hover:shadow-brand-primary/50 hover:translate-y-[-2px] active:translate-y-[0px] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                CONNECT WALLET
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full lg:w-[31.25rem] flex flex-col gap-7">
+                        <div class="glass-panel rounded-[24px] p-5 sm:p-6 h-full flex flex-col justify-between">
+                            <div>
+                                <div class="mb-6">
+                                    <h3 class="text-gray-400 font-display font-bold text-base sm:text-lg mb-1 tracking-wide">
+                                    	<span id="cardPair">theSTRAT / fBOMB</span>
+                                    	<span id="cardChange" class="mb-1 px-2 py-0.5 rounded text-xs font-bold bg-danger/10 text-danger border border-danger/20">-0.00%</span>
+                                    </h3>
+                                    <div class="flex items-end gap-3">
+                                        <div id="cardPrice" class="text-4xl sm:text-5xl font-display font-extrabold text-white tracking-tight leading-none">
+                                            $-.--
+                                        </div>
+                                    </div>
+                                    <div class="flex items-end gap-1">
+                                        <div id="cardPriceInTokens" class="text-xl sm:text-xl font-display font-extrabold text-white tracking-tight leading-none">
+                                            -.-- fBOMB
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
+                                    <div class="bg-black/30 p-3 sm:p-4 rounded-2xl border border-white/5">
+                                        <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Market Cap</div>
+                                        <div id="cardFdv" class="text-lg sm:text-xl font-display font-bold text-white">$0</div>
+                                    </div>
+                                    <div class="bg-black/30 p-3 sm:p-4 rounded-2xl border border-white/5">
+                                        <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Liquidity</div>
+                                        <div id="cardLiq" class="text-lg sm:text-xl font-display font-bold text-white">$0</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0a0510] border border-white/5 rounded-2xl p-4 sm:p-5 mb-4">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="text-[0.65rem] uppercase tracking-widest text-gray-400 font-bold">Pool Composition</div>
+                                        <div id="poolDonut" class="w-8 h-8 rounded-full" style="background: conic-gradient(#8E24AA 0% 50%, #ffffff 50% 100%); box-shadow: 0 0 15px rgba(142,36,170,0.3);">
+                                            <div class="w-5 h-5 bg-[#0a0510] rounded-full absolute top-1.5 left-1.5"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-3">
+                                        <div class="bg-[#0a0510] rounded-xl p-3 border border-white/5 flex flex-col gap-2">
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex items-center gap-2">
+                                                    <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5">
+                                                    <span class="text-xs font-bold text-gray-300">theSTRAT</span>
+                                                </div>
+                                                <span id="cVal1" class="font-mono text-xs text-white font-bold">---</span>
+                                            </div>
+                                            <div class="h-1 bg-gray-800 rounded-full overflow-hidden">
+                                                <div id="bar1" class="h-full bg-brand-primary w-[50%] transition-all duration-500 shadow-[0_0_8px_#8E24AA]"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-[#0a0510] rounded-xl p-3 border border-white/5 flex flex-col gap-2">
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex items-center gap-2">
+                                                    <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-5 h-5">
+                                                    <span class="text-xs font-bold text-gray-300">fBOMB</span>
+                                                </div>
+                                                <span id="cVal2" class="font-mono text-xs text-white font-bold">---</span>
+                                            </div>
+                                            <div class="h-1 bg-gray-800 rounded-full overflow-hidden">
+                                                <div id="bar2" class="h-full bg-white w-[50%] transition-all duration-500 shadow-[0_0_8px_white]"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="w-full bg-[#0a0510] border border-white/10 rounded-2xl p-4 mt-auto relative overflow-visible">
+                                <div class="absolute -top-2.5 left-5 bg-[#0a0510] px-2 text-[0.55rem] text-gray-500 font-bold uppercase tracking-widest z-20 border border-white/5 rounded-full">Smart Route</div>
+
+                                <div class="route-path-container h-8 mt-1">
+                                    <div class="route-line-bg"></div>
+                                    <div class="route-line-active animate-pulse-glow"></div>
+                                    <div class="route-dot w-7 h-7">
+                                        <img src="thenastrat_token_logo_white_gradient.png" class="w-3.5 h-3.5 rounded-full">
+                                    </div>
+                                    <div class="route-pill shadow-[0_0_10px_rgba(217,70,239,0.3)] text-[0.65rem] py-1 px-3">
+                                        THENA
+                                    </div>
+                                    <div class="route-dot w-7 h-7" style="border-color: #d946ef; box-shadow: 0 0 15px rgba(217, 70, 239, 0.3);">
+                                        <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-3.5 h-3.5 rounded-full">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboard-view" class="hidden absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-0 translate-x-5 scale-95 pointer-events-none z-0">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full pb-8">
+
+                    <div class="lg:col-span-2 flex flex-col gap-6">
+                        <div class="glass-panel rounded-[24px] p-4 sm:p-6 min-h-[21.875rem] lg:min-h-[28.125rem] relative flex flex-col">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h2 class="font-display font-bold text-base sm:text-lg text-white">Price Performance</h2>
+                                    <span class="text-xs text-gray-500">Last 30 Days</span>
+                                </div>
+                                <div class="text-right">
+                                    <div id="dashPriceVal" class="text-xl sm:text-2xl font-bold font-display">$0.00</div>
+                                    <div id="dashPriceChg" class="text-sm text-danger font-medium">-0.00%</div>
+                                </div>
+                            </div>
+                            <div class="flex-grow w-full relative min-h-[28.125rem] mt-2 rounded-xl overflow-hidden border border-white/5">
+                                <iframe
+                                  src="https://dexscreener.com/bsc/0x3d63abc40402d0f7291917A85E0E4c46Fb1A37b4?embed=1&theme=dark&trades=0&info=0&interval=30D&quote=fBOMB"
+                                  style="position:absolute;width:100%;height:100%;top:0;left:0;border:0;"
+                                ></iframe>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <div class="text-[0.65rem] uppercase tracking-wider text-gray-500 font-bold mb-1">Market Cap</div>
+                                <div id="barMC" class="text-white font-bold font-display text-sm sm:text-base">---</div>
+                            </div>
+                            <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <div class="text-[0.65rem] uppercase tracking-wider text-gray-500 font-bold mb-1">Volume (24h)</div>
+                                <div id="barVol" class="text-white font-bold font-display text-sm sm:text-base">---</div>
+                            </div>
+                            <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <div class="text-[0.65rem] uppercase tracking-wider text-gray-500 font-bold mb-1">Burned</div>
+                                <div id="barBurn" class="text-white font-bold font-display text-sm sm:text-base">---</div>
+                            </div>
+                            <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <div class="text-[0.65rem] uppercase tracking-wider text-gray-500 font-bold mb-1">Change</div>
+                                <div id="barChg" class="text-white font-bold font-display text-sm sm:text-base">---</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        <div class="bg-gradient-to-br from-brand-card to-[#2e1045] border border-brand-primary/30 rounded-[24px] p-5 sm:p-6 relative overflow-hidden group">
+                            <div class="absolute top-[-50%] right-[-50%] w-64 h-64 bg-brand-accent/20 rounded-full blur-3xl group-hover:bg-brand-accent/30 transition-all duration-700"></div>
+
+                            <div class="relative z-10">
+                                <div class="text-[0.65rem] uppercase tracking-widest text-gray-400 font-bold mb-2">Protocol Treasury</div>
+                                <div id="repTotalValue" class="text-3xl sm:text-4xl font-display font-extrabold text-success mb-1 drop-shadow-lg">$0.00</div>
+                                <div class="text-xs text-brand-secondary mb-6 font-medium">Estimated Intrinsic Value</div>
+
+                                <div class="border-t border-white/10 pt-4 space-y-3">
+                                    <div id="rowFbombLp" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">fBOMB (in LP)</span>
+                                        <span id="repFbombLp" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div id="rowEthenaHeld" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">eTHENA (Held)</span>
+                                        <span id="repEthenaHeld" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div id="rowEthenaStaked" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">eTHENA (Staked)</span>
+                                        <span id="repEthenaStaked" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div id="rowStakeThe" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">stakeTHENA</span>
+                                        <span id="repStakeThe" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div id="rowVeThe" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">veTHE</span>
+                                        <span id="repVeThe" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-[24px] p-5 sm:p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[0.65rem] uppercase tracking-widest text-gray-400 font-bold">User Holdings</span>
+                                <span id="statusBadge" class="text-[0.65rem] px-2 py-0.5 rounded bg-white/5 text-gray-400 font-medium border border-white/10">Not Connected</span>
+                            </div>
+
+                            <div class="bg-black/30 p-1 rounded-lg flex gap-1 mb-4">
+                                <button id="tabWallet" onclick="setQueryMode(false)" class="flex-1 py-1.5 text-xs font-semibold rounded-md bg-brand-primary text-white shadow-sm transition-all">My Wallet</button>
+                                <button id="tabQuery" onclick="setQueryMode(true)" class="flex-1 py-1.5 text-xs font-semibold rounded-md text-gray-400 hover:text-white hover:bg-white/5 transition-all">Query Mode</button>
+                            </div>
+
+                            <div id="queryWrap" class="relative mb-4 hidden animate-fade-in-up">
+                                <svg class="absolute left-3 top-3 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="queryInput" placeholder="Search 0xAddress..." oninput="handleQuery()" class="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-xs font-mono text-white focus:border-brand-secondary focus:outline-none transition-colors">
+                            </div>
+
+                            <div class="flex flex-col gap-6 my-4">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div id="balanceLabel" class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">theSTRAT Balance</div>
+                                    <div class="flex items-center gap-3">
+                                        <span id="userWallet" class="text-4xl font-display font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(142,36,170,0.5)]">0.00</span>
+                                        <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2 py-1 rounded-lg">
+                                            <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5 rounded-full">
+                                            <span class="text-[10px] font-bold text-brand-secondary">theSTRAT</span>
+                                        </div>
+                                    </div>
+                                    <div id="userWalletUsd" class="text-sm font-mono text-gray-400 mt-2">$0.00 USD</div>
+                                </div>
+                                <div class="w-2/3 mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                            </div>
+
+                            <button onclick="copyAddress()" class="w-full mt-2 flex items-center justify-between px-4 py-3 bg-white/5 border border-dashed border-white/20 rounded-xl hover:bg-brand-primary/20 hover:border-brand-primary/50 hover:text-white text-gray-400 transition-all group">
+                                <span id="userAddrDisplay" class="font-mono text-xs">0x...</span>
+                                <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
+                        </div>
+
+                        <div class="glass-panel rounded-[24px] p-5 sm:p-6 mt-6 flex flex-col h-[31.25rem]">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <span class="text-[0.65rem] uppercase tracking-widest text-gray-400 font-bold">Trade History</span>
+                                    <div class="text-[0.55rem] text-brand-secondary">Showing All Records</div>
+                                </div>
+                                <span id="txCountBadge" class="text-[10px] px-2 py-0.5 rounded bg-success/10 text-success font-bold border border-success/20">0 Trades</span>
+                            </div>
+
+                            <div id="txHistoryList" class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                                <div class="text-center py-20 text-gray-600 text-xs italic">Connect wallet to view history</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+    <footer class="relative w-full border-t border-white/5 bg-[#0a0510]/90 backdrop-blur-xl mt-auto z-50">
+        <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-5 grid grid-cols-1 md:grid-cols-3 items-center gap-6">
+            
+            <div class="hidden md:block"></div>
+
+            <div class="flex flex-col xl:flex-row items-center justify-center gap-3 sm:gap-5 w-full">
+                <span class=" text-xs sm:text-sm uppercase tracking-widest text-gray-500 font-bold whitespace-nowrap">Powered by</span>
+                <div class="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
+                    <div class="flex items-center gap-1.5 cursor-pointer hover:text-white transition-all hover:-translate-y-0.5" onclick="window.open('https://mclb.org')">
+                        <img src="mclb.svg" alt="MCLB" class="w-4 h-4 object-contain">
+                        <span class="font-medium">MCLB</span>
+                    </div>
+                    <div class="w-1 h-1 rounded-full bg-white/10"></div>
+                    <div class="flex items-center gap-1.5 cursor-pointer hover:text-white transition-all hover:-translate-y-0.5" onclick="window.open('https://thena.fi')">
+                        <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="w-4 h-4 object-contain rounded-sm">
+                        <span class="font-medium">THENA.fi</span>
+                    </div>
+                    <div class="w-1 h-1 rounded-full bg-white/10"></div>
+                    <div class="flex items-center gap-1.5 cursor-pointer hover:text-white transition-all hover:-translate-y-0.5" onclick="window.open('https://eliteness.network')">
+                        <img src="https://ftm.guru/icons/eliteness.png" alt="Eliteness" class="w-4 h-4 object-contain">
+                        <span class="font-medium">Eliteness</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center md:justify-end gap-6 w-full">
+                <a href="https://x.com/ThenaStrategy" target="_blank" class="text-gray-500 hover:text-white hover:scale-110 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://thenastrategy.gitbook.io/thena-strategy/" target="_blank" class="text-gray-500 hover:text-white hover:scale-110 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </a>
+                <a href="https://t.me/ThenaStrategy" target="_blank" class="text-gray-500 hover:text-white hover:scale-110 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg>
+                </a>
+            </div>
+            
+        </div>
+    </footer>
+
+    <div id="toastContainer" class="fixed top-24 right-5 z-[100] flex flex-col gap-3 pointer-events-none max-w-sm w-full"></div>
+
+    <div id="swapModal" class="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm hidden flex justify-center items-center opacity-0 transition-opacity duration-300">
+        <div class="bg-[#1a0b2e] border border-brand-primary w-[90%] max-w-[24rem] p-8 rounded-3xl text-center shadow-[0_0_50px_rgba(142,36,170,0.3)] transform scale-95 transition-transform duration-300 relative">
+            <div id="modalSpinner" class="w-12 h-12 border-4 border-white/10 border-t-brand-primary rounded-full animate-spin mx-auto mb-6"></div>
+
+            <svg id="modalSuccess" class="hidden w-16 h-16 text-success mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <svg id="modalError" class="hidden w-16 h-16 text-danger mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+
+            <div class="text-xl font-display font-bold text-white mb-2" id="modalTitle">Processing...</div>
+            <div class="text-sm text-gray-400 mb-6" id="modalDesc">Please confirm transaction in your wallet</div>
+
+            <button id="modalCloseBtn" class="hidden bg-white/5 border border-white/10 text-white px-6 py-2 rounded-lg hover:bg-white/10 transition-colors" onclick="hideModal()">Close</button>
+        </div>
+    </div>
+
+    <div id="leftAdBox" class="hidden sm:block fixed bottom-5 left-5 w-[16rem] bg-brand-card/95 backdrop-blur-xl border border-brand-primary/20 rounded-2xl p-4 shadow-[0_0_30px_rgba(0,0,0,0.5)] z-50 transition-all hover:-translate-y-1">
+        <button class="absolute top-2 right-2 text-gray-500 hover:text-white text-xs" onclick="toggleAds()">✕</button>
+        <div class="flex gap-3 items-center mb-3">
+            <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-10 h-10 rounded-full bg-white/10">
+            <div class="font-bold text-sm leading-tight text-white">Need<br>fBOMB?</div>
+        </div>
+        <div class="space-y-2">
+            <a href="https://thena.fi/swap?outputCurrency=0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979" target="_blank" class="block text-center text-[0.65rem] font-bold bg-white/5 hover:bg-brand-primary text-white py-2 rounded-lg transition-colors">Buy on THENA</a>
+            <a href="https://mclb.org/bridge" target="_blank" class="block text-center text-[0.65rem] font-bold bg-white/5 hover:bg-brand-secondary text-white py-2 rounded-lg transition-colors">Bridge from MCLB.org</a>
+        </div>
+    </div>
+
+    <div id="mobileInfoBtn" class="hidden" onclick="toggleAds()"></div>
+
+
+    <script>
+	let allTransactions = []; 
+
+async function loadTransactionsCSV() {
+    try {
+        const response = await fetch('pasttransactions.csv');
+        const csvText = await response.text();
+        
+        const lines = csvText.trim().split('\n');
+        allTransactions = lines.slice(1).map(line => {
+            const values = line.split(',');
+            if (values.length < 8) return null;
+            return {
+                date: values[0], time: values[1], type: values[2],
+                usdVolume: values[3], tokenAmount: values[4], price: values[5],
+                maker: values[6].toLowerCase(), link: values[7]
+            };
+        }).filter(t => t !== null);
+        
+        const localTrades = JSON.parse(localStorage.getItem('my_new_trades') || "[]");
+        allTransactions = [...localTrades, ...allTransactions];
+
+        console.log("Total Transactions Loaded:", allTransactions.length);
+    } catch (e) {
+        console.error("Error loading CSV:", e);
+    }
+}
+
+
+function displayUserHistory(address) {
+    const listContainer = document.getElementById('txHistoryList');
+    const badge = document.getElementById('txCountBadge');
+    
+    if (!address) {
+        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-sm italic">Connect wallet to view history</div>`;
+        badge.innerText = "0 Trades";
+        return;
+    }
+
+    const userTrades = allTransactions.filter(t => t.maker === address.toLowerCase());
+    badge.innerText = `${userTrades.length} Trade${userTrades.length === 1 ? '' : 's'}`;
+
+    if (userTrades.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-[0.75rem]">No transactions found for this address.</div>`;
+        return;
+    }
+
+    userTrades.sort((a,b) => new Date(b.date + " " + b.time) - new Date(a.date + " " + a.time));
+
+    const currentPrice = pair && pair.priceUsd ? parseFloat(pair.priceUsd) : 0;
+
+    listContainer.innerHTML = userTrades.map(tx => {
+        const usdPrice = parseFloat(tx.price);
+        const totalUsd = parseFloat(tx.usdVolume);
+        const tokenAmt = parseFloat(tx.tokenAmount);
+        const isSell = tx.type.toLowerCase() === 'sell';
+        
+        const typeColor = isSell ? 'text-danger' : 'text-success';
+        const typeBg = isSell ? 'bg-danger/10' : 'bg-success/10';
+
+        let currentValueHtml = '';
+        if (currentPrice > 0) {
+            const currentUsdValue = tokenAmt * currentPrice;
+            
+            if (!isSell) {
+                const diff = currentUsdValue - totalUsd;
+                const pnlPercent = totalUsd > 0 ? (diff / totalUsd) * 100 : 0;
+                const pnlColor = diff >= 0 ? 'text-success' : 'text-danger';
+                const sign = diff >= 0 ? '+' : '';
+                
+                currentValueHtml = `
+                <div class="flex justify-between items-center text-[0.65rem] pt-1">
+                    <span class="text-gray-400 font-medium text-[0.55rem] uppercase tracking-tighter">Current Value</span>
+                    <div class="text-right">
+                        <span class="text-white font-bold">$${currentUsdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <span class="${pnlColor} ml-1 font-bold text-[0.55rem]">(${sign}${pnlPercent.toFixed(2)}%)</span>
+                    </div>
+                </div>`;
+            } else {
+                currentValueHtml = `
+                <div class="flex justify-between items-center text-[0.65rem] pt-1">
+                    <span class="text-gray-400 font-medium text-[0.55rem] uppercase tracking-tighter">Value (If Held)</span>
+                    <span class="text-white font-bold">$${currentUsdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>`;
+            }
+        }
+
+        return `
+            <div class="bg-black/40 border border-white/5 rounded-xl p-3 hover:border-brand-primary/40 transition-all group">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="text-white text-[0.75rem] font-bold">${tx.date}</span>
+                            <span class="text-[0.55rem] px-1.5 py-0.5 rounded ${typeBg} ${typeColor} font-bold uppercase">${tx.type}</span>
+                        </div>
+                        <span class="text-gray-500 text-[0.55rem]">${tx.time}</span>
+                    </div>
+                    <a href="${tx.link}" target="_blank" class="text-brand-primary hover:text-white transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-[0.75rem]">
+                        <span class="text-gray-400">Execution Price</span>
+                        <div class="text-right">
+                            <div class="${typeColor} font-bold">$${usdPrice.toFixed(6)}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-[0.75rem]">
+                        <span class="text-gray-400">Amount</span>
+                        <span class="text-white font-mono">${tokenAmt.toLocaleString()} theSTRAT</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[0.65rem] pt-2 mt-1 border-t border-white/5">
+                        <span class="text-gray-500 font-medium text-[0.55rem] uppercase tracking-tighter">${isSell ? 'Total Received' : 'Total Spent'}</span>
+                        <span class="text-brand-secondary font-bold">$${totalUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</span>
+                    </div>
+                    ${currentValueHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+        const ADDR_ROUTER   = "0xd4ae6eca985340dd434d38f470accce4dc78d109";
+        const ADDR_THESTRAT = "0x31fCA0083A2b0b99aB044EB21625ACC6Ed87e4fe";//"0x28da45415B602B69b97DE6CF6aA75458358e270c";//"0x0e5eb3a3c1cf4d46fDedAD88D481A284b0496B4C";
+        const ADDR_FBOMB    = "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979";
+        const ADDR_WBNB     = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+        const ADDR_TREASURY = "0x28aa4f9ffe21365473b64c161b566c3cdead0108";
+        const ADDR_MSIG     = "0x5053776B2111809AA4b308F1F6417E65f8aABa1E";
+        const ADDR_GAUGE    = "0xce6b9bae3c330e0455d1af0ae3996f496cdbf1f1";//ethena/wbnb gauge
+        const ADDR_LP_PAIR  = "0x3d63abc40402d0f7291917A85E0E4c46Fb1A37b4";//"0x54d67ef39ad989debc4dd73f0f9115c651a5c994";//"0x7309c3e4c48327E24f6641625afb5e4636704b80";//"0x7245D36825acFE58dE64E1b4A5F6d95662628faA";
+        const ADDR_ETHENA   = "0xafbe3b8b0939a5538DE32f7752A78e08C8492295";
+        const ADDR_THE      = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
+        const ADDR_VETHE    = "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D";
+const ADDR_STAKETHENA = "0x5b8ce6d591c914a56cb019b3decb63ede22708c8"; 
+const ADDR_MANUAL_STAKE = "0x90cda9b619b124d321111fe240f8191a72e93297";
+        let VETHE_RATIO = 2.50;
+        const BSC_RPC = "https://bsc-dataseed.binance.org/";
+
+        const IMG_BOMB = "fBOMB_token_whiteblue_blackcircle.png";
+        const IMG_THESTRAT = "thenastrat_token_logo_white_gradient.png";
+
+        const MINIMAL_STRAT_ABI = ["function approve(address spender, uint256 amount) external returns (bool)","function allowance(address owner, address spender) external view returns (uint256)","function decimals() external view returns (uint8)","function balanceOf(address account) external view returns (uint256)","function totalSupply() external view returns (uint256)"];
+        const ROUTER_ABI = ["function getAmountsOut(uint amountIn, tuple(address from, address to, bool stable)[] memory routes) public view returns (uint[] memory amounts)","function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, tuple(address from, address to, bool stable)[] calldata routes, address to, uint deadline) external"];
+        const ERC20_ABI = ["function approve(address spender, uint256 amount) external returns (bool)","function allowance(address owner, address spender) external view returns (uint256)","function decimals() external view returns (uint8)","function balanceOf(address account) external view returns (uint256)"];
+        const STAKING_ABI = ["function balanceOf(address account) external view returns (uint256)","function earned(address account, address _rewardsToken) external view returns (uint256)","function totalSupply() external view returns (uint256)"];
+const PAIR_ABI = [
+    "function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+    "function totalSupply() external view returns (uint256)",
+    "function token0() external view returns (address)",
+    "function token1() external view returns (address)",
+    "function balanceOf(address account) external view returns (uint256)" 
+];
+const STAKETHENA_VAULT_ABI = [
+    "function balanceOf(address account) external view returns (uint256)",
+    "function convertToAssets(uint256 shares) external view returns (uint256)"
+];
+
+const GAUGE_ABI = [
+    "function balanceOf(address account) external view returns (uint256)",
+    "function earned(address account, address _rewardsToken) external view returns (uint256)"
+];
+        const VETHE_ABI = ["function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)","function locked(uint256 id) external view returns (int128 amount, uint256 end)","function balanceOf(address owner) external view returns (uint256)"];
 
         let provider, signer, userAddr;
         let pair = null;
         let isBuy = true;
-        let slippage = 0.5;
-        let chartInstance = null;
+        let slippage = 12.0;
         let quoteTimeout = null;
-        let activeRoute = null; 
+        let chartInstance = null;
+        let queryTimeout = null;
+        let isQueryMode = false;
 
-        function switchTab(t) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            const btn = (t === 'swap') ? document.querySelector('.tab-btn:nth-child(1)') : document.querySelector('.tab-btn:nth-child(2)');
-            btn.classList.add('active');
-            document.getElementById(t + '-view').classList.add('active');
+       function switchTab(t) {
+            const swapBtn = document.getElementById('tab-swap');
+            const dashBtn = document.getElementById('tab-dashboard');
+            const swapView = document.getElementById('swap-view');
+            const dashView = document.getElementById('dashboard-view');
+
+            const activeBtn = ['bg-brand-primary', 'text-white', 'shadow-lg'];
+            const inactiveBtn = ['text-gray-400', 'hover:text-white'];
+
+            if (t === 'swap') {
+                swapBtn.classList.add(...activeBtn);
+                swapBtn.classList.remove(...inactiveBtn);
+                dashBtn.classList.remove(...activeBtn);
+                dashBtn.classList.add(...inactiveBtn);
+
+                dashView.classList.replace('relative', 'absolute');
+                dashView.classList.add('opacity-0', 'translate-x-5', 'scale-95', 'pointer-events-none');
+                dashView.classList.remove('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                
+                setTimeout(() => { if(!dashView.classList.contains('opacity-100')) dashView.classList.add('hidden'); }, 500);
+
+                swapView.classList.remove('hidden');
+                setTimeout(() => {
+                    swapView.classList.replace('absolute', 'relative');
+                    swapView.classList.remove('opacity-0', '-translate-x-5', 'scale-95', 'pointer-events-none');
+                    swapView.classList.add('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                }, 10);
+
+            } else {
+                dashBtn.classList.add(...activeBtn);
+                dashBtn.classList.remove(...inactiveBtn);
+                swapBtn.classList.remove(...activeBtn);
+                swapBtn.classList.add(...inactiveBtn);
+
+                swapView.classList.replace('relative', 'absolute');
+                swapView.classList.add('opacity-0', '-translate-x-5', 'scale-95', 'pointer-events-none');
+                swapView.classList.remove('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                
+                setTimeout(() => { if(!swapView.classList.contains('opacity-100')) swapView.classList.add('hidden'); }, 500);
+
+                dashView.classList.remove('hidden');
+                setTimeout(() => {
+                    dashView.classList.replace('absolute', 'relative');
+                    dashView.classList.remove('opacity-0', 'translate-x-5', 'scale-95', 'pointer-events-none');
+                    dashView.classList.add('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                }, 10);
+
+                updateDashboard();
+                fetchUserStats();
+                updateAllUI();
+            }
         }
-
         function toggleSettings() {
-            document.getElementById('settingsPanel').classList.toggle('open');
+            const panel = document.getElementById('settingsPanel');
+            const gear = document.getElementById('settingsGear');
+            panel.classList.toggle('open');
+            gear.classList.toggle('active');
         }
 
         function setSlip(val) {
@@ -344,316 +893,648 @@
         }
 
         function updateSlipUI() {
-            const btns = document.querySelectorAll('.slip-btn');
-            btns.forEach(b => {
-                if(parseFloat(b.innerText) === slippage && document.getElementById('customSlip').value === "") {
-                    b.classList.add('active');
+            document.querySelectorAll('.slip-option').forEach(b => {
+                const isActive = parseFloat(b.innerText) === slippage && document.getElementById('customSlip').value === "";
+                if(isActive) {
+                    b.classList.add('bg-brand-primary', 'text-white', 'border-transparent');
+                    b.classList.remove('border-brand-border');
                 } else {
-                    b.classList.remove('active');
+                    b.classList.remove('bg-brand-primary', 'text-white', 'border-transparent');
+                    b.classList.add('border-brand-border');
                 }
             });
-            document.getElementById('slipDisplay').innerText = slippage + "%";
-            calc(); 
+            calc();
+        }
+
+        function copyAddress() {
+            if(!userAddr) return alert("Connect Wallet first");
+            navigator.clipboard.writeText(userAddr);
+            showToast("Address Copied", "success");
+        }
+
+        function setQueryMode(enabled) {
+            isQueryMode = enabled;
+            const wrap = document.getElementById('queryWrap');
+            const tabW = document.getElementById('tabWallet');
+            const tabQ = document.getElementById('tabQuery');
+
+            if(enabled) {
+                wrap.classList.remove('hidden');
+                tabW.classList.remove('bg-brand-primary', 'text-white');
+                tabW.classList.add('text-gray-400', 'hover:text-white');
+
+                tabQ.classList.add('bg-brand-primary', 'text-white');
+                tabQ.classList.remove('text-gray-400');
+
+                document.getElementById('balanceLabel').innerText = "Query Balance";
+                document.getElementById('userWallet').innerText = "0.00";
+            } else {
+                wrap.classList.add('hidden');
+                tabW.classList.add('bg-brand-primary', 'text-white');
+                tabQ.classList.remove('bg-brand-primary', 'text-white');
+                tabQ.classList.add('text-gray-400');
+
+                document.getElementById('queryInput').value = "";
+                document.getElementById('balanceLabel').innerText = "Balance";
+                fetchUserStats();
+            }
+        }
+
+        function handleQuery() {
+            clearTimeout(queryTimeout);
+            queryTimeout = setTimeout(() => { fetchUserStats(); }, 500);
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            let borderColor = type === 'success' ? 'border-success' : (type === 'error' ? 'border-danger' : 'border-brand-primary');
+            toast.className = `bg-[#140a1e] border-l-4 ${borderColor} text-white px-5 py-3 rounded-md shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0`;
+
+            let icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+            toast.innerHTML = `<span class="font-bold text-lg">${icon}</span> <span class="text-sm font-medium">${msg}</span>`;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            });
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function showModal(title, desc) {
+            const modal = document.getElementById('swapModal');
+            document.getElementById('modalSpinner').style.display = 'block';
+            document.getElementById('modalSuccess').classList.add('hidden');
+            document.getElementById('modalError').classList.add('hidden');
+            document.getElementById('modalCloseBtn').classList.add('hidden');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalDesc').innerText = desc;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+                modal.querySelector('div').classList.add('scale-100');
+            }, 10);
+        }
+
+        function setModalError(errMsg) {
+            document.getElementById('modalSpinner').style.display = 'none';
+            document.getElementById('modalError').classList.remove('hidden');
+            document.getElementById('modalTitle').innerText = "Failed";
+            document.getElementById('modalDesc').innerText = errMsg;
+            document.getElementById('modalCloseBtn').classList.remove('hidden');
+            document.getElementById('modalCloseBtn').style.display = 'inline-block';
+        }
+
+        function setModalSuccess(txHash) {
+            document.getElementById('modalSpinner').style.display = 'none';
+            document.getElementById('modalSuccess').classList.remove('hidden');
+            document.getElementById('modalTitle').innerText = "Success";
+            document.getElementById('modalDesc').innerText = "Transaction confirmed";
+            document.getElementById('modalCloseBtn').classList.remove('hidden');
+            document.getElementById('modalCloseBtn').style.display = 'inline-block';
+        }
+        function hideModal() {
+            const modal = document.getElementById('swapModal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
         async function connectWallet() {
-            if(!window.ethereum) return alert("Please install MetaMask or Rabby!");
-            
+            if(!window.ethereum) return showToast("Install MetaMask", "error");
             try {
                 provider = new ethers.BrowserProvider(window.ethereum);
                 signer = await provider.getSigner();
                 userAddr = await signer.getAddress();
-                
-                const network = await provider.getNetwork();
-                if(network.chainId !== 56n) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x38' }], 
-                        });
-                       
-                        provider = new ethers.BrowserProvider(window.ethereum);
-                        signer = await provider.getSigner();
-                    } catch(e) {
-                        alert("Please switch your wallet to Binance Smart Chain (BSC).");
-                        return;
-                    }
+
+                const net = await provider.getNetwork();
+                if(net.chainId !== 56n) {
+                    try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] }); }
+                    catch(e) { return showToast("Switch to BSC", "error"); }
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
                 }
 
-               
-                const shortAddr = userAddr.substring(0,6) + "..." + userAddr.substring(38);
-                document.getElementById('connectBtn').innerText = shortAddr;
+                document.getElementById('connectBtn').innerHTML = `${userAddr.substring(0,6)}...${userAddr.substring(38)}`;
                 document.getElementById('mainActionBtn').innerText = "SWAP";
-                
-                
+
+                const badge = document.getElementById('statusBadge');
+                badge.innerText = "Connected";
+                badge.className = "text-[0.65rem] px-2 py-0.5 rounded bg-success/20 text-success font-medium border border-success/30";
+                document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
+
+                showToast("Wallet Connected", "success");
                 calc();
+                updateDashboard();
+                fetchSwapBalances();
+                if(isQueryMode) handleQuery(); else fetchUserStats();
 
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { console.error(e); showToast("Connection failed", "error"); }
         }
 
-        
         async function init() {
-            document.getElementById('cardDate').innerText = new Date().toLocaleString();
-            try {
-                const res = await fetch("https://api.dexscreener.com/latest/dex/search?q=fbomb%20ethena");
-                const data = await res.json();
-                if(data.pairs && data.pairs.length) {
-                    pair = data.pairs[0];
-                    updateAllUI();
-                }
-            } catch(e) { console.error(e); }
-        }
+    await loadTransactionsCSV();
 
-        function updateAllUI() {
-            if(!pair) return;
-            updateSwapInputs();
+    try {
+        if(!provider) provider = new ethers.JsonRpcProvider(BSC_RPC);
+        updateSlipUI();
+        updateDashboard();
+    } catch(e) { console.log("Init RPC error:", e); }
+
+    try {
+        const res = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/" + ADDR_LP_PAIR);
+        const data = await res.json();
+        if(data.pairs && data.pairs.length) {
+            pair = data.pairs[0];
+            pair.baseToken.symbol = "theSTRAT";
+            updateAllUI();
+        }
+    } catch(e) {}
+
+    // TRIGGER THE MOCK TEST
+  //  console.log("Running Mock Test for address...");
+ //   displayUserHistory("0x6Efee96287B5e1a2Ef966E25baE15a54BDE9b83E");
+}
+
+     async function updateDashboard() {
+    if (!provider) return;
+    
+  //  console.log("--- START DASHBOARD UPDATE ---");
+  //  console.log("Multisig Address:", ADDR_MSIG);
+
+    try {
+        const stakeTheContract = new ethers.Contract(ADDR_STAKETHENA, STAKETHENA_VAULT_ABI, provider);
+        const gaugeContract = new ethers.Contract(ADDR_GAUGE, GAUGE_ABI, provider); 
+        
+        const manualStakeContract = new ethers.Contract(ADDR_MANUAL_STAKE, STAKING_ABI, provider); 
+
+        const pairContract = new ethers.Contract(ADDR_LP_PAIR, PAIR_ABI, provider);
+        const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
+        const veTheContract = new ethers.Contract(ADDR_VETHE, VETHE_ABI, provider);
+        const theContract = new ethers.Contract(ADDR_THE, MINIMAL_STRAT_ABI, provider);
+
+        let priceThe = 0;
+        let priceFbomb = 0;
+        try {
+            const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
+            const data = await res.json();
+            if (data.pairs && data.pairs.length > 0) priceThe = parseFloat(data.pairs[0].priceUsd);
             
-            document.getElementById('cardPair').innerText = `${pair.baseToken.symbol} / ${pair.quoteToken.symbol}`;
-            document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(4);
-            const chg = pair.priceChange.h24;
-            const chgEl = document.getElementById('cardChange');
-            chgEl.innerText = (chg >= 0 ? "+" : "") + chg + "%";
-            chgEl.style.color = chg >= 0 ? "#00aa00" : "#cc0000";
-            document.getElementById('cardFdv').innerText = fmtUSD(pair.fdv);
-            document.getElementById('cardLiq').innerText = fmtUSD(pair.liquidity.usd);
-            document.getElementById('cTok1').innerText = pair.baseToken.symbol;
-            document.getElementById('cVal1').innerText = fmtNum(pair.liquidity.base);
-            document.getElementById('cTok2').innerText = pair.quoteToken.symbol;
-            document.getElementById('cVal2').innerText = fmtNum(pair.liquidity.quote);
-
-            document.getElementById('anPair').innerText = `${pair.baseToken.symbol} / ${pair.quoteToken.symbol}`;
-            document.getElementById('anPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(6);
-            document.getElementById('anFdv').innerText = fmtUSD(pair.fdv);
-            document.getElementById('anLiq').innerText = fmtUSD(pair.liquidity.usd);
-            document.getElementById('anVol').innerText = fmtUSD(pair.volume.h24);
-            document.getElementById('anTxns').innerText = (pair.txns.h24.buys + pair.txns.h24.sells);
-            const date = new Date(pair.pairCreatedAt);
-            document.getElementById('anAge').innerText = isNaN(date.getTime()) ? "Unknown" : date.toLocaleDateString();
-            document.getElementById('anDex').innerText = pair.dexId.toUpperCase();
-            document.getElementById('anTok1').innerText = pair.baseToken.symbol;
-            document.getElementById('anVal1').innerText = fmtNum(pair.liquidity.base);
-            document.getElementById('anTok2').innerText = pair.quoteToken.symbol;
-            document.getElementById('anVal2').innerText = fmtNum(pair.liquidity.quote);
-
-            renderChart(parseFloat(pair.priceUsd));
-        }
-
-        function updateSwapInputs() {
-            const tBase = { sym: "eTHENA", name: "eTHENA", icon: IMG_ETHENA, addr: ADDR_ETHENA };
-            const tQuote = { sym: "fBOMB", name: "fBOMB", icon: IMG_BOMB, addr: ADDR_FBOMB };
-
-            const tin = isBuy ? tBase : tQuote;
-            const tout = isBuy ? tQuote : tBase;
-
-            document.getElementById('sSym').innerText = tin.sym;
-            document.getElementById('sName').innerText = tin.name;
-            document.getElementById('sIcon').src = tin.icon;
-            document.getElementById('bSym').innerText = tout.sym;
-            document.getElementById('bName').innerText = tout.name;
-            document.getElementById('bIcon').src = tout.icon;
-            calc();
-        }
-
-        function toggleSwap() {
-            isBuy = !isBuy;
-            document.getElementById('inpAmt').value = "";
-            document.getElementById('outAmt').value = "";
-            updateSwapInputs();
-        }
-
-       
-        async function getBestRoute(amountInWei, tokenIn, tokenOut, routerContract) {
-            const routeDirectVolatile = [{ from: tokenIn, to: tokenOut, stable: false }];
-            try {
-                const amounts = await routerContract.getAmountsOut(amountInWei, routeDirectVolatile);
-                return { route: routeDirectVolatile, amounts };
-            } catch (e) {}
-
-           
-            const routeDirectStable = [{ from: tokenIn, to: tokenOut, stable: true }];
-            try {
-                const amounts = await routerContract.getAmountsOut(amountInWei, routeDirectStable);
-                return { route: routeDirectStable, amounts };
-            } catch (e) {}
-
-            
-            const routeWbnb = [
-                { from: tokenIn, to: ADDR_WBNB, stable: false },
-                { from: ADDR_WBNB, to: tokenOut, stable: false }
-            ];
-            try {
-                const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb);
-                return { route: routeWbnb, amounts };
-            } catch (e) {}
-
-            throw new Error("No liquidity found");
-        }
-
-       
-        function calc() {
-            const val = parseFloat(document.getElementById('inpAmt').value);
-            if(!val || val <= 0) {
-                document.getElementById('outAmt').value = "";
-                document.getElementById('quoteTxt').innerText = "---";
-                document.getElementById('bUsd').innerHTML = "$0.00"; 
-                return;
+            if (pair && pair.priceNative && parseFloat(pair.priceNative) > 0) {
+                priceFbomb = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
             }
+        } catch (e) { console.log("Price fetch error:", e); }
 
-            if(!provider) {
-                document.getElementById('outAmt').placeholder = "Connect Wallet";
-                return;
-            }
 
-            clearTimeout(quoteTimeout);
-            quoteTimeout = setTimeout(async () => {
-                const tokenIn = isBuy ? ADDR_ETHENA : ADDR_FBOMB;
-                const tokenOut = isBuy ? ADDR_FBOMB : ADDR_ETHENA;
-                
-                document.getElementById('outAmt').placeholder = "Loading...";
+        const rawGaugeWei = await gaugeContract.balanceOf(ADDR_MSIG);
+        const gaugeBal = parseFloat(ethers.formatUnits(rawGaugeWei, 18));
+  //      console.log("Staked (Gauge/Eliteness):", gaugeBal);
 
+        const rawVaultShares = await stakeTheContract.balanceOf(ADDR_MSIG);
+        const rawVaultAssets = await stakeTheContract.convertToAssets(rawVaultShares);
+        const vaultBal = parseFloat(ethers.formatUnits(rawVaultAssets, 18));
+   //     console.log("stakeTHENA (Vault Assets):", vaultBal);
+
+        const rawManualWei = await manualStakeContract.balanceOf(ADDR_MSIG);
+        const manualBal = parseFloat(ethers.formatUnits(rawManualWei, 18));
+   //     console.log("Staked (Manual 0x90...):", manualBal);
+
+
+        const totalStakedEthena = gaugeBal + vaultBal + manualBal;
+   //     console.log(">> TOTAL to show in stakeTHENA row:", totalStakedEthena);
+
+
+        const rawTheWei = await theContract.balanceOf(ADDR_MSIG);
+        const balThe = parseFloat(ethers.formatUnits(rawTheWei, 18));
+   //     console.log("THE (Held):", balThe);
+
+        const rawLpWei = await pairContract.balanceOf(ADDR_MSIG);
+        const balLp = parseFloat(ethers.formatUnits(rawLpWei, 18));
+        
+        let valFbombInLp = 0;
+        if (balLp > 0) {
+            const totalLpWei = await pairContract.totalSupply();
+            const reserves = await pairContract.getReserves();
+            const token0 = await pairContract.token0();
+            const reserveFbombWei = (token0.toLowerCase() === ADDR_FBOMB.toLowerCase()) ? reserves[0] : reserves[1];
+            valFbombInLp = (balLp / parseFloat(ethers.formatUnits(totalLpWei, 18))) * parseFloat(ethers.formatUnits(reserveFbombWei, 18));
+        }
+  //      console.log("fBOMB in LP:", valFbombInLp);
+
+        const veCount = await veTheContract.balanceOf(ADDR_MSIG);
+        let valVeLocked = 0;
+        if (Number(veCount) > 0) {
+            for (let i = 0; i < Number(veCount); i++) {
                 try {
-                    
-                    const router = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, provider);
-                    const tokenContract = new ethers.Contract(tokenIn, ERC20_ABI, provider);
-                    const outContract = new ethers.Contract(tokenOut, ERC20_ABI, provider);
-
-                    const inDecimals = await tokenContract.decimals();
-                    const outDecimals = await outContract.decimals();
-                    const amountInWei = ethers.parseUnits(val.toString(), inDecimals);
-
-                    const res = await getBestRoute(amountInWei, tokenIn, tokenOut, router);
-                    activeRoute = res.route; 
-                    
-                    const amountOutWei = res.amounts[res.amounts.length - 1];
-                    const amtOut = parseFloat(ethers.formatUnits(amountOutWei, outDecimals));
-
-                    document.getElementById('outAmt').value = amtOut.toFixed(6);
-
-                    const priceBase = parseFloat(pair.priceUsd);
-                    const priceQuote = priceBase / parseFloat(pair.priceNative);
-                    const priceIn = isBuy ? priceBase : priceQuote;
-                    const priceOut = isBuy ? priceQuote : priceBase;
-                    
-                    const valInUsd = val * priceIn;
-                    const valOutUsd = amtOut * priceOut;
-                    
-                    document.getElementById('sUsd').innerText = fmtUSD(valInUsd);
-                    
-                    const diff = valInUsd - valOutUsd;
-                    const pct = (diff / valInUsd) * 100;
-                    const color = pct > 2 ? '#cc0000' : '#555'; 
-                    document.getElementById('bUsd').innerHTML = `<span style="color:${color}">${fmtUSD(valOutUsd)}</span>`;
-
-                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'eTHENA':'fBOMB'} = ${(amtOut/val).toFixed(4)} ${isBuy?'fBOMB':'eTHENA'}`;
-                    document.getElementById('quoteTxt').innerText = amtOut.toFixed(6);
-
-                } catch (e) {
-                    console.error(e);
-                    document.getElementById('outAmt').value = "No Liquidity";
-                }
-            }, 500);
+                    const tid = await veTheContract.tokenOfOwnerByIndex(ADDR_MSIG, i);
+                    const lock = await veTheContract.locked(tid);
+                    valVeLocked += parseFloat(ethers.formatUnits(lock[0], 18));
+                } catch (err) {}
+            }
         }
-
-        document.getElementById('mainActionBtn').addEventListener('click', async () => {
-            if(!userAddr) return connectWallet();
-
-            const btn = document.getElementById('mainActionBtn');
-            const val = document.getElementById('inpAmt').value;
-            
-            if(!val) return alert("Enter an amount");
-
-            const originalText = btn.innerText;
-            btn.innerText = "SWAPPING...";
-            btn.style.background = "#ccc";
-            btn.disabled = true;
-
-            try {
-                const tokenIn = isBuy ? ADDR_ETHENA : ADDR_FBOMB;
-                const tokenOut = isBuy ? ADDR_FBOMB : ADDR_ETHENA;
-
-                const tokenInContract = new ethers.Contract(tokenIn, ERC20_ABI, signer);
-                const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
-                
-                const decimals = await tokenInContract.decimals();
-                const amountInWei = ethers.parseUnits(val.toString(), decimals);
-
-                const allowance = await tokenInContract.allowance(userAddr, ADDR_ROUTER);
-                if (allowance < amountInWei) {
-                    btn.innerText = "APPROVING...";
-                    const txApp = await tokenInContract.approve(ADDR_ROUTER, ethers.MaxUint256);
-                    await txApp.wait();
-                }
-
-                btn.innerText = "CONFIRM IN WALLET...";
-                
-                const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
-                const expectedOutWei = routeRes.amounts[routeRes.amounts.length - 1];
-                
-                const slippageBps = BigInt(Math.floor(parseFloat(slippage) * 100)); 
-                const minOutWei = (expectedOutWei * (10000n - slippageBps)) / 10000n;
-                const deadline = Math.floor(Date.now() / 1000) + 60 * 10;
-
-                const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                    amountInWei,
-                    minOutWei,
-                    routeRes.route,
-                    userAddr,
-                    deadline,
-                    { gasLimit: 800000 } 
-                );
-
-                btn.innerText = "PENDING...";
-                const receipt = await tx.wait();
-                
-                alert("SWAP SUCCESS!\nHash: " + tx.hash);
-                calc(); 
-
-            } catch (e) {
-                console.error(e);
-                alert("Swap Failed: " + (e.reason || e.message));
-            }
-
-            
-            btn.innerText = "SWAP";
-            btn.disabled = false;
-            btn.style.background = ""; 
-        });
+  //      console.log("veTHE Locked:", valVeLocked);
 
 
-        function renderChart(currPrice) {
-            const ctx = document.getElementById('customChart').getContext('2d');
-            const labels = [];
-            const data = [];
-            let price = currPrice * 0.8; 
-            for(let i=1; i<=30; i++) {
-                labels.push(`Day ${i}`);
-                if(i === 30) data.push(currPrice);
-                else {
-                    const move = (Math.random() - 0.4) * (currPrice * 0.05);
-                    price += move;
-                    data.push(price);
+        const updateRow = (rowId, valId, amount, price) => {
+            const row = document.getElementById(rowId);
+            const label = document.getElementById(valId);
+            if (row && label) {
+                if (amount > 0.001) { 
+                    const usdValue = amount * price;
+                    label.innerText = `${fmtUSD(usdValue)} (${fmtNum(amount)})`;
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
                 }
             }
+        };
+
+        updateRow('rowTheHeld',  'repTheHeld',  balThe,            priceThe);
+        updateRow('rowStakeThe', 'repStakeThe', totalStakedEthena, priceThe); // Sum of Vault + Gauge + Manual
+        updateRow('rowFbombLp',  'repFbombLp',  valFbombInLp,      priceFbomb);
+        updateRow('rowVeThe',    'repVeThe',    valVeLocked,       priceThe);
+
+        const rowHeld = document.getElementById('rowEthenaHeld');
+        if(rowHeld) rowHeld.classList.add('hidden');
+
+        const rawEthenaHeld = await ethenaContract.balanceOf(ADDR_MSIG);
+        const balEthenaHeld = parseFloat(ethers.formatUnits(rawEthenaHeld, 18));
+
+        const totalValue = (valFbombInLp * priceFbomb) + 
+                           ((balEthenaHeld + totalStakedEthena + valVeLocked + balThe) * priceThe);
+                           
+        const elemTotal = document.getElementById('repTotalValue');
+        if (elemTotal) elemTotal.innerText = fmtUSD(totalValue);
+
+    //    console.log("--- END UPDATE ---");
+
+    } catch (e) { console.error("Dashboard Update Error:", e); }
+}
+        function renderPriceChart() {
             if(chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById('priceChart').getContext('2d');
+
+            const brandColor = "#8E24AA";
+            const textColor = "#B39DDB";
+
+            let currentPrice = pair ? parseFloat(pair.priceUsd) : 0.1732;
+            let dataPoints = [];
+            let labels = [];
+            let val = currentPrice * 0.85;
+            for(let i=0; i<30; i++) {
+                labels.push("");
+                let change = (Math.random() - 0.4) * (currentPrice * 0.05);
+                val += change;
+                if(i===29) val = currentPrice;
+                dataPoints.push(val);
+            }
+            document.getElementById('dashPriceVal').innerText = "$" + currentPrice.toFixed(6);
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(142, 36, 170, 0.5)');
+            gradient.addColorStop(1, 'rgba(142, 36, 170, 0)');
+
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        data: data, borderColor: '#000', borderWidth: 2, pointRadius: 0, pointHoverRadius: 6, fill: true, backgroundColor: 'rgba(0,0,0,0.02)', tension: 0.4
+                        label: 'Price',
+                        data: dataPoints,
+                        borderColor: brandColor,
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: true
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false, backgroundColor: '#12081f', titleColor: '#fff', bodyColor: '#fff', borderColor:'#8E24AA', borderWidth:1 } },
                     scales: {
-                        x: { display: true, grid: {display:false}, ticks: { font: {family:'Courier Prime', size:10}, maxTicksLimit: 6 } },
-                        y: { position: 'right', grid: {color:'#eee', borderDash:[5,5]}, ticks: { font: {family:'Courier Prime', size:10}, callback: v=>'$'+v.toFixed(4) } }
-                    }
+                        x: { display: false },
+y: { 
+    display: true, 
+    position:'right', 
+    grid: { color: 'rgba(255,255,255,0.05)' }, 
+    ticks: { 
+        callback: function(value){ return '$' + value.toFixed(8); }, 
+        font:{family:'Inter'}, 
+        color: textColor 
+    } 
+}                    },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
             });
         }
+
+       async function fetchUserStats() {
+            if(!provider) return;
+            let targetAddr = userAddr;
+
+            if(isQueryMode) {
+                const inputVal = document.getElementById('queryInput').value;
+                if(ethers.isAddress(inputVal)) {
+                    targetAddr = inputVal;
+                } else {
+                    document.getElementById('userWallet').innerText = "---";
+                    document.getElementById('userEthena').innerText = "---";
+                    return;
+                }
+            } else {
+                if(!userAddr) return;
+            }
+
+            try {
+                const tokenContract = new ethers.Contract(ADDR_THESTRAT, MINIMAL_STRAT_ABI, provider);
+                const walletWei = await tokenContract.balanceOf(targetAddr);
+const balanceNum = parseFloat(ethers.formatUnits(walletWei, 18));
+document.getElementById('userWallet').innerText = balanceNum.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+if (pair && pair.priceUsd) {
+    const usdVal = balanceNum * parseFloat(pair.priceUsd);
+    const usdEl = document.getElementById('userWalletUsd');
+    if (usdEl) usdEl.innerText = "$" + usdVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USD";
+}
+
+                const ethenaContract = new ethers.Contract(ADDR_ETHENA, MINIMAL_STRAT_ABI, provider);
+                const ethenaWei = await ethenaContract.balanceOf(targetAddr);
+                const ethenaEl = document.getElementById('userEthena');
+                if(ethenaEl) {
+                    ethenaEl.innerText = parseFloat(ethers.formatUnits(ethenaWei, 18)).toFixed(2);
+                }
+        displayUserHistory(targetAddr); 
+
+            } catch(e) { console.log("User stats error", e); }
+        }
+
+        async function fetchSwapBalances() {
+            if(!userAddr || !provider) return;
+            try {
+                const tIn = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                const tOut = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
+                const cIn = new ethers.Contract(tIn, MINIMAL_STRAT_ABI, provider);
+                const cOut = new ethers.Contract(tOut, MINIMAL_STRAT_ABI, provider);
+                const [bIn, bOut] = await Promise.all([ cIn.balanceOf(userAddr), cOut.balanceOf(userAddr) ]);
+                const bInFmt = ethers.formatUnits(bIn, 18);
+                const bOutFmt = ethers.formatUnits(bOut, 18);
+
+                document.getElementById('sBal').innerText = parseFloat(bInFmt).toFixed(4);
+                document.getElementById('sBal').dataset.raw = bInFmt;
+                document.getElementById('bBal').innerText = parseFloat(bOutFmt).toFixed(4);
+            } catch(e) { console.log("Swap balance fetch error", e); }
+        }
+
+        function setMax() {
+            const raw = document.getElementById('sBal').dataset.raw;
+            if(raw) { document.getElementById('inpAmt').value = raw; calc(); }
+        }
+
+        function updateAllUI() {
+            if(!pair) return;
+            //document.getElementById('cardPair').innerText = `theSTRAT / ${pair.quoteToken.symbol}`;
+            document.getElementById('cardPrice').innerText = "$" + parseFloat(pair.priceUsd).toFixed(8);
+			    document.getElementById('dashPriceVal').innerText = "$" + parseFloat(pair.priceUsd).toFixed(8);
+            document.getElementById('cardPriceInTokens').innerText = parseFloat(pair.priceNative).toFixed(8) + " fBOMB";
+            const chg = pair.priceChange.h24;
+            if(chg) {
+            	const chgEl = document.getElementById('cardChange');
+            	chgEl.innerText = (chg >= 0 ? "+" : "-") + chg + "%";
+            	chgEl.className = chg >= 0 ? "mb-2 px-3 py-1 rounded-lg text-sm font-bold bg-success/10 text-success border border-success/20" : "mb-2 px-3 py-1 rounded-lg text-sm font-bold bg-danger/10 text-danger border border-danger/20";
+            	document.getElementById('dashPriceChg').innerText = (chg >= 0 ? "+" : "-") + chg + "%";
+            	document.getElementById('dashPriceChg').className = chg >= 0 ? "text-sm text-success font-medium" : "text-sm text-danger font-medium";
+            }
+
+            document.getElementById('cardFdv').innerText = fmtUSD(pair.fdv);
+            document.getElementById('cardLiq').innerText = fmtUSD(pair.liquidity.usd);
+
+            const liqBase = pair.liquidity.base;
+            const liqQuote = pair.liquidity.quote;
+
+            document.getElementById('cVal1').innerText = fmtNum(liqBase);
+            document.getElementById('cVal2').innerText = fmtNum(liqQuote);
+
+            document.getElementById('barMC').innerText = fmtUSD(pair.fdv);
+            document.getElementById('barVol').innerText = fmtUSD(pair.volume.h24);
+            document.getElementById('barBurn').innerText = "0";
+            document.getElementById('barChg').innerText = (chg >= 0 ? "+" : "") + chg + "%";
+            document.getElementById('barChg').className = chg >= 0 ? "text-success font-bold font-display" : "text-danger font-bold font-display";
+
+            updateSwapInputs();
+        }
+
+function updateSwapInputs() {
+    const tStrat = { sym: "theSTRAT", name: "Thena Strategy", icon: IMG_THESTRAT };
+    const tBomb = { sym: "fBOMB", name: "fBOMB", icon: IMG_BOMB };
+
+    const tin = isBuy ? tBomb : tStrat;
+    const tout = isBuy ? tStrat : tBomb;
+
+    document.getElementById('sSym').innerText = tin.sym;
+    document.getElementById('sIcon').src = tin.icon;
+
+    document.getElementById('bSym').innerText = tout.sym;
+    document.getElementById('bIcon').src = tout.icon;
+
+    const btnSell = document.getElementById('helpBtnSell');
+    const btnBuy = document.getElementById('helpBtnBuy');
+
+    if(btnSell) {
+        btnSell.style.display = (tin.sym === 'fBOMB') ? 'flex' : 'none';
+    }
+    if(btnBuy) {
+        btnBuy.style.display = (tout.sym === 'fBOMB') ? 'flex' : 'none';
+    }
+
+    fetchSwapBalances();
+    calc();
+}
+
+function toggleAds() {
+    const el = document.getElementById('leftAdBox');
+
+    const isHidden = el.style.display === 'none' || el.classList.contains('hidden');
+
+    if (isHidden) {
+        el.classList.remove('hidden');
+        el.style.display = '';
+    } else {
+        el.classList.add('hidden');
+        el.style.display = 'none';
+    }
+}
+
+       function toggleSwap() {
+    isBuy = !isBuy;
+    document.getElementById('inpAmt').value = "";
+    document.getElementById('outAmt').value = "";
+        document.getElementById('swapArrowBtn').classList.toggle('rotate-180');
+
+    updateSwapInputs();
+}
+
+        async function getBestRoute(amountInWei, tokenIn, tokenOut, routerContract) {
+            const routeDir = [{ from: tokenIn, to: tokenOut, stable: false }];
+            try { const amounts = await routerContract.getAmountsOut(amountInWei, routeDir); return { route: routeDir, amounts }; } catch (e) { }
+            const routeWbnb = [{ from: tokenIn, to: ADDR_WBNB, stable: false }, { from: ADDR_WBNB, to: tokenOut, stable: false }];
+            try { const amounts = await routerContract.getAmountsOut(amountInWei, routeWbnb); return { route: routeWbnb, amounts }; } catch (e) {}
+            throw new Error("No Liquidity");
+        }
+
+        function calc() {
+            const val = parseFloat(document.getElementById('inpAmt').value);
+            if(!val || val<=0) {
+                document.getElementById('outAmt').value = "";
+                document.getElementById('quoteTxt').innerText = "---";
+                document.getElementById('bUsd').innerHTML = "$0.00";
+                document.getElementById('sUsd').innerHTML = "$0.00";
+                return;
+            }
+            if(!provider) { document.getElementById('outAmt').placeholder = "Connect"; return; }
+
+            clearTimeout(quoteTimeout);
+            quoteTimeout = setTimeout(async () => {
+                try {
+                    const router = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, provider);
+                    const tokenIn = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                    const tokenOut = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
+                    const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
+                    const outAbi = (tokenOut === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
+                    const tokenContract = new ethers.Contract(tokenIn, inAbi, provider);
+                    const outContract = new ethers.Contract(tokenOut, outAbi, provider);
+                    const decimals = await tokenContract.decimals();
+                    const outDecimals = await outContract.decimals();
+                    const amountInWei = ethers.parseUnits(val.toString(), decimals);
+                    const res = await getBestRoute(amountInWei, tokenIn, tokenOut, router);
+                    const amountOutWei = res.amounts[res.amounts.length - 1];
+                    const rawAmtOut = parseFloat(ethers.formatUnits(amountOutWei, outDecimals));
+const slipFactor = (100 - slippage) / 100;
+const minReceived = rawAmtOut * slipFactor;
+
+document.getElementById('outAmt').value = minReceived.toFixed(6);
+
+document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
+
+document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'theSTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'theSTRAT':'fBOMB'}`;
+
+const priceIn = isBuy ? (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative)) : parseFloat(pair.priceUsd);
+document.getElementById('sUsd').innerText = fmtUSD(val * priceIn);
+
+const priceOut = isBuy ? parseFloat(pair.priceUsd) : (parseFloat(pair.priceUsd)/parseFloat(pair.priceNative));
+document.getElementById('bUsd').innerText = fmtUSD(rawAmtOut * priceOut);
+                    document.getElementById('rateTxt').innerText = `1 ${isBuy?'fBOMB':'theSTRAT'} = ${(rawAmtOut/val).toFixed(4)} ${isBuy?'theSTRAT':'fBOMB'}`;
+                    document.getElementById('quoteTxt').innerText = minReceived.toFixed(6);
+                } catch(e) { console.log(e); }
+            }, 500);
+        }
+
+        document.getElementById('mainActionBtn').addEventListener('click', async () => {
+            if(!userAddr) return connectWallet();
+            const btn = document.getElementById('mainActionBtn');
+            const val = document.getElementById('inpAmt').value;
+
+            if(!val) return showToast("Enter Amount", "error");
+            showModal("Swapping", "Confirm transaction in wallet...");
+
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            try {
+                const tokenIn = isBuy ? ADDR_FBOMB : ADDR_THESTRAT;
+                const tokenOut = isBuy ? ADDR_THESTRAT : ADDR_FBOMB;
+                const inAbi = (tokenIn === ADDR_THESTRAT) ? MINIMAL_STRAT_ABI : ERC20_ABI;
+
+                const tokenContract = new ethers.Contract(tokenIn, inAbi, signer);
+                const routerContract = new ethers.Contract(ADDR_ROUTER, ROUTER_ABI, signer);
+
+                const decimals = await tokenContract.decimals();
+                const amountInWei = ethers.parseUnits(val.toString(), decimals);
+
+                document.getElementById('modalTitle').innerText = "Approving";
+                const allowance = await tokenContract.allowance(userAddr, ADDR_ROUTER);
+
+                if(allowance < amountInWei) {
+                    const txApp = await tokenContract.approve(ADDR_ROUTER, ethers.MaxUint256);
+                    await txApp.wait();
+                }
+
+                document.getElementById('modalTitle').innerText = "Confirm Swap";
+                const routeRes = await getBestRoute(amountInWei, tokenIn, tokenOut, routerContract);
+                const expectedOut = routeRes.amounts[routeRes.amounts.length-1];
+                const minOut = (expectedOut * BigInt((100 - slippage)*100)) / 10000n;
+                const deadline = Math.floor(Date.now()/1000) + 600;
+
+                const tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                    amountInWei, minOut, routeRes.route, userAddr, deadline, { gasLimit: 500000 }
+                );
+
+                document.getElementById('modalTitle').innerText = "Pending";
+                await tx.wait();
+
+                setModalSuccess(tx.hash);
+                showToast("Swap Successful", "success");
+if (pair) { 
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; 
+    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+
+    const valIn = parseFloat(document.getElementById('inpAmt').value);
+    const valOut = parseFloat(document.getElementById('outAmt').value);
+    
+    const stratPriceUsd = parseFloat(pair.priceUsd);
+    
+    let usdVolume, tokenAmount, tradeType;
+
+    if (isBuy) {
+        tradeType = "Buy";
+        tokenAmount = valOut; 
+        const fBombPriceUsd = stratPriceUsd / parseFloat(pair.priceNative);
+        usdVolume = (valIn * fBombPriceUsd).toFixed(2);
+    } else {
+        tradeType = "Sell";
+        tokenAmount = valIn; 
+        usdVolume = (valIn * stratPriceUsd).toFixed(2);
+    }
+
+    const newTrade = {
+        date: dateStr,
+        time: timeStr,
+        type: tradeType,
+        usdVolume: usdVolume,     
+        tokenAmount: tokenAmount.toString(),
+        price: stratPriceUsd.toFixed(8),       
+        maker: userAddr.toLowerCase(),
+        link: `https://bscscan.com/tx/${tx.hash}`
+    };
+
+    allTransactions.unshift(newTrade); 
+    
+    let localTrades = JSON.parse(localStorage.getItem('my_new_trades') || "[]");
+    localTrades.push(newTrade);
+    localStorage.setItem('my_new_trades', JSON.stringify(localTrades));
+
+    displayUserHistory(userAddr);
+}
+                fetchSwapBalances(); calc();
+            } catch(e) {
+                console.error(e);
+                let errorMsg = "Transaction failed";
+                if(e.message.includes("User denied")) errorMsg = "Rejected by user";
+                setModalError(errorMsg);
+                showToast("Failed", "error");
+            }
+            btn.innerText = "SWAP";
+            btn.disabled = false;
+        });
+
 
         function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
         function fmtNum(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n); }
