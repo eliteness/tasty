@@ -27,6 +27,11 @@
         tailwind.config = {
             darkMode: 'class',
             theme: {
+			screens: {
+                    'sm': '640px', 'md': '768px', 'lg': '1024px', 'xl': '1280px', '2xl': '1536px',
+                    '4k': '2560px', /* Triggers on Ultrawide and 4K displays */
+                    '5k': '3840px'
+                },
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -65,10 +70,15 @@
     </script>
 
     <style>
-        @media (min-width: 1600px) { html { font-size: 18px; } }
-        @media (min-width: 2000px) { html { font-size: 22px; } }
-        @media (min-width: 2560px) { html { font-size: 28px; } }
-        @media (min-width: 3840px) { html { font-size: 42px; } }
+/* Make standard displays (~1080p and mobile) slightly smaller. 
+   Browser default is usually 16px, so 14px reduces it by ~12.5% */
+html { font-size: 14px; }
+
+/* Scale up slightly for larger screens, but keep them smaller than before */
+@media (min-width: 1600px) { html { font-size: 16px; } } /* Was 18px */
+@media (min-width: 2000px) { html { font-size: 18px; } } /* Was 22px */
+@media (min-width: 2560px) { html { font-size: 22px; } } /* Was 28px */
+@media (min-width: 3840px) { html { font-size: 32px; } } /* Was 42px - Much smaller for 4K */
 
         
         .main-content-wrapper {
