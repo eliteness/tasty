@@ -150,21 +150,51 @@ html { font-size: 14px; }
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         .glass-panel {
-            background: rgba(18, 8, 31, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
+    background: rgba(18, 8, 31, 0.3); /* Much more transparent */
+    backdrop-filter: blur(20px) saturate(180%); /* Stronger blur and color boost */
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    /* This thin, semi-transparent white border creates the "glass edge" */
+    border: 1px solid rgba(255, 255, 255, 0.12); 
+    box-shadow: 
+        0 8px 32px 0 rgba(0, 0, 0, 0.6),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05); /* Inner subtle glow */
+}
 
         .input-box {
-            background: #0a0510;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-        }
-        .input-box:focus-within {
-            background: #0f0518;
-            border-color: #8E24AA;
-        }
+    background: rgba(5, 1, 10, 0.4); /* Transparent black */
+    border: 1px solid rgba(255, 255, 255, 0.05); /* Very faint border */
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.input-box:focus-within {
+    background: rgba(15, 5, 24, 0.6);
+    border-color: rgba(142, 36, 170, 0.5); /* Glowing purple border on focus */
+    box-shadow: 0 0 15px rgba(142, 36, 170, 0.15);
+}
+
+/* Make the "Smart Route" section look like glass too */
+.route-pill {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+#swap-view .glass-panel {
+    position: relative;
+    z-index: 1;
+}
+
+/* Adds a soft glowing shadow behind the swap and data cards */
+#swap-view .glass-panel::after {
+    content: "";
+    position: absolute;
+    inset: -2px; /* Pull it out slightly */
+    z-index: -1;
+    background: linear-gradient(135deg, rgba(142, 36, 170, 0.2), transparent, rgba(217, 70, 239, 0.1));
+    border-radius: 26px; /* Match the panel radius + 2 */
+    filter: blur(10px);
+    opacity: 0.5;
+}
 
         .settings-container {
             max-height: 0;
