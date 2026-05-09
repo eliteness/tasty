@@ -1102,14 +1102,41 @@ const GAUGE_ABI = [
     } catch(e) { console.log("Init RPC error:", e); }
 
     try {
-        const res = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/" + ADDR_LP_PAIR);
-        const data = await res.json();
-        if(data.pairs && data.pairs.length) {
-            pair = data.pairs[0];
-            pair.baseToken.symbol = "theSTRAT";
-            updateAllUI();
+        const geckoRes = await fetch("https://api.geckoterminal.com/api/v2/networks/bsc/pools/" + ADDR_LP_PAIR);
+        if (!geckoRes.ok) throw new Error("GeckoTerminal failed");
+        
+        const gtData = await geckoRes.json();
+        const attrs = gtData.data.attributes;
+        
+        pair = {
+            priceUsd: attrs.base_token_price_usd,
+            priceNative: attrs.base_token_price_quote_token,
+            priceChange: { h24: parseFloat(attrs.price_change_percentage.h24 || 0) },
+            fdv: parseFloat(attrs.fdv_usd || 0),
+            volume: { h24: parseFloat(attrs.volume_usd.h24 || 0) },
+            liquidity: {
+                usd: parseFloat(attrs.reserve_in_usd || 0),
+                base: parseFloat(attrs.reserve_in_usd || 0) / 2 / parseFloat(attrs.base_token_price_usd || 1),
+                quote: parseFloat(attrs.reserve_in_usd || 0) / 2 / (parseFloat(attrs.base_token_price_usd || 1) / parseFloat(attrs.base_token_price_quote_token || 1))
+            },
+            baseToken: { symbol: "theSTRAT" }
+        };
+        updateAllUI();
+        
+    } catch (geckoErr) {
+        console.log("GeckoTerminal error, falling back to DexScreener...");
+        try {
+            const dexRes = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/" + ADDR_LP_PAIR);
+            const data = await dexRes.json();
+            if(data.pairs && data.pairs.length) {
+                pair = data.pairs[0];
+                pair.baseToken.symbol = "theSTRAT";
+                updateAllUI();
+            }
+        } catch (dexErr) {
+            console.log("Both APIs failed to load pair data.");
         }
-    } catch(e) {}
+    }
 
     // TRIGGER THE MOCK TEST
   //  console.log("Running Mock Test for address...");
@@ -1134,16 +1161,27 @@ const GAUGE_ABI = [
         const theContract = new ethers.Contract(ADDR_THE, MINIMAL_STRAT_ABI, provider);
 
         let priceThe = 0;
+        letlet priceThe = 0;
         let priceFbomb = 0;
+        
         try {
-            const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
-            const data = await res.json();
-            if (data.pairs && data.pairs.length > 0) priceThe = parseFloat(data.pairs[0].priceUsd);
-            
-            if (pair && pair.priceNative && parseFloat(pair.priceNative) > 0) {
-                priceFbomb = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
+            const geckoRes = await fetch(`https://api.geckoterminal.com/api/v2/networks/bsc/tokens/${ADDR_THE}`);
+            if (!geckoRes.ok) throw new Error("Gecko THE Token failed");
+            const gtToken = await geckoRes.json();
+            priceThe = parseFloat(gtToken.data.attributes.price_usd);
+        } catch (e1) {
+            try {
+                const dexRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
+                const data = await dexRes.json();
+                if (data.pairs && data.pairs.length > 0) priceThe = parseFloat(data.pairs[0].priceUsd);
+            } catch (e2) {
+                console.log("Price fetch error:", e2);
             }
-        } catch (e) { console.log("Price fetch error:", e); }
+        }
+
+        if (pair && pair.priceNative && parseFloat(pair.priceNative) > 0) {
+            priceFbomb = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
+        }
 
 
         const rawGaugeWei = await gaugeContract.balanceOf(ADDR_MSIG);
