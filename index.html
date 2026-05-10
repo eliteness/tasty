@@ -27,6 +27,11 @@
         tailwind.config = {
             darkMode: 'class',
             theme: {
+			screens: {
+                    'sm': '640px', 'md': '768px', 'lg': '1024px', 'xl': '1280px', '2xl': '1536px',
+                    '4k': '2560px', /* Triggers on Ultrawide and 4K displays */
+                    '5k': '3840px'
+                },
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -65,34 +70,144 @@
     </script>
 
     <style>
+/* Make standard displays (~1080p and mobile) slightly smaller. 
+   Browser default is usually 16px, so 14px reduces it by ~12.5% */
+html { font-size: 14px; }
+
+/* Scale up slightly for larger screens, but keep them smaller than before */
+@media (min-width: 1600px) { html { font-size: 16px; } } /* Was 18px */
+@media (min-width: 2000px) { html { font-size: 18px; } } /* Was 22px */
+@media (min-width: 2560px) { html { font-size: 22px; } } /* Was 28px */
+@media (min-width: 3840px) { html { font-size: 32px; } } /* Was 42px - Much smaller for 4K */
+
+        
+        .main-content-wrapper {
+            min-height: 75vh;
+            display: flex;
+            flex-direction: column;
+            /* Removed justify-content: center so the button stops jumping */
+            /* Added a consistent top margin instead */
+            margin-top: 6vh; 
+        }
+		
         body {
             background-color: #05010a;
-            background-image:
-                radial-gradient(circle at 0% 0%, rgba(142, 36, 170, 0.1), transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(217, 70, 239, 0.05), transparent 40%);
+            /* Added a subtle static base gradient so it's never purely black */
+            background-image: radial-gradient(circle at 50% 50%, rgba(30, 10, 40, 0.6), transparent 100%);
             background-attachment: fixed;
+        }
+
+        /* Animated Background Elements */
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(10%, 15%) scale(1.2); }
+            66% { transform: translate(-10%, 5%) scale(0.8); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .bg-animated-layer {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1; /* Pushes it securely behind all content */
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px); /* Reduced blur slightly so the color shows more */
+            opacity: 0.7; /* Much higher visibility */
+            animation: floatOrb 20s infinite ease-in-out alternate;
+        }
+
+        .bg-orb-1 {
+            width: 50vw; height: 50vw;
+            /* Much stronger color: #8E24AA */
+            background: radial-gradient(circle, rgba(142, 36, 170, 0.6) 0%, transparent 70%);
+            top: -10%; left: -10%;
+        }
+
+        .bg-orb-2 {
+            width: 55vw; height: 55vw;
+            /* Stronger accent color: #d946ef */
+            background: radial-gradient(circle, rgba(217, 70, 239, 0.4) 0%, transparent 70%);
+            bottom: -10%; right: -10%;
+            animation-delay: -7s;
+            animation-duration: 25s;
+        }
+
+        .bg-orb-3 {
+            width: 40vw; height: 40vw;
+            /* Secondary color for the middle: #AB47BC */
+            background: radial-gradient(circle, rgba(171, 71, 188, 0.3) 0%, transparent 70%);
+            top: 30%; left: 30%;
+            animation-delay: -12s;
+            animation-duration: 22s;
         }
 
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         .glass-panel {
-            background: rgba(18, 8, 31, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
+    /* A slight vertical gradient makes the top look like it's catching more light */
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.08) 0%, rgba(18, 8, 31, 0.4) 40%, rgba(18, 8, 31, 0.7) 100%);
+    
+    backdrop-filter: blur(25px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    
+    /* Brighter, more distinct top-left border to simulate a light source */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
 
-        .input-box {
-            background: #0a0510;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-        }
-        .input-box:focus-within {
-            background: #0f0518;
-            border-color: #8E24AA;
-        }
+    /* Multi-layered shadow: 1 sharp dark shadow + 1 soft large glow */
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.8), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Thin white inner line at the very top */
+    
+    position: relative;
+}
 
+     .input-box {
+    background: rgba(0, 0, 0, 0.4); /* Solid black but transparent */
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle inner shadow for depth */
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-box:focus-within {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(217, 70, 239, 0.4);
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(217, 70, 239, 0.1);
+}
+
+/* Make the "Smart Route" section look like glass too */
+.route-pill {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+#swap-view .glass-panel {
+    position: relative;
+    z-index: 1;
+}
+
+/* Adds a soft glowing shadow behind the swap and data cards */
+#swap-view .glass-panel::after {
+    content: "";
+    position: absolute;
+    inset: -1px; 
+    z-index: -1;
+    /* More saturated purple/pink glow */
+    background: linear-gradient(135deg, rgba(142, 36, 170, 0.4), transparent 50%, rgba(217, 70, 239, 0.2));
+    border-radius: 26px;
+    filter: blur(15px);
+    opacity: 0.8; /* Increased from 0.5 */
+}
         .settings-container {
             max-height: 0;
             opacity: 0;
@@ -101,7 +216,7 @@
             margin-bottom: 0;
         }
         .settings-container.open {
-            max-height: 120px;
+            max-height: 10rem; 
             opacity: 1;
             margin-bottom: 1rem;
             padding: 1rem;
@@ -157,50 +272,56 @@
             border: 1px solid #373a45;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 0.65rem;
             font-weight: 700;
             color: #d946ef;
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #05010a; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-		.custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
+        *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+
+* {
+    scrollbar-width: none !important;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(142, 36, 170, 0.3);
-    border-radius: 10px;
+
+* {
+    -ms-overflow-style: none !important;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(142, 36, 170, 0.6);
+html, body {
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
     </style>
 </head>
 <body class="text-white antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-brand-primary selection:text-white">
 
-    <header class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05010a]/90 backdrop-blur-xl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <div class="flex items-center gap-2 sm:gap-3">
-            <img src="thenastrat_token_logo_white_gradient.png" alt="Icon" class="h-8 w-8 sm:h-10 sm:w-10">
-            <span class="font-display font-bold text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                Thena Strategy
-            </span>
-        </div>
-        <button id="connectBtn" onclick="connectWallet()"
-            class="px-4 py-2 sm:px-6 sm:py-2.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-purple-900/20 hover:scale-105 hover:shadow-purple-900/40 transition-all duration-300 whitespace-nowrap">
-            CONNECT WALLET
-        </button>
+    <div class="bg-animated-layer">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
     </div>
-</header>
 
+    <header class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05010a]/80 backdrop-blur-xl">
+        <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <img src="thenastrat_token_logo_white_gradient.png" alt="Icon" class="h-8 w-8 sm:h-10 sm:w-10">
+                <span class="font-display font-bold text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                    Thena Strategy
+                </span>
+            </div>
+            <button id="connectBtn" onclick="connectWallet()"
+                class="px-4 py-2 sm:px-6 sm:py-2.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-purple-900/20 hover:scale-105 hover:shadow-purple-900/40 transition-all duration-300 whitespace-nowrap">
+                CONNECT WALLET
+            </button>
+        </div>
+    </header>
 
-<main class="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
-
-        <div class="flex justify-center mb-8 sm:mb-12">
+<main class="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 main-content-wrapper">
+        
+    <div class="flex justify-center mb-8 sm:mb-12">
             <div class="flex p-1 bg-white/5 border border-white/5 rounded-full backdrop-blur-md relative">
                 <button onclick="switchTab('swap')" id="tab-swap" class="relative px-6 sm:px-10 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-display font-bold transition-all duration-300 overflow-hidden bg-brand-primary text-white shadow-lg z-10">
                     Swap
@@ -211,18 +332,13 @@
             </div>
         </div>
 
-        <div class="relative w-full max-w-7xl mx-auto">
-
+    <div class="relative w-full max-w-[85rem] max-w-scaled mx-auto">
 
             <div id="swap-view" class="relative transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-100 translate-x-0 scale-100 z-10 origin-top">
+<div class="flex flex-col lg:flex-row justify-center items-start gap-10 mx-auto">
 
-                <div class="flex flex-col lg:flex-row justify-center items-start gap-7 mx-auto">
-
-
-                    <div class="w-full lg:w-[460px] flex flex-col gap-7">
-
+    <div class="w-full lg:w-[35rem] flex flex-col gap-7">
                         <div class="glass-panel rounded-[24px] p-4 sm:p-5 relative">
-
                             <div class="flex justify-between items-center mb-4 sm:mb-5">
                                 <h2 class="text-lg sm:text-xl font-display font-bold text-white">Swap</h2>
                                 <button onclick="toggleSettings()" class="text-gray-400 hover:text-white transition-colors">
@@ -230,63 +346,57 @@
                                 </button>
                             </div>
 
-                           <div id="settingsPanel" class="settings-container bg-black/40 rounded-xl border-white/5 border-0">
-    <label class="text-[10px] text-gray-400 font-medium mb-2 block uppercase tracking-wide">Slippage Tolerance</label>
-    <div class="flex gap-2">
-        <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(12.0)">12%</button>
-        <button class="slip-option flex-1 py-2 rounded-lg text-xs font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(13.0)">13%</button>
-
-        <input type="number" id="customSlip" placeholder="Custom %" class="flex-1 bg-transparent border border-brand-border rounded-lg text-center text-xs text-white focus:outline-none focus:border-brand-secondary transition-colors" oninput="setCustomSlip()">
-    </div>
-</div>
-<div class="input-box rounded-2xl p-3.5 mb-1 relative group">
-    <div class="flex justify-between mb-2 text-xs">
-        <span class="text-gray-400 font-medium ml-1">Sell</span>
-        <span class="text-gray-400">Bal: <span id="sBal" class="text-white font-mono">0.00</span> <span onclick="setMax()" class="cursor-pointer text-brand-accent hover:text-white ml-2 font-bold transition-colors">MAX</span></span>
-    </div>
-    <div class="flex items-center gap-3">
-        <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
-            <img src="fBOMB_token_whiteblue_blackcircle.png" id="sIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
-            <span id="sSym" class="font-display font-bold text-sm sm:text-base">fBOMB</span>
-        </div>
-
-        <button id="helpBtnSell" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">
-            ?
-        </button>
-
-        <input type="number" id="inpAmt" placeholder="0" oninput="calc()" class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none">
-    </div>
-    <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="sUsd">$0.00</div>
-</div>
-<div class="relative h-2 flex items-center justify-center z-10">
-    <button id="swapArrowBtn" onclick="toggleSwap()" class="absolute bg-[#12081f] border border-[#2d1b4e] p-2 rounded-lg text-brand-primary hover:text-white hover:bg-brand-primary hover:border-brand-primary transition-all duration-300 shadow-xl">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-    </button>
-</div>
-<div class="input-box rounded-2xl p-3.5 mt-1">
-    <div class="flex justify-between mb-2 text-xs">
-        <span class="text-gray-400 font-medium ml-1">Buy</span>
-        <span class="text-gray-400">Bal: <span id="bBal" class="text-white font-mono">0.00</span></span>
-    </div>
-    <div class="flex items-center gap-3">
-        <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
-            <img src="thenastrat_token_logo_white_gradient.png" id="bIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
-            <span id="bSym" class="font-display font-bold text-sm sm:text-base">theSTRAT</span>
-        </div>
-
-        <button id="helpBtnBuy" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">
-            ?
-        </button>
-
-        <input type="text" id="outAmt" placeholder="0" readonly class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none cursor-default">
-    </div>
-    <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="bUsd">$0.00</div>
-</div>
+                            <div id="settingsPanel" class="settings-container bg-black/40 rounded-xl border-white/5 border-0">
+                                <label class="text-[0.65rem] text-gray-400 font-medium mb-3 block uppercase tracking-widest">Slippage Tolerance</label>
+                                <div class="flex gap-2">
+                                    <button class="slip-option flex-1 py-2.5 rounded-lg text-sm font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(12.0)">12%</button>
+                                    <button class="slip-option flex-1 py-2.5 rounded-lg text-sm font-bold border border-brand-border hover:bg-brand-primary/20 transition-colors" onclick="setSlip(13.0)">13%</button>
+                                    <input type="number" id="customSlip" placeholder="Custom %" class="flex-1 w-0 bg-transparent border border-brand-border rounded-lg text-center text-sm text-white focus:outline-none focus:border-brand-secondary transition-colors" oninput="setCustomSlip()">
+                                </div>
+                            </div>
+                            <div class="input-box rounded-2xl p-3.5 mb-1 relative group">
+                                <div class="flex justify-between mb-2 text-xs">
+                                    <span class="text-gray-400 font-medium ml-1">Sell</span>
+                                    <span class="text-gray-400">Bal: <span id="sBal" class="text-white font-mono">0.00</span> <span onclick="setMax()" class="cursor-pointer text-brand-accent hover:text-white ml-2 font-bold transition-colors">MAX</span></span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                                        <img src="fBOMB_token_whiteblue_blackcircle.png" id="sIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
+                                        <span id="sSym" class="font-display font-bold text-sm sm:text-base">fBOMB</span>
+                                    </div>
+                                    <button id="helpBtnSell" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">?</button>
+                                    <input type="number" id="inpAmt" placeholder="0" oninput="calc()" class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none">
+                                </div>
+                                <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="sUsd">$0.00</div>
+                            </div>
+                            
+                            <div class="relative h-2 flex items-center justify-center z-10">
+                                <button id="swapArrowBtn" onclick="toggleSwap()" class="absolute bg-[#12081f] border border-[#2d1b4e] p-2 rounded-lg text-brand-primary hover:text-white hover:bg-brand-primary hover:border-brand-primary transition-all duration-300 shadow-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                                </button>
+                            </div>
+                            
+                            <div class="input-box rounded-2xl p-3.5 mt-1">
+                                <div class="flex justify-between mb-2 text-xs">
+                                    <span class="text-gray-400 font-medium ml-1">Buy</span>
+                                    <span class="text-gray-400">Bal: <span id="bBal" class="text-white font-mono">0.00</span></span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                                        <img src="thenastrat_token_logo_white_gradient.png" id="bIcon" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full">
+                                        <span id="bSym" class="font-display font-bold text-sm sm:text-base">theSTRAT</span>
+                                    </div>
+                                    <button id="helpBtnBuy" onclick="toggleAds()" class="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary/20 border border-brand-primary text-brand-secondary text-xs font-bold hover:bg-brand-primary hover:text-white transition-colors animate-pulse-glow" style="display: none;">?</button>
+                                    <input type="text" id="outAmt" placeholder="0" readonly class="flex-1 w-0 bg-transparent text-right font-display text-2xl sm:text-3xl font-bold placeholder-gray-700 focus:outline-none cursor-default">
+                                </div>
+                                <div class="text-right text-[11px] text-gray-500 mt-2 font-mono pr-1" id="bUsd">$0.00</div>
+                            </div>
+                            
                             <div class="mt-6 space-y-2 px-2">
                                 <div class="flex justify-between text-xs font-medium">
-        <span class="text-gray-500">Transfer Tax</span>
-        <span class="text-brand-accent font-bold">10%</span>
-    </div>
+                                    <span class="text-gray-500">Transfer Tax</span>
+                                    <span class="text-brand-accent font-bold">10%</span>
+                                </div>
                                 <div class="flex justify-between text-xs font-medium">
                                     <span class="text-gray-500">Rate</span>
                                     <span id="rateTxt" class="text-white">---</span>
@@ -302,13 +412,13 @@
                             </button>
                         </div>
                     </div>
-                    <div class="w-full lg:w-[500px] flex flex-col gap-7">
+                    
+                    <div class="w-full lg:w-[31.25rem] flex flex-col gap-7">
                         <div class="glass-panel rounded-[24px] p-5 sm:p-6 h-full flex flex-col justify-between">
-
                             <div>
                                 <div class="mb-6">
                                     <h3 class="text-gray-400 font-display font-bold text-base sm:text-lg mb-1 tracking-wide">
-                                    	<span id="cardPair">theSTRAT / fBOMB<span>
+                                    	<span id="cardPair">theSTRAT / fBOMB</span>
                                     	<span id="cardChange" class="mb-1 px-2 py-0.5 rounded text-xs font-bold bg-danger/10 text-danger border border-danger/20">-0.00%</span>
                                     </h3>
                                     <div class="flex items-end gap-3">
@@ -336,9 +446,8 @@
 
                                 <div class="bg-[#0a0510] border border-white/5 rounded-2xl p-4 sm:p-5 mb-4">
                                     <div class="flex items-center justify-between mb-4">
-                                        <div class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Pool Composition</div>
+                                        <div class="text-[0.65rem] uppercase tracking-widest text-gray-400 font-bold">Pool Composition</div>
                                         <div id="poolDonut" class="w-8 h-8 rounded-full" style="background: conic-gradient(#8E24AA 0% 50%, #ffffff 50% 100%); box-shadow: 0 0 15px rgba(142,36,170,0.3);">
-                                            <div class="w-5 h-5 bg-[#0a0510] rounded-full absolute top-1.5 left-1.5"></div>
                                         </div>
                                     </div>
 
@@ -373,7 +482,7 @@
                             </div>
 
                             <div class="w-full bg-[#0a0510] border border-white/10 rounded-2xl p-4 mt-auto relative overflow-visible">
-                                <div class="absolute -top-2.5 left-5 bg-[#0a0510] px-2 text-[9px] text-gray-500 font-bold uppercase tracking-widest z-20 border border-white/5 rounded-full">Smart Route</div>
+                                <div class="absolute -top-2.5 left-5 bg-[#0a0510] px-2 text-[0.55rem] text-gray-500 font-bold uppercase tracking-widest z-20 border border-white/5 rounded-full">Smart Route</div>
 
                                 <div class="route-path-container h-8 mt-1">
                                     <div class="route-line-bg"></div>
@@ -381,7 +490,7 @@
                                     <div class="route-dot w-7 h-7">
                                         <img src="thenastrat_token_logo_white_gradient.png" class="w-3.5 h-3.5 rounded-full">
                                     </div>
-                                    <div class="route-pill shadow-[0_0_10px_rgba(217,70,239,0.3)] text-[9px] py-1 px-3">
+                                    <div class="route-pill shadow-[0_0_10px_rgba(217,70,239,0.3)] text-[0.65rem] py-1 px-3">
                                         THENA
                                     </div>
                                     <div class="route-dot w-7 h-7" style="border-color: #d946ef; box-shadow: 0 0 15px rgba(217, 70, 239, 0.3);">
@@ -389,17 +498,16 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="dashboard-view" class="hidden absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-0 translate-x-[20px] scale-95 pointer-events-none z-0">
+            <div id="dashboard-view" class="hidden absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] opacity-0 translate-x-5 scale-95 pointer-events-none z-0">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full pb-8">
 
                     <div class="lg:col-span-2 flex flex-col gap-6">
-                        <div class="glass-panel rounded-[24px] p-4 sm:p-6 min-h-[350px] lg:min-h-[450px] relative flex flex-col">
+                        <div class="glass-panel rounded-[24px] p-4 sm:p-6 min-h-[21.875rem] lg:min-h-[28.125rem] relative flex flex-col">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
                                     <h2 class="font-display font-bold text-base sm:text-lg text-white">Price Performance</h2>
@@ -410,153 +518,172 @@
                                     <div id="dashPriceChg" class="text-sm text-danger font-medium">-0.00%</div>
                                 </div>
                             </div>
-                           <div class="flex-grow w-full relative min-h-[450px] mt-2 rounded-xl overflow-hidden border border-white/5">
-<iframe
-  src="https://dexscreener.com/bsc/0x3d63abc40402d0f7291917A85E0E4c46Fb1A37b4?embed=1&theme=dark&trades=0&info=0&interval=30D&quote=fBOMB"
-  style="position:absolute;width:100%;height:100%;top:0;left:0;border:0;"
-></iframe>
+<div class="flex-grow w-full relative min-h-[28.125rem] lg:min-h-[28.125rem] mt-2 rounded-xl overflow-hidden border border-white/5">
+    <iframe 
+        src="https://www.geckoterminal.com/bsc/pools/0x3d63abc40402d0f7291917a85e0e4c46fb1a37b4?embed=1&info=0&swaps=0&dark_mode=true&interval=1d" 
+        style="position:absolute;width:100%;height:100%;top:0;left:0;border:0;"
+        title="GeckoTerminal Chart"
+        allow="clipboard-write"
+        allowfullscreen>
+    </iframe>
 </div>
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Market Cap</div>
+                                <div class="text-[0.65rem] uppercase tracking-wider text-gray-500 font-bold mb-1">Market Cap</div>
                                 <div id="barMC" class="text-white font-bold font-display text-sm sm:text-base">---</div>
                             </div>
                             <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Volume (24h)</div>
+                                <div class="text-[0.65rem] uppercase tracking-wider text-gray-500 font-bold mb-1">Volume (24h)</div>
                                 <div id="barVol" class="text-white font-bold font-display text-sm sm:text-base">---</div>
                             </div>
                             <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Burned</div>
+                                <div class="text-[0.65rem] uppercase tracking-wider text-gray-500 font-bold mb-1">Burned</div>
                                 <div id="barBurn" class="text-white font-bold font-display text-sm sm:text-base">---</div>
                             </div>
                             <div class="bg-brand-card border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                <div class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Change</div>
+                                <div class="text-[0.65rem] uppercase tracking-wider text-gray-500 font-bold mb-1">Change</div>
                                 <div id="barChg" class="text-white font-bold font-display text-sm sm:text-base">---</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="flex flex-col gap-6">
-
                         <div class="bg-gradient-to-br from-brand-card to-[#2e1045] border border-brand-primary/30 rounded-[24px] p-5 sm:p-6 relative overflow-hidden group">
                             <div class="absolute top-[-50%] right-[-50%] w-64 h-64 bg-brand-accent/20 rounded-full blur-3xl group-hover:bg-brand-accent/30 transition-all duration-700"></div>
 
                             <div class="relative z-10">
-                                <div class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Protocol Treasury</div>
+                                <div class="text-[0.65rem] uppercase tracking-widest text-gray-400 font-bold mb-2">Protocol Treasury</div>
                                 <div id="repTotalValue" class="text-3xl sm:text-4xl font-display font-extrabold text-success mb-1 drop-shadow-lg">$0.00</div>
                                 <div class="text-xs text-brand-secondary mb-6 font-medium">Estimated Intrinsic Value</div>
 
-<div class="border-t border-white/10 pt-4 space-y-3">
-    <div id="rowFbombLp" class="flex justify-between items-center text-sm hidden">
-        <span class="text-gray-400">fBOMB (in LP)</span>
-        <span id="repFbombLp" class="font-mono font-bold text-white">0</span>
-    </div>
-    <div id="rowEthenaHeld" class="flex justify-between items-center text-sm hidden">
-        <span class="text-gray-400">eTHENA (Held)</span>
-        <span id="repEthenaHeld" class="font-mono font-bold text-white">0</span>
-    </div>
-    <div id="rowEthenaStaked" class="flex justify-between items-center text-sm hidden">
-        <span class="text-gray-400">eTHENA (Staked)</span>
-        <span id="repEthenaStaked" class="font-mono font-bold text-white">0</span>
-    </div>
-    <div id="rowStakeThe" class="flex justify-between items-center text-sm hidden">
-        <span class="text-gray-400">stakeTHENA</span>
-        <span id="repStakeThe" class="font-mono font-bold text-white">0</span>
-    </div>
-	
-    <div id="rowVeThe" class="flex justify-between items-center text-sm hidden">
-        <span class="text-gray-400">veTHE</span>
-        <span id="repVeThe" class="font-mono font-bold text-white">0</span>
-    </div>
-</div>
+                                <div class="border-t border-white/10 pt-4 space-y-3">
+                                    <div id="rowFbombLp" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">fBOMB (in LP)</span>
+                                        <span id="repFbombLp" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div id="rowEthenaHeld" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">eTHENA (Held)</span>
+                                        <span id="repEthenaHeld" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div id="rowEthenaStaked" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">eTHENA (Staked)</span>
+                                        <span id="repEthenaStaked" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div id="rowStakeThe" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">stakeTHENA</span>
+                                        <span id="repStakeThe" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                    <div id="rowVeThe" class="flex justify-between items-center text-sm hidden">
+                                        <span class="text-gray-400">veTHE</span>
+                                        <span id="repVeThe" class="font-mono font-bold text-white">0</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                       <div class="glass-panel rounded-[24px] p-5 sm:p-6">
-    <div class="flex justify-between items-center mb-4">
-        <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">User Holdings</span>
-        <span id="statusBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-400 font-medium border border-white/10">Not Connected</span>
-    </div>
+                        <div class="glass-panel rounded-[24px] p-5 sm:p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[0.65rem] uppercase tracking-widest text-gray-400 font-bold">User Holdings</span>
+                                <span id="statusBadge" class="text-[0.65rem] px-2 py-0.5 rounded bg-white/5 text-gray-400 font-medium border border-white/10">Not Connected</span>
+                            </div>
 
-    <div class="bg-black/30 p-1 rounded-lg flex gap-1 mb-4">
-        <button id="tabWallet" onclick="setQueryMode(false)" class="flex-1 py-1.5 text-xs font-semibold rounded-md bg-brand-primary text-white shadow-sm transition-all">My Wallet</button>
-        <button id="tabQuery" onclick="setQueryMode(true)" class="flex-1 py-1.5 text-xs font-semibold rounded-md text-gray-400 hover:text-white hover:bg-white/5 transition-all">Query Mode</button>
-    </div>
+                            <div class="bg-black/30 p-1 rounded-lg flex gap-1 mb-4">
+                                <button id="tabWallet" onclick="setQueryMode(false)" class="flex-1 py-1.5 text-xs font-semibold rounded-md bg-brand-primary text-white shadow-sm transition-all">My Wallet</button>
+                                <button id="tabQuery" onclick="setQueryMode(true)" class="flex-1 py-1.5 text-xs font-semibold rounded-md text-gray-400 hover:text-white hover:bg-white/5 transition-all">Query Mode</button>
+                            </div>
 
-    <div id="queryWrap" class="relative mb-4 hidden animate-fade-in-up">
-        <svg class="absolute left-3 top-3 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="queryInput" placeholder="Search 0xAddress..." oninput="handleQuery()" class="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-xs font-mono text-white focus:border-brand-secondary focus:outline-none transition-colors">
-    </div>
+                            <div id="queryWrap" class="relative mb-4 hidden animate-fade-in-up">
+                                <svg class="absolute left-3 top-3 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="queryInput" placeholder="Search 0xAddress..." oninput="handleQuery()" class="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-xs font-mono text-white focus:border-brand-secondary focus:outline-none transition-colors">
+                            </div>
 
-    <div class="flex flex-col gap-6 my-4">
+                            <div class="flex flex-col gap-6 my-4">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div id="balanceLabel" class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">theSTRAT Balance</div>
+                                    <div class="flex items-center gap-3">
+                                        <span id="userWallet" class="text-4xl font-display font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(142,36,170,0.5)]">0.00</span>
+                                        <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2 py-1 rounded-lg">
+                                            <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5 rounded-full">
+                                            <span class="text-[10px] font-bold text-brand-secondary">theSTRAT</span>
+                                        </div>
+                                    </div>
+                                    <div id="userWalletUsd" class="text-sm font-mono text-gray-400 mt-2">$0.00 USD</div>
+                                </div>
+                                <div class="w-2/3 mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                            </div>
 
-       <div class="flex flex-col items-center justify-center">
-            <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">theSTRAT Balance</div>
-            <div class="flex items-center gap-3">
-                <span id="userWallet" class="text-4xl font-display font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(142,36,170,0.5)]">0.00</span>
-                <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2 py-1 rounded-lg">
-                    <img src="thenastrat_token_logo_white_gradient.png" class="w-5 h-5 rounded-full">
-                    <span class="text-[10px] font-bold text-brand-secondary">theSTRAT</span>
-                </div>
-            </div>
-            <div id="userWalletUsd" class="text-sm font-mono text-gray-400 mt-2">$0.00 USD</div>
-        </div>
+                            <button onclick="copyAddress()" class="w-full mt-2 flex items-center justify-between px-4 py-3 bg-white/5 border border-dashed border-white/20 rounded-xl hover:bg-brand-primary/20 hover:border-brand-primary/50 hover:text-white text-gray-400 transition-all group">
+                                <span id="userAddrDisplay" class="font-mono text-xs">0x...</span>
+                                <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
+                        </div>
 
-        <div class="w-2/3 mx-auto h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                        <div class="glass-panel rounded-[24px] p-5 sm:p-6 mt-6 flex flex-col h-[31.25rem]">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <span class="text-[0.65rem] uppercase tracking-widest text-gray-400 font-bold">Trade History</span>
+                                    <div class="text-[0.55rem] text-brand-secondary">Showing All Records</div>
+                                </div>
+                                <span id="txCountBadge" class="text-[10px] px-2 py-0.5 rounded bg-success/10 text-success font-bold border border-success/20">0 Trades</span>
+                            </div>
 
-    </div>
-
-    <button onclick="copyAddress()" class="w-full mt-2 flex items-center justify-between px-4 py-3 bg-white/5 border border-dashed border-white/20 rounded-xl hover:bg-brand-primary/20 hover:border-brand-primary/50 hover:text-white text-gray-400 transition-all group">
-        <span id="userAddrDisplay" class="font-mono text-xs">0x...</span>
-        <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-    </button>
-</div>
-
-<div class="glass-panel rounded-[24px] p-5 sm:p-6 mt-6 flex flex-col h-[500px]">
-    <div class="flex justify-between items-center mb-4">
-        <div>
-<span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Trade History</span>
-            <div class="text-[9px] text-brand-secondary">Showing All Records</div>
-        </div>
-<span id="txCountBadge" class="text-[10px] px-2 py-0.5 rounded bg-success/10 text-success font-bold border border-success/20">0 Trades</span>
-    </div>
-
-    <div id="txHistoryList" class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-        <div class="text-center py-20 text-gray-600 text-xs italic">Connect wallet to view history</div>
-    </div>
-</div>
+                            <div id="txHistoryList" class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                                <div class="text-center py-20 text-gray-600 text-xs italic">Connect wallet to view history</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </main>
 
-    <footer class="relative z-10 mt-auto py-12 border-t border-white/5 bg-[#05010a]">
-        <div class="flex justify-center gap-8 mb-8">
-            <a href="https://x.com/ThenaStrategy" class="text-gray-500 hover:text-brand-accent hover:-translate-y-1 transition-all"><svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-            <a href="https://thenastrategy.gitbook.io/thena-strategy/" class="text-gray-500 hover:text-brand-accent hover:-translate-y-1 transition-all"><svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></a>
-            <a href="https://t.me/ThenaStrategy" class="text-gray-500 hover:text-brand-accent hover:-translate-y-1 transition-all"><svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg></a>
-        </div>
-        <div class="flex justify-center items-center gap-2 text-xs text-gray-500 opacity-80 mt-4 mb-4">
-            <span class="font-bold tracking-wide text-xs sm:text-xs">Powered by</span>
-        </div>
-        <div class="flex justify-center items-center gap-2 text-l text-gray-500 opacity-80">
-	        <img onclick="window.open('https://mclb.org')"  src="mclb.svg" alt="Thena" class="w-4 h-4 hover:scale-110 transition-transform">
-	        <span onclick="window.open('https://mclb.org')" class="font-bold tracking-wide">Millennium Club</span>
-	        <img onclick="window.open('https://thena.fi')"  src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="w-4 h-4 hover:scale-110 transition-transform">
-	        <span onclick="window.open('https://thena.fi')"  class="font-bold tracking-wide">THENA.fi</span>
-	        <img onclick="window.open('https://eliteness.network')"  src="https://ftm.guru/icons/eliteness.png" alt="Thena" class="w-4 h-4 hover:scale-110 transition-transform">
-	        <span onclick="window.open('https://eliteness.network')"  class="font-bold tracking-wide">Eliteness Network</span>
+    
+    <footer class="relative w-full border-t border-white/5 bg-[#0a0510]/90 backdrop-blur-xl mt-auto z-50">
+        <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-5 grid grid-cols-1 md:grid-cols-3 items-center gap-6">
+            
+            <div class="hidden md:block"></div>
+
+            <div class="flex flex-col xl:flex-row items-center justify-center gap-3 sm:gap-5 w-full">
+                <span class=" text-xs sm:text-sm uppercase tracking-widest text-gray-500 font-bold whitespace-nowrap">Powered by</span>
+                <div class="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
+                    <div class="flex items-center gap-1.5 cursor-pointer hover:text-white transition-all hover:-translate-y-0.5" onclick="window.open('https://mclb.org')">
+                        <img src="mclb.svg" alt="MCLB" class="w-4 h-4 object-contain">
+                        <span class="font-medium">MCLB</span>
+                    </div>
+                    <div class="w-1 h-1 rounded-full bg-white/10"></div>
+                    <div class="flex items-center gap-1.5 cursor-pointer hover:text-white transition-all hover:-translate-y-0.5" onclick="window.open('https://thena.fi')">
+                        <img src="https://thena.fi/favicon/apple-touch-icon.png" alt="Thena" class="w-4 h-4 object-contain rounded-sm">
+                        <span class="font-medium">THENA.fi</span>
+                    </div>
+                    <div class="w-1 h-1 rounded-full bg-white/10"></div>
+                    <div class="flex items-center gap-1.5 cursor-pointer hover:text-white transition-all hover:-translate-y-0.5" onclick="window.open('https://eliteness.network')">
+                        <img src="https://ftm.guru/icons/eliteness.png" alt="Eliteness" class="w-4 h-4 object-contain">
+                        <span class="font-medium">Eliteness</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center md:justify-end gap-6 w-full">
+                <a href="https://x.com/ThenaStrategy" target="_blank" class="text-gray-500 hover:text-white hover:scale-110 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://thenastrategy.gitbook.io/thena-strategy/" target="_blank" class="text-gray-500 hover:text-white hover:scale-110 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </a>
+                <a href="https://t.me/ThenaStrategy" target="_blank" class="text-gray-500 hover:text-white hover:scale-110 transition-all">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M21.93 3.53c-.36-.45-1.03-.54-1.55-.34L3.43 10.15c-.68.27-.69 1.14-.02 1.41l4.5 1.77 1.48 4.79c.14.47.74.55 1.01.16l2.12-3.08 4.4 3.39c.5.39 1.25.13 1.38-.5l2.67-13.5c.09-.46-.39-.92-.94-1.06zm-4.32 2.62l-7.6 6.8-.75-3.3 8.35-3.5z"/></svg>
+                </a>
+            </div>
+            
         </div>
     </footer>
 
     <div id="toastContainer" class="fixed top-24 right-5 z-[100] flex flex-col gap-3 pointer-events-none max-w-sm w-full"></div>
 
     <div id="swapModal" class="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm hidden flex justify-center items-center opacity-0 transition-opacity duration-300">
-        <div class="bg-[#1a0b2e] border border-brand-primary w-[90%] max-w-sm p-8 rounded-3xl text-center shadow-[0_0_50px_rgba(142,36,170,0.3)] transform scale-95 transition-transform duration-300 relative">
+        <div class="bg-[#1a0b2e] border border-brand-primary w-[90%] max-w-[24rem] p-8 rounded-3xl text-center shadow-[0_0_50px_rgba(142,36,170,0.3)] transform scale-95 transition-transform duration-300 relative">
             <div id="modalSpinner" class="w-12 h-12 border-4 border-white/10 border-t-brand-primary rounded-full animate-spin mx-auto mb-6"></div>
 
             <svg id="modalSuccess" class="hidden w-16 h-16 text-success mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -569,19 +696,20 @@
         </div>
     </div>
 
-<div id="leftAdBox" class="hidden sm:block fixed bottom-5 left-5 w-64 bg-brand-card/95 backdrop-blur-xl border border-brand-primary/20 rounded-2xl p-4 shadow-[0_0_30px_rgba(0,0,0,0.5)] z-50 transition-all hover:-translate-y-1">
-    <button class="absolute top-2 right-2 text-gray-500 hover:text-white text-xs" onclick="toggleAds()">✕</button>
-    <div class="flex gap-3 items-center mb-3">
-        <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-10 h-10 rounded-full bg-white/10">
-        <div class="font-bold text-sm leading-tight text-white">Need<br>fBOMB?</div>
+    <div id="leftAdBox" class="hidden sm:block fixed bottom-5 left-5 w-[16rem] bg-brand-card/95 backdrop-blur-xl border border-brand-primary/20 rounded-2xl p-4 shadow-[0_0_30px_rgba(0,0,0,0.5)] z-50 transition-all hover:-translate-y-1">
+        <button class="absolute top-2 right-2 text-gray-500 hover:text-white text-xs" onclick="toggleAds()">✕</button>
+        <div class="flex gap-3 items-center mb-3">
+            <img src="fBOMB_token_whiteblue_blackcircle.png" class="w-10 h-10 rounded-full bg-white/10">
+            <div class="font-bold text-sm leading-tight text-white">Need<br>fBOMB?</div>
+        </div>
+        <div class="space-y-2">
+            <a href="https://thena.fi/swap?outputCurrency=0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979" target="_blank" class="block text-center text-[0.65rem] font-bold bg-white/5 hover:bg-brand-primary text-white py-2 rounded-lg transition-colors">Buy on THENA</a>
+            <a href="https://mclb.org/bridge" target="_blank" class="block text-center text-[0.65rem] font-bold bg-white/5 hover:bg-brand-secondary text-white py-2 rounded-lg transition-colors">Bridge from MCLB.org</a>
+        </div>
     </div>
-    <div class="space-y-2">
-        <a href="https://thena.fi/swap?outputCurrency=0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979" target="_blank" class="block text-center text-[10px] font-bold bg-white/5 hover:bg-brand-primary text-white py-2 rounded-lg transition-colors">Buy on THENA</a>
-        <a href="https://mclb.org/bridge" target="_blank" class="block text-center text-[10px] font-bold bg-white/5 hover:bg-brand-secondary text-white py-2 rounded-lg transition-colors">Bridge from MCLB.org</a>
-    </div>
-</div>
 
     <div id="mobileInfoBtn" class="hidden" onclick="toggleAds()"></div>
+
 
     <script>
 	let allTransactions = []; 
@@ -617,7 +745,7 @@ function displayUserHistory(address) {
     const badge = document.getElementById('txCountBadge');
     
     if (!address) {
-        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-xs italic">Connect wallet to view history</div>`;
+        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-sm italic">Connect wallet to view history</div>`;
         badge.innerText = "0 Trades";
         return;
     }
@@ -626,7 +754,7 @@ function displayUserHistory(address) {
     badge.innerText = `${userTrades.length} Trade${userTrades.length === 1 ? '' : 's'}`;
 
     if (userTrades.length === 0) {
-        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-[11px]">No transactions found for this address.</div>`;
+        listContainer.innerHTML = `<div class="text-center py-20 text-gray-600 text-[0.75rem]">No transactions found for this address.</div>`;
         return;
     }
 
@@ -654,17 +782,17 @@ function displayUserHistory(address) {
                 const sign = diff >= 0 ? '+' : '';
                 
                 currentValueHtml = `
-                <div class="flex justify-between items-center text-[10px] pt-1">
-                    <span class="text-gray-400 font-medium text-[9px] uppercase tracking-tighter">Current Value</span>
+                <div class="flex justify-between items-center text-[0.65rem] pt-1">
+                    <span class="text-gray-400 font-medium text-[0.55rem] uppercase tracking-tighter">Current Value</span>
                     <div class="text-right">
                         <span class="text-white font-bold">$${currentUsdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                        <span class="${pnlColor} ml-1 font-bold text-[9px]">(${sign}${pnlPercent.toFixed(2)}%)</span>
+                        <span class="${pnlColor} ml-1 font-bold text-[0.55rem]">(${sign}${pnlPercent.toFixed(2)}%)</span>
                     </div>
                 </div>`;
             } else {
                 currentValueHtml = `
-                <div class="flex justify-between items-center text-[10px] pt-1">
-                    <span class="text-gray-400 font-medium text-[9px] uppercase tracking-tighter">Value (If Held)</span>
+                <div class="flex justify-between items-center text-[0.65rem] pt-1">
+                    <span class="text-gray-400 font-medium text-[0.55rem] uppercase tracking-tighter">Value (If Held)</span>
                     <span class="text-white font-bold">$${currentUsdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                 </div>`;
             }
@@ -675,10 +803,10 @@ function displayUserHistory(address) {
                 <div class="flex justify-between items-start mb-2">
                     <div class="flex flex-col">
                         <div class="flex items-center gap-2">
-                            <span class="text-white text-[11px] font-bold">${tx.date}</span>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded ${typeBg} ${typeColor} font-bold uppercase">${tx.type}</span>
+                            <span class="text-white text-[0.75rem] font-bold">${tx.date}</span>
+                            <span class="text-[0.55rem] px-1.5 py-0.5 rounded ${typeBg} ${typeColor} font-bold uppercase">${tx.type}</span>
                         </div>
-                        <span class="text-gray-500 text-[9px]">${tx.time}</span>
+                        <span class="text-gray-500 text-[0.55rem]">${tx.time}</span>
                     </div>
                     <a href="${tx.link}" target="_blank" class="text-brand-primary hover:text-white transition-colors">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -688,18 +816,18 @@ function displayUserHistory(address) {
                 </div>
                 
                 <div class="space-y-1.5">
-                    <div class="flex justify-between items-center text-[11px]">
+                    <div class="flex justify-between items-center text-[0.75rem]">
                         <span class="text-gray-400">Execution Price</span>
                         <div class="text-right">
                             <div class="${typeColor} font-bold">$${usdPrice.toFixed(6)}</div>
                         </div>
                     </div>
-                    <div class="flex justify-between text-[11px]">
+                    <div class="flex justify-between text-[0.75rem]">
                         <span class="text-gray-400">Amount</span>
                         <span class="text-white font-mono">${tokenAmt.toLocaleString()} theSTRAT</span>
                     </div>
-                    <div class="flex justify-between items-center text-[10px] pt-2 mt-1 border-t border-white/5">
-                        <span class="text-gray-500 font-medium text-[9px] uppercase tracking-tighter">${isSell ? 'Total Received' : 'Total Spent'}</span>
+                    <div class="flex justify-between items-center text-[0.65rem] pt-2 mt-1 border-t border-white/5">
+                        <span class="text-gray-500 font-medium text-[0.55rem] uppercase tracking-tighter">${isSell ? 'Total Received' : 'Total Spent'}</span>
                         <span class="text-brand-secondary font-bold">$${totalUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD</span>
                     </div>
                     ${currentValueHtml}
@@ -758,48 +886,58 @@ const GAUGE_ABI = [
         let queryTimeout = null;
         let isQueryMode = false;
 
-        function switchTab(t) {
-    const swapBtn = document.getElementById('tab-swap');
-    const dashBtn = document.getElementById('tab-dashboard');
-    const swapView = document.getElementById('swap-view');
-    const dashView = document.getElementById('dashboard-view');
+       function switchTab(t) {
+            const swapBtn = document.getElementById('tab-swap');
+            const dashBtn = document.getElementById('tab-dashboard');
+            const swapView = document.getElementById('swap-view');
+            const dashView = document.getElementById('dashboard-view');
 
-    const activeBtn = ['bg-brand-primary', 'text-white', 'shadow-lg'];
-    const inactiveBtn = ['text-gray-400', 'hover:text-white'];
+            const activeBtn = ['bg-brand-primary', 'text-white', 'shadow-lg'];
+            const inactiveBtn = ['text-gray-400', 'hover:text-white'];
 
-    if (t === 'swap') {
-        swapBtn.classList.add(...activeBtn);
-        swapBtn.classList.remove(...inactiveBtn);
-        dashBtn.classList.remove(...activeBtn);
-        dashBtn.classList.add(...inactiveBtn);
+            if (t === 'swap') {
+                swapBtn.classList.add(...activeBtn);
+                swapBtn.classList.remove(...inactiveBtn);
+                dashBtn.classList.remove(...activeBtn);
+                dashBtn.classList.add(...inactiveBtn);
 
-        dashView.classList.replace('relative', 'absolute');
-        dashView.classList.add('opacity-0', 'translate-x-[20px]', 'scale-95', 'pointer-events-none');
-        dashView.classList.remove('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                dashView.classList.replace('relative', 'absolute');
+                dashView.classList.add('opacity-0', 'translate-x-5', 'scale-95', 'pointer-events-none');
+                dashView.classList.remove('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                
+                setTimeout(() => { if(!dashView.classList.contains('opacity-100')) dashView.classList.add('hidden'); }, 500);
 
-        swapView.classList.replace('absolute', 'relative');
-        swapView.classList.remove('opacity-0', 'translate-x-[-20px]', 'scale-95', 'pointer-events-none', 'hidden');
-        swapView.classList.add('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                swapView.classList.remove('hidden');
+                setTimeout(() => {
+                    swapView.classList.replace('absolute', 'relative');
+                    swapView.classList.remove('opacity-0', '-translate-x-5', 'scale-95', 'pointer-events-none');
+                    swapView.classList.add('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                }, 10);
 
-    } else {
-        dashBtn.classList.add(...activeBtn);
-        dashBtn.classList.remove(...inactiveBtn);
-        swapBtn.classList.remove(...activeBtn);
-        swapBtn.classList.add(...inactiveBtn);
+            } else {
+                dashBtn.classList.add(...activeBtn);
+                dashBtn.classList.remove(...inactiveBtn);
+                swapBtn.classList.remove(...activeBtn);
+                swapBtn.classList.add(...inactiveBtn);
 
-        swapView.classList.replace('relative', 'absolute');
-        swapView.classList.add('opacity-0', 'translate-x-[-20px]', 'scale-95', 'pointer-events-none');
-        swapView.classList.remove('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                swapView.classList.replace('relative', 'absolute');
+                swapView.classList.add('opacity-0', '-translate-x-5', 'scale-95', 'pointer-events-none');
+                swapView.classList.remove('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                
+                setTimeout(() => { if(!swapView.classList.contains('opacity-100')) swapView.classList.add('hidden'); }, 500);
 
-        dashView.classList.replace('absolute', 'relative');
-        dashView.classList.remove('opacity-0', 'translate-x-[20px]', 'scale-95', 'pointer-events-none', 'hidden');
-        dashView.classList.add('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                dashView.classList.remove('hidden');
+                setTimeout(() => {
+                    dashView.classList.replace('absolute', 'relative');
+                    dashView.classList.remove('opacity-0', 'translate-x-5', 'scale-95', 'pointer-events-none');
+                    dashView.classList.add('opacity-100', 'translate-x-0', 'scale-100', 'pointer-events-auto');
+                }, 10);
 
-        updateDashboard();
-        fetchUserStats();
-        updateAllUI();
-    }
-}
+                updateDashboard();
+                fetchUserStats();
+                updateAllUI();
+            }
+        }
         function toggleSettings() {
             const panel = document.getElementById('settingsPanel');
             const gear = document.getElementById('settingsGear');
@@ -953,7 +1091,7 @@ const GAUGE_ABI = [
 
                 const badge = document.getElementById('statusBadge');
                 badge.innerText = "Connected";
-                badge.className = "text-[10px] px-2 py-0.5 rounded bg-success/20 text-success font-medium border border-success/30";
+                badge.className = "text-[0.65rem] px-2 py-0.5 rounded bg-success/20 text-success font-medium border border-success/30";
                 document.getElementById('userAddrDisplay').innerText = userAddr.substring(0,8) + "..." + userAddr.substring(36);
 
                 showToast("Wallet Connected", "success");
@@ -975,14 +1113,42 @@ const GAUGE_ABI = [
     } catch(e) { console.log("Init RPC error:", e); }
 
     try {
-        const res = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/" + ADDR_LP_PAIR);
-        const data = await res.json();
-        if(data.pairs && data.pairs.length) {
-            pair = data.pairs[0];
-            pair.baseToken.symbol = "theSTRAT";
-            updateAllUI();
+        const geckoRes = await fetch("https://api.geckoterminal.com/api/v2/networks/bsc/pools/" + ADDR_LP_PAIR);
+        if (!geckoRes.ok) throw new Error("GeckoTerminal failed");
+        
+        const gtData = await geckoRes.json();
+        const attrs = gtData.data.attributes;
+        
+        // Format Gecko data to match our UI expectations
+        pair = {
+            priceUsd: attrs.base_token_price_usd,
+            priceNative: attrs.base_token_price_quote_token,
+            priceChange: { h24: parseFloat(attrs.price_change_percentage.h24 || 0) },
+            fdv: parseFloat(attrs.fdv_usd || 0),
+            volume: { h24: parseFloat(attrs.volume_usd.h24 || 0) },
+            liquidity: {
+                usd: parseFloat(attrs.reserve_in_usd || 0),
+                base: parseFloat(attrs.reserve_in_usd || 0) / 2 / parseFloat(attrs.base_token_price_usd || 1),
+                quote: parseFloat(attrs.reserve_in_usd || 0) / 2 / (parseFloat(attrs.base_token_price_usd || 1) / parseFloat(attrs.base_token_price_quote_token || 1))
+            },
+            baseToken: { symbol: "theSTRAT" }
+        };
+        updateAllUI();
+        
+    } catch (geckoErr) {
+        console.log("GeckoTerminal error, falling back to DexScreener...");
+        try {
+            const dexRes = await fetch("https://api.dexscreener.com/latest/dex/pairs/bsc/" + ADDR_LP_PAIR);
+            const data = await dexRes.json();
+            if(data.pairs && data.pairs.length) {
+                pair = data.pairs[0];
+                pair.baseToken.symbol = "theSTRAT";
+                updateAllUI();
+            }
+        } catch (dexErr) {
+            console.log("Both APIs failed to load pair data.");
         }
-    } catch(e) {}
+    }
 
     // TRIGGER THE MOCK TEST
   //  console.log("Running Mock Test for address...");
@@ -1008,15 +1174,25 @@ const GAUGE_ABI = [
 
         let priceThe = 0;
         let priceFbomb = 0;
+        
         try {
-            const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
-            const data = await res.json();
-            if (data.pairs && data.pairs.length > 0) priceThe = parseFloat(data.pairs[0].priceUsd);
-            
-            if (pair && pair.priceNative && parseFloat(pair.priceNative) > 0) {
-                priceFbomb = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
+            const geckoRes = await fetch(`https://api.geckoterminal.com/api/v2/networks/bsc/tokens/${ADDR_THE}`);
+            if (!geckoRes.ok) throw new Error("Gecko THE Token failed");
+            const gtToken = await geckoRes.json();
+            priceThe = parseFloat(gtToken.data.attributes.price_usd);
+        } catch (e1) {
+            try {
+                const dexRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ADDR_THE}`);
+                const data = await dexRes.json();
+                if (data.pairs && data.pairs.length > 0) priceThe = parseFloat(data.pairs[0].priceUsd);
+            } catch (e2) {
+                console.log("Price fetch error:", e2);
             }
-        } catch (e) { console.log("Price fetch error:", e); }
+        }
+
+        if (pair && pair.priceNative && parseFloat(pair.priceNative) > 0) {
+            priceFbomb = parseFloat(pair.priceUsd) / parseFloat(pair.priceNative);
+        }
 
 
         const rawGaugeWei = await gaugeContract.balanceOf(ADDR_MSIG);
