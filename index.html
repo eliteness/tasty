@@ -1269,16 +1269,36 @@ const GAUGE_ABI = [
         const rawEthenaHeld = await ethenaContract.balanceOf(ADDR_MSIG);
         const balEthenaHeld = parseFloat(ethers.formatUnits(rawEthenaHeld, 18));
 
-        const totalValue = (valFbombInLp * priceFbomb) + 
+      const totalValue = (valFbombInLp * priceFbomb) + 
                            ((balEthenaHeld + totalStakedEthena + valVeLocked + balThe) * priceThe);
                            
         const elemTotal = document.getElementById('repTotalValue');
         if (elemTotal) elemTotal.innerText = fmtUSD(totalValue);
 
+        try {
+            const theStratContract = new ethers.Contract(ADDR_THESTRAT, MINIMAL_STRAT_ABI, provider);
+            
+            const rawTotalSupply = await theStratContract.totalSupply();
+            const currentTotalSupply = parseFloat(ethers.formatUnits(rawTotalSupply, 18));
+            
+            const INITIAL_SUPPLY = 1000000000; 
+            
+            const tokensBurned = INITIAL_SUPPLY - currentTotalSupply;
+
+            const barBurnElement = document.getElementById('barBurn');
+            if (barBurnElement) {
+                barBurnElement.innerText = fmtNum(tokensBurned);
+            }
+        } catch (burnErr) {
+            console.error("Failed to fetch Burned amount:", burnErr);
+        }
+
     //    console.log("--- END UPDATE ---");
 
     } catch (e) { console.error("Dashboard Update Error:", e); }
 }
+
+
         function renderPriceChart() {
             if(chartInstance) chartInstance.destroy();
             const ctx = document.getElementById('priceChart').getContext('2d');
@@ -1427,7 +1447,7 @@ if (pair && pair.priceUsd) {
 
             document.getElementById('barMC').innerText = fmtUSD(pair.fdv);
             document.getElementById('barVol').innerText = fmtUSD(pair.volume.h24);
-            document.getElementById('barBurn').innerText = "0";
+// document.getElementById('barBurn').innerText = "0"; 
             document.getElementById('barChg').innerText = (chg >= 0 ? "+" : "") + chg + "%";
             document.getElementById('barChg').className = chg >= 0 ? "text-success font-bold font-display" : "text-danger font-bold font-display";
 
